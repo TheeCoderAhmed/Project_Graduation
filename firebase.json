@@ -1,0 +1,30 @@
+{
+  "firestore": {
+    "database": "(default)",
+    "location": "us-central1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "drapo-7",
+          "appId": "1:330975090300:android:74cd1abe3833e500fd9bf9",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "drapo-7",
+          "configurations": {
+            "android": "1:330975090300:android:74cd1abe3833e500fd9bf9"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // =============================================
+    // USER PROFILE IMAGES
+    // =============================================
+    match /users/{userId}/profile/{filename} {
+      allow read: if true;
+      allow write: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    
+    // =============================================
+    // DISCUSSION MEDIA (images/videos)
+    // =============================================
+    match /discussions/{postId}/{filename} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.size < 50 * 1024 * 1024;
+      allow delete: if request.auth != null;
+    }
+    
+    // =============================================
+    // PLACE IMAGES
+    // =============================================
+    match /places/{placeId}/{filename} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // =============================================
+    // MARKET / RESTAURANT IMAGES
+    // =============================================
+    match /markets/{marketId}/{filename} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    match /restaurants/{restaurantId}/{filename} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // =============================================
+    // ANNOUNCEMENT MEDIA
+    // =============================================
+    match /announcements/{announcementId}/{filename} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

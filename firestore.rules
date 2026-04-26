@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── HELPER FUNCTIONS ───────────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isAuth() && getUserRole() == 'admin';
+    }
+
+    function isPatient() {
+      return isAuth() && getUserRole() == 'patient';
+    }
+
+    // ── USERS ──────────────────────────────────────────────────────────────
+    // Users can only read/write their OWN document. No cross-user reads.
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId)
+        // Prevent users from escalating their own role
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+      allow delete: if false;
+    }
+
+    // ── PROVIDERS ──────────────────────────────────────────────────────────
+    // Anyone can read. Only admins or the linked owner can write basic fields.
+    // averageRating, rankingScore, totalReviews are LOCKED — only Cloud Functions
+    // or admin can update them to prevent manipulation.
+    match /providers/{providerId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+        (isAuth() && resource.data.ownerId == request.auth.uid
+          // Prevent providers from touching their own scores
+          && !request.resource.data.diff(resource.data)
+              .affectedKeys().hasAny(['averageRating', 'rankingScore', 'totalReviews']));
+      allow delete: if isAdmin();
+    }
+
+    // ── REVIEWS ────────────────────────────────────────────────────────────
+    // Anyone can read. Only patients can create. No editing after submission.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isPatient()
+        // Submitted userId must match the authenticated user
+        && request.resource.data.userId == request.auth.uid
+        // Rating must be between 1 and 5
+        && request.resource.data.overallRating >= 1
+        && request.resource.data.overallRating <= 5;
+      allow update: if false;
+      allow delete: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+    }
+
+    // ── RANKING UPDATES (write-only from trusted path) ─────────────────────
+    // Block direct client writes to score fields on providers (enforced above).
+    // In production, move recalculateRanking() to a Cloud Function.
+
+    // ── DENY EVERYTHING ELSE ───────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
