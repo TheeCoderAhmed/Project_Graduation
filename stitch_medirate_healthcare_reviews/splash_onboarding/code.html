@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MediRank - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#9ccbf7",
+                    "surface-container-highest": "#e2e2e6",
+                    "surface-bright": "#f9f9fd",
+                    "tertiary-fixed-dim": "#f1be72",
+                    "on-tertiary-container": "#fac67a",
+                    "primary-container": "#2a5c82",
+                    "on-primary-fixed": "#001d32",
+                    "on-surface": "#191c1e",
+                    "inverse-on-surface": "#f0f0f4",
+                    "outline-variant": "#c1c7cf",
+                    "on-secondary-fixed": "#00201f",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#78d6d2",
+                    "inverse-surface": "#2e3133",
+                    "on-primary-fixed-variant": "#124a6f",
+                    "background": "#f9f9fd",
+                    "on-error-container": "#93000a",
+                    "surface": "#f9f9fd",
+                    "secondary-container": "#91f0ec",
+                    "on-surface-variant": "#41474e",
+                    "primary-fixed": "#cde5ff",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#5a3b00",
+                    "primary": "#074469",
+                    "on-tertiary-fixed-variant": "#614000",
+                    "surface-container": "#edeef1",
+                    "primary-fixed-dim": "#9ccbf7",
+                    "on-tertiary-fixed": "#281800",
+                    "on-secondary-container": "#006e6c",
+                    "secondary": "#006a68",
+                    "on-background": "#191c1e",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#a5d4ff",
+                    "secondary-fixed": "#94f2ef",
+                    "outline": "#72787f",
+                    "on-error": "#ffffff",
+                    "surface-dim": "#d9dadd",
+                    "surface-variant": "#e2e2e6",
+                    "error": "#ba1a1a",
+                    "surface-container-low": "#f3f3f7",
+                    "surface-container-high": "#e7e8eb",
+                    "on-secondary-fixed-variant": "#00504e",
+                    "tertiary-container": "#76510e",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffddb0",
+                    "surface-tint": "#316289"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "container-margin": "20px",
+                    "xl": "32px",
+                    "gutter": "16px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "xxl": "48px",
+                    "unit": "8px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "h1": ["Manrope"],
+                    "h3": ["Manrope"],
+                    "label-caps": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "h2": ["Manrope"],
+                    "button": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "h1": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h2": ["32px", {"lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "button": ["16px", {"lineHeight": "1.0", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .ambient-shadow {
+            box-shadow: 0 12px 32px -8px rgba(7, 68, 105, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<!-- Suppressing TopAppBar and BottomNavBar as this is a linear/transactional onboarding screen -->
+<body class="bg-gradient-to-b from-surface-bright to-surface-container-low min-h-screen flex flex-col font-sans text-on-surface antialiased overflow-hidden">
+<!-- Header / Logo Area -->
+<header class="pt-xl px-container-margin flex flex-col items-center justify-center shrink-0 mt-md">
+<div class="relative flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-sm border border-outline-variant/30 mb-sm">
+<!-- Medical Cross -->
+<span class="material-symbols-outlined text-primary text-[36px]" style="font-variation-settings: 'FILL' 1;">add</span>
+<!-- Integrated Ranking Star -->
+<div class="absolute -bottom-2 -right-2 bg-tertiary-fixed-dim rounded-full w-7 h-7 flex items-center justify-center border-2 border-white shadow-sm">
+<span class="material-symbols-outlined text-on-tertiary-fixed text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<h1 class="font-h3 text-h3 text-primary tracking-tight">MediRank</h1>
+</header>
+<!-- Carousel Section -->
+<main class="flex-1 flex flex-col justify-center relative w-full mt-lg">
+<!-- Decorative Background Blob -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-64 bg-primary-fixed/30 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+<div class="w-full overflow-x-auto snap-x snap-mandatory no-scrollbar flex gap-gutter px-container-margin pb-xl pt-sm">
+<!-- Card 1: Doctors -->
+<section class="snap-center shrink-0 w-[85vw] max-w-[340px] bg-white/80 backdrop-blur-md rounded-[24px] border border-white p-2 ambient-shadow flex flex-col">
+<div class="w-full h-56 rounded-[20px] bg-surface-variant overflow-hidden relative mb-md">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Abstract soft focus 3D rendering of a premium stethoscope resting on a pristine white clipboard with glowing soft blue light in a modern clinical setting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDt91kebkGymMmMecv6655QIUqkHue4JpZMLm-wHeI51OjB-KrXqRzfi7vXBY-NuxCFFwjbj9cY5CJwIXN_PnhN36XSOC5BsttnOpIiEfe59CwRKGr3iAnsR05tXDT_3x0t-Q_cRaUKW851VJ6QGFfswGR5fR-I-ftp7J9iHvvUZ-q-PDnAAbSuXnS-XPSPX3-6LWDIIixuwBcf6ZGXogtOYIrlh702Y05o0ULZQqslEQFmlSPqCkMvWP_RJHtH1sSFynsExbGBTDg');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+<div class="absolute bottom-md left-md right-md">
+<span class="inline-flex items-center gap-1 bg-white/90 backdrop-blur text-primary px-3 py-1.5 rounded-full font-label-caps text-label-caps mb-2">
+<span class="material-symbols-outlined text-[14px]">verified</span> Verified Profiles
+                        </span>
+</div>
+</div>
+<div class="px-sm pb-md text-center flex flex-col items-center">
+<h2 class="font-h2 text-h2 text-on-surface mb-xs">Find the best doctors</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[260px]">Access trusted, independent reviews to find the right specialist for your specific health needs.</p>
+</div>
+</section>
+<!-- Card 2: Pharmacy -->
+<section class="snap-center shrink-0 w-[85vw] max-w-[340px] bg-white/80 backdrop-blur-md rounded-[24px] border border-white p-2 ambient-shadow flex flex-col">
+<div class="w-full h-56 rounded-[20px] bg-surface-variant overflow-hidden relative mb-md">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Close up of pristine white pharmacy pill bottles standing on a clean glass surface with a vibrant soft teal background emphasizing hygiene and care" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDrGWBgbo0EvDyV_wcIyW_9MR6owz5aO5WPYt_Miixe5oo6zXfWe6mI-VxkXRqwt9cJghcve-Kap9ss0BamoC8X1DvHKMBlWcSZ5V9jG5ZTNZA-BPYgcwfEVdI6ier74XWGo7tWuzzOQeWmDyFIHJeGhWujemHmnS9toy2sQlEl1o1_Gt14adIqpbJn_N52Oc2Nj05PxB1XX0ndx1Yu0lgJAh5M2fruubyeuTNWRStRMNkieeTUVfavF_0nVh9qE-14dky0PRRzenU');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+<div class="absolute bottom-md left-md right-md">
+<span class="inline-flex items-center gap-1 bg-secondary-fixed/90 backdrop-blur text-on-secondary-fixed px-3 py-1.5 rounded-full font-label-caps text-label-caps mb-2">
+<span class="material-symbols-outlined text-[14px]">local_pharmacy</span> Service Ratings
+                        </span>
+</div>
+</div>
+<div class="px-sm pb-md text-center flex flex-col items-center">
+<h2 class="font-h2 text-h2 text-on-surface mb-xs">Rate your pharmacy</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[260px]">Share your prescription experiences and discover the most efficient, caring pharmacies near you.</p>
+</div>
+</section>
+<!-- Card 3: Community -->
+<section class="snap-center shrink-0 w-[85vw] max-w-[340px] bg-white/80 backdrop-blur-md rounded-[24px] border border-white p-2 ambient-shadow flex flex-col">
+<div class="w-full h-56 rounded-[20px] bg-surface-variant overflow-hidden relative mb-md">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Overhead view of diverse hands connecting puzzle pieces shaped like hearts on a clean medical blue background symbolizing community healthcare support" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD4WM0bMj2Xm8UV5LcJpbukmX0CthF6JFTqiNEN0UvGSIX6dTAtHIX3vPTrXz8uWdi8qvoqFok4gKY5qduax13SIdxCbDB0ukYBm3T2BtVPMFHp6n5RwCNLn5t8aS-rO1ZKdTRkXY_TVqFv5Woy-Im15VuDfuVExuhW5BorFZznwE3xoDCuhmDxPD5YJ0WHqSg5H3XZtjX-luLpgFmMDsuQcWqFu1QKY0JwrZ258dhoqUcUW2Eb0OHiTkNUaxziDGmmir9i2wwj72A');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+<div class="absolute bottom-md left-md right-md">
+<span class="inline-flex items-center gap-1 bg-tertiary-fixed/90 backdrop-blur text-on-tertiary-fixed px-3 py-1.5 rounded-full font-label-caps text-label-caps mb-2">
+<span class="material-symbols-outlined text-[14px]">diversity_1</span> Shared Insights
+                        </span>
+</div>
+</div>
+<div class="px-sm pb-md text-center flex flex-col items-center">
+<h2 class="font-h2 text-h2 text-on-surface mb-xs">Help the community</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-[260px]">Your honest feedback empowers other patients to make confident, informed healthcare decisions.</p>
+</div>
+</section>
+</div>
+<!-- Pagination Indicators -->
+<div class="flex justify-center items-center gap-sm mt-sm mb-lg">
+<div class="h-2 w-8 bg-primary rounded-full transition-all duration-300"></div>
+<div class="h-2 w-2 bg-outline-variant/50 rounded-full transition-all duration-300"></div>
+<div class="h-2 w-2 bg-outline-variant/50 rounded-full transition-all duration-300"></div>
+</div>
+</main>
+<!-- Bottom Action Area -->
+<footer class="px-container-margin pb-xxl pt-md shrink-0 bg-gradient-to-t from-surface-bright via-surface-bright to-transparent relative z-10">
+<button class="w-full bg-primary text-on-primary font-button text-button py-[18px] rounded-full shadow-[0_4px_16px_rgba(7,68,105,0.25)] flex justify-center items-center gap-sm transition-transform active:scale-[0.98] hover:bg-primary/90">
+            Get Started
+            <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'wght' 600;">arrow_forward</span>
+</button>
+<p class="text-center mt-gutter font-body-sm text-body-sm text-on-surface-variant">
+            Already have an account? <a class="text-primary font-semibold hover:underline" href="#">Log in</a>
+</p>
+</footer>
+</body></html>

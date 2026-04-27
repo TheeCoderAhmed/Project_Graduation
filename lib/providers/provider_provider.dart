@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/firestore_service.dart';
+import '../services/dummy_data_service.dart';
 import '../models/provider_model.dart';
 
 class ProviderProvider extends ChangeNotifier {
@@ -22,62 +23,74 @@ class ProviderProvider extends ChangeNotifier {
   Future<void> loadHomeData() async {
     _isLoading = true;
     notifyListeners();
-    try {
-      _topDoctors = await _service.getTopProviders(type: 'doctor');
-      _topPharmacies = await _service.getTopProviders(type: 'pharmacy');
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    await Future.delayed(const Duration(milliseconds: 500));
+    _topDoctors = DummyDataService.doctors;
+    _topPharmacies = DummyDataService.pharmacies;
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<void> search(String query) async {
-    if (query.isEmpty) {
+    if (query.trim().isEmpty) {
       _searchResults = [];
       notifyListeners();
       return;
     }
-    
     _isLoading = true;
     notifyListeners();
-    
-    try {
-      final q = query.toLowerCase();
-      final allProviders = [..._topDoctors, ..._topPharmacies];
-      
-      final uniqueIds = <String>{};
-      final List<ProviderModel> results = [];
-      
-      for (var p in allProviders) {
-        if (uniqueIds.contains(p.providerId)) continue;
-        
-        final matchName = p.name.toLowerCase().contains(q);
-        final matchSpec = p.specialty.toLowerCase().contains(q);
-        final matchAddr = p.address.toLowerCase().contains(q);
-        
-        if (matchName || matchSpec || matchAddr) {
-          uniqueIds.add(p.providerId);
-          results.add(p);
-        }
-      }
-      
-      _searchResults = results;
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+
+    await Future.delayed(const Duration(milliseconds: 250));
+    final q = query.toLowerCase();
+    _searchResults = DummyDataService.allProviders.where((p) {
+      return p.name.toLowerCase().contains(q) ||
+          p.specialty.toLowerCase().contains(q) ||
+          p.address.toLowerCase().contains(q) ||
+          p.type.toLowerCase().contains(q);
+    }).toList();
+
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<void> loadBookmarks(List<String> ids) async {
-    _bookmarked = await _service.getBookmarkedProviders(ids);
+    if (ids.isEmpty) {
+      _bookmarked = [];
+      notifyListeners();
+      return;
+    }
+    _bookmarked = DummyDataService.allProviders
+        .where((p) => ids.contains(p.providerId))
+        .toList();
     notifyListeners();
   }
 
-  Future<void> toggleBookmark(String userId, String providerId, bool add) async {
-    await _service.toggleBookmark(userId, providerId, add);
+  /// Persists bookmark to Firestore. Returns true on success.
+  /// On failure, returns false so the caller (screen/AuthProvider) can
+  /// roll back the optimistic local toggle.
+  Future<bool> toggleBookmark(
+      String userId, String providerId, bool add) async {
+    try {
+      await _service.toggleBookmark(userId, providerId, add);
+      _error = null;
+      return true;
+    } catch (e) {
+      _error = 'Could not save bookmark. Check your connection.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  ProviderModel? getById(String providerId) {
+    try {
+      return DummyDataService.allProviders
+          .firstWhere((p) => p.providerId == providerId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
   }
 }

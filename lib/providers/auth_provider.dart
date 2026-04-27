@@ -19,10 +19,12 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider() {
     _firebaseUser = FirebaseAuth.instance.currentUser;
-    
+
     _authService.authStateChanges.listen((user) async {
       _firebaseUser = user;
       if (user != null) {
+        // getUserData() now swallows its own errors and returns null —
+        // we never crash here even on network failure.
         _userModel = await _authService.getUserData(user.uid);
       } else {
         _userModel = null;
@@ -41,13 +43,17 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      await _authService.signUp(
-        email: email, password: password,
-        fullName: fullName, role: role,
+      final userModel = await _authService.signUp(
+        email: email,
+        password: password,
+        fullName: fullName,
+        role: role,
       );
+      _userModel = userModel;
+      _firebaseUser = FirebaseAuth.instance.currentUser;
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = _friendlyError(e.toString());
       return false;
     } finally {
       _isLoading = false;
@@ -63,7 +69,7 @@ class AuthProvider extends ChangeNotifier {
       await _authService.signIn(email: email, password: password);
       return true;
     } catch (e) {
-      _error = e.toString();
+      _error = _friendlyError(e.toString());
       return false;
     } finally {
       _isLoading = false;
@@ -71,8 +77,18 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Signs the user out. Swallows network errors gracefully — if Firebase
+  /// can't reach the server we still clear local state so the UI goes to login.
   Future<void> signOut() async {
-    await _authService.signOut();
+    try {
+      await _authService.signOut();
+    } catch (_) {
+      // Firebase signOut can fail on bad network. Clear local state anyway —
+      // the user should always be able to leave the app.
+      _firebaseUser = null;
+      _userModel = null;
+      notifyListeners();
+    }
   }
 
   void clearError() {
@@ -80,6 +96,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Optimistic local bookmark toggle. The caller is responsible for
+  /// persisting to Firestore via FirestoreService.toggleBookmark().
   void toggleBookmark(String providerId, bool add) {
     if (_userModel == null) return;
     final bookmarks = List<String>.from(_userModel!.bookmarks);
@@ -90,5 +108,47 @@ class AuthProvider extends ChangeNotifier {
     }
     _userModel = _userModel!.copyWith(bookmarks: bookmarks);
     notifyListeners();
+  }
+
+  /// Reverts a failed bookmark toggle back to the previous state.
+  void revertBookmark(String providerId, bool wasBookmarked) {
+    toggleBookmark(providerId, wasBookmarked);
+  }
+
+  Future<void> refreshUserData() async {
+    if (_firebaseUser == null) return;
+    final fresh = await _authService.getUserData(_firebaseUser!.uid);
+    if (fresh != null) {
+      _userModel = fresh;
+      notifyListeners();
+    }
+  }
+
+  String _friendlyError(String raw) {
+    if (raw.contains('email-already-in-use')) {
+      return 'That email is already registered.';
+    }
+    if (raw.contains('wrong-password') ||
+        raw.contains('invalid-credential') ||
+        raw.contains('invalid-email')) {
+      return 'Incorrect email or password.';
+    }
+    if (raw.contains('user-not-found')) {
+      return 'No account found with that email.';
+    }
+    if (raw.contains('weak-password')) {
+      return 'Password must be at least 6 characters.';
+    }
+    if (raw.contains('network-request-failed') ||
+        raw.contains('connection')) {
+      return 'Check your internet connection and try again.';
+    }
+    if (raw.contains('Account setup failed')) {
+      return 'Account setup failed. Please check your connection and try again.';
+    }
+    if (raw.contains('too-many-requests')) {
+      return 'Too many attempts. Please wait a moment and try again.';
+    }
+    return 'Something went wrong. Please try again.';
   }
 }

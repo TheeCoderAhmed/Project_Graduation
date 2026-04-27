@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MediRank - User Profile &amp; History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&amp;family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#9ccbf7",
+                        "surface-container-highest": "#e2e2e6",
+                        "surface-bright": "#f9f9fd",
+                        "tertiary-fixed-dim": "#f1be72",
+                        "on-tertiary-container": "#fac67a",
+                        "primary-container": "#2a5c82",
+                        "on-primary-fixed": "#001d32",
+                        "on-surface": "#191c1e",
+                        "inverse-on-surface": "#f0f0f4",
+                        "outline-variant": "#c1c7cf",
+                        "on-secondary-fixed": "#00201f",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#78d6d2",
+                        "inverse-surface": "#2e3133",
+                        "on-primary-fixed-variant": "#124a6f",
+                        "background": "#f9f9fd",
+                        "on-error-container": "#93000a",
+                        "surface": "#f9f9fd",
+                        "secondary-container": "#91f0ec",
+                        "on-surface-variant": "#41474e",
+                        "primary-fixed": "#cde5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#5a3b00",
+                        "primary": "#074469",
+                        "on-tertiary-fixed-variant": "#614000",
+                        "surface-container": "#edeef1",
+                        "primary-fixed-dim": "#9ccbf7",
+                        "on-tertiary-fixed": "#281800",
+                        "on-secondary-container": "#006e6c",
+                        "secondary": "#006a68",
+                        "on-background": "#191c1e",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#a5d4ff",
+                        "secondary-fixed": "#94f2ef",
+                        "outline": "#72787f",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d9dadd",
+                        "surface-variant": "#e2e2e6",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f7",
+                        "surface-container-high": "#e7e8eb",
+                        "on-secondary-fixed-variant": "#00504e",
+                        "tertiary-container": "#76510e",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffddb0",
+                        "surface-tint": "#316289"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "container-margin": "20px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "xxl": "48px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "h1": ["Manrope"],
+                        "h3": ["Manrope"],
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h2": ["Manrope"],
+                        "button": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "h1": ["40px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "h3": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "h2": ["32px", { "lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "button": ["16px", { "lineHeight": "1.0", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 border-b border-b border-slate-200 dark:border-slate-800 shadow-sm shadow-blue-500/5 bg-white dark:bg-slate-900 hidden md:flex">
+<div class="flex justify-between items-center px-5 h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="text-blue-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="text-blue-800 dark:text-blue-300 font-bold tracking-tight font-manrope font-semibold text-lg">MediRank</span>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out px-3 py-2 rounded-md font-body-sm text-body-sm" href="#">Home</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out px-3 py-2 rounded-md font-body-sm text-body-sm" href="#">Search</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out px-3 py-2 rounded-md font-body-sm text-body-sm" href="#">Reviews</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out px-3 py-2 rounded-md font-body-sm text-body-sm" href="#">Analytics</a>
+<a class="text-blue-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out px-3 py-2 rounded-md font-body-sm text-body-sm font-semibold border-b-2 border-blue-700" href="#">Profile</a>
+</nav>
+<div class="flex items-center">
+<button class="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 ease-in-out p-1 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User Avatar" class="w-8 h-8 object-cover rounded-full" data-alt="professional portrait of a young woman with a warm smile, soft natural lighting, blurred medical background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO3LuSsGREfMmoCAGcnBLdMj16KPwmNC3FKswZtVq5YcH71mgjk0EYgmaC-xtQLsdeuFn9EKZqw9VwnO19-SabSaKRUKfK9XoHCX16YxX-pdewP5cZyWQSQ4yIuAyTzTwA5Q2KQFOtuSnbBCgF6zeyLu9q5XghTIvmzvvFmDCd-lkeCrR318Fs-vjYj2AJW7CMgpI7Md52g1pek6rruqU3z5zR8XFjOg_Qx4KFGOExIqrMhd_8n4eB17AHOaGSjpfE3ey2K7ssuBg"/>
+</button>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-container-margin md:px-lg pt-lg md:pt-xl">
+<!-- Profile Header Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-xl">
+<!-- User Info Card -->
+<div class="md:col-span-2 bg-surface-container-lowest rounded-xl p-lg border border-outline-variant/30 flex flex-col md:flex-row items-center md:items-start gap-lg relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-fixed/20 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+<div class="w-32 h-32 rounded-full overflow-hidden border-4 border-surface-container-lowest shadow-sm flex-shrink-0">
+<img alt="Sarah Jenkins" class="w-full h-full object-cover" data-alt="high quality professional portrait of a woman looking confident and approachable, soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdd8BT41PIfZ-opd87yGzgZqDbTI05V21ws3DxeSQGZD0p16jw552j1VpK0oRVrkxgaGRA_ebnOS-vuPmdgcaEvB4u-k8doklQ4Lm4WMJy60CpF4pVUwGzAFRCtRw0JwTZkqoyir4Lu2ZGGYsD7nQPWgjV9nUjEQS9N-8Vm_It25nKG50IO50jfltBBhT0R5El_pjbpB-X1J-LjNpl3UthIfNPOngFSrsJCVlhs4BnzaDG1-F0FTg1eQwMMw0D0nK5nq7QN0I9piA"/>
+</div>
+<div class="flex flex-col items-center md:items-start flex-grow text-center md:text-left">
+<h1 class="font-h2 text-h2 text-on-surface mb-xs">Sarah Jenkins</h1>
+<div class="flex items-center text-on-surface-variant font-body-sm text-body-sm mb-md">
+<span class="material-symbols-outlined text-[18px] mr-1 opacity-70">location_on</span>
+<span>Seattle, WA</span>
+<span class="mx-2 opacity-30">•</span>
+<span>Joined Sept 2022</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-lg mb-md">
+                        Advocating for transparent healthcare. Sharing my experiences with specialists to help others find the right care.
+                    </p>
+<button class="font-button text-button bg-primary text-on-primary px-lg py-sm rounded-lg hover:bg-on-primary-fixed-variant transition-colors mt-auto w-full md:w-auto flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+                        Edit Profile
+                    </button>
+</div>
+</div>
+<!-- Quick Stats Card -->
+<div class="bg-surface-container-lowest rounded-xl p-lg border border-outline-variant/30 flex flex-col justify-center">
+<h3 class="font-h3 text-h3 text-on-surface mb-md">Contributions</h3>
+<div class="grid grid-cols-2 gap-md">
+<div class="bg-surface-container-low rounded-lg p-md text-center">
+<span class="block font-h2 text-h2 text-primary mb-xs">12</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">REVIEWS</span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-md text-center">
+<span class="block font-h2 text-h2 text-primary mb-xs">8</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">SAVED</span>
+</div>
+<div class="bg-surface-container-low rounded-lg p-md text-center col-span-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+<span class="font-body-md text-body-md text-on-surface font-semibold">Top Contributor</span>
+</div>
+<span class="font-body-sm text-body-sm text-primary">Level 4</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tabs -->
+<div class="border-b border-outline-variant/30 mb-lg">
+<div class="flex gap-lg">
+<button class="pb-sm border-b-2 border-primary font-body-md text-body-md text-primary font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">rate_review</span>
+                    My Reviews
+                </button>
+<button class="pb-sm border-b-2 border-transparent hover:border-outline-variant/50 font-body-md text-body-md text-on-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+                    Saved
+                </button>
+</div>
+</div>
+<!-- Reviews List (Bento-ish layout for items) -->
+<div class="grid gap-md">
+<!-- Review Item 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-lg border border-outline-variant/30 flex flex-col md:flex-row gap-lg">
+<div class="md:w-1/4 flex-shrink-0 flex flex-col gap-sm">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">REVIEWED PROVIDER</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold font-body-md">
+                            EK
+                        </div>
+<div>
+<div class="font-body-md text-body-md text-on-surface font-semibold">Dr. Eleanor Kensington</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Cardiology</div>
+</div>
+</div>
+</div>
+<div class="md:w-3/4 flex flex-col">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex text-tertiary-fixed-dim">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Oct 12, 2023</span>
+</div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold mb-sm">Excellent bedside manner, but long wait times</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                        Dr. Kensington is incredibly thorough and takes the time to explain complex procedures in a way that is easy to understand. However, I waited over 45 minutes past my appointment time.
+                    </p>
+<div class="flex gap-sm mt-auto">
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant rounded font-body-sm text-body-sm">Communication</span>
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant rounded font-body-sm text-body-sm">Expertise</span>
+</div>
+</div>
+</div>
+<!-- Review Item 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-lg border border-outline-variant/30 flex flex-col md:flex-row gap-lg">
+<div class="md:w-1/4 flex-shrink-0 flex flex-col gap-sm">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">REVIEWED PROVIDER</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold font-body-md">
+                            VP
+                        </div>
+<div>
+<div class="font-body-md text-body-md text-on-surface font-semibold">Valley Pediatrics</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Clinic</div>
+</div>
+</div>
+</div>
+<div class="md:w-3/4 flex flex-col">
+<div class="flex justify-between items-start mb-sm">
+<div class="flex text-tertiary-fixed-dim">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Aug 05, 2023</span>
+</div>
+<h4 class="font-body-lg text-body-lg text-on-surface font-semibold mb-sm">Fantastic facility for children</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md">
+                        The entire staff is amazing with kids. The waiting room is clean and has great distractions. Dr. Smith specifically was very patient with my nervous toddler.
+                    </p>
+<div class="flex gap-sm mt-auto">
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant rounded font-body-sm text-body-sm">Facility</span>
+<span class="px-2 py-1 bg-surface-container text-on-surface-variant rounded font-body-sm text-body-sm">Staff</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 border-t border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_0_rgba(42,92,130,0.08)] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md md:hidden">
+<div class="fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-4 pb-safe">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-manrope text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-manrope text-[10px] font-medium">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">rate_review</span>
+<span class="font-manrope text-[10px] font-medium">Reviews</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150 gap-1 w-16" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-manrope text-[10px] font-medium">Analytics</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-400 scale-105 active:scale-95 transition-transform duration-150 gap-1 w-16" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-manrope text-[10px] font-medium">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

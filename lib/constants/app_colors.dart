@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
 
+/// Clinical Clarity — "Guided Confidence" design system
+/// Medical Blue / Mint Teal / Warm Amber
 class AppColors {
-  // Premium Healthcare Trust Palette
-  static const Color primary       = Color(0xFF0891B2); // Deep Cyan 600
-  static const Color primaryDark   = Color(0xFF164E63); // Cyan 900
-  static const Color primaryLight  = Color(0xFF22D3EE); // Cyan 400
-  
-  static const Color accent        = Color(0xFF0EA5E9); // Ocean Blue
-  
-  static const Color background    = Color(0xFFF8FAFC); // Slate 50
-  static const Color surface       = Color(0xFFFFFFFF); // White
-  static const Color surfaceContainer = Color(0xFFF1F5F9); // Slate 100 for subtle nested layers
-  
-  static const Color textPrimary   = Color(0xFF0F172A); // Slate 900 - high contrast but not fully black
-  static const Color textSecondary = Color(0xFF475569); // Slate 600
-  
-  static const Color error         = Color(0xFFDC2626); // Red 600
-  static const Color success       = Color(0xFF059669); // Emerald 600
-  static const Color divider       = Color(0xFFE2E8F0); // Slate 200
+  // ── Primary (Medical Blue) ──────────────────────────────────────────
+  static const Color primary          = Color(0xFF074469);
+  static const Color primaryContainer = Color(0xFF2A5C82);
+  static const Color onPrimary        = Color(0xFFFFFFFF);
+
+  // ── Secondary (Mint Teal) ───────────────────────────────────────────
+  static const Color secondary          = Color(0xFF006A68);
+  static const Color secondaryContainer = Color(0xFF91F0EC);
+  static const Color onSecondary        = Color(0xFFFFFFFF);
+
+  // ── Tertiary (Warm Amber — ratings & achievements) ──────────────────
+  static const Color tertiary      = Color(0xFF5A3B00);
+  static const Color tertiaryFixed = Color(0xFFFFDDB0);
+  static const Color starGold      = Color(0xFFF5A623);
+
+  // ── Surfaces ────────────────────────────────────────────────────────
+  static const Color background       = Color(0xFFF9F9FD);
+  static const Color surface          = Color(0xFFFFFFFF);
+  static const Color surfaceContainer = Color(0xFFF0F3F8);
+
+  // ── Text ────────────────────────────────────────────────────────────
+  static const Color textPrimary   = Color(0xFF191C1E);
+  static const Color textSecondary = Color(0xFF41474E);
+
+  // ── Outline & Divider ───────────────────────────────────────────────
+  static const Color outline = Color(0xFF72787F);
+  static const Color divider = Color(0xFFE0E3E8);
+
+  // ── Semantic ────────────────────────────────────────────────────────
+  static const Color error   = Color(0xFFBA1A1A);
+  static const Color success = Color(0xFF006A68); // Reuse teal for positive
+
+  // ── Ambient Shadow (used in BoxShadow) ──────────────────────────────
+  static Color ambientShadow = const Color(0xFF074469).withValues(alpha: 0.15);
 }

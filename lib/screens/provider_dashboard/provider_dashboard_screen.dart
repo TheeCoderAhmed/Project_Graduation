@@ -1,279 +1,254 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
-import '../../constants/app_routes.dart';
+import '../../constants/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/provider_provider.dart';
 import '../../providers/review_provider.dart';
 import '../../services/firestore_service.dart';
 import '../../models/provider_model.dart';
 import '../../widgets/common/loading_indicator.dart';
-import '../../widgets/review_card.dart';
 
 class ProviderDashboardScreen extends StatefulWidget {
   const ProviderDashboardScreen({super.key});
-
   @override
   State<ProviderDashboardScreen> createState() => _ProviderDashboardScreenState();
 }
 
 class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
-  ProviderModel? _ownProvider;
+  ProviderModel? _myProvider;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+    _loadMyProfile();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadMyProfile() async {
     final auth = context.read<AuthProvider>();
-
-    // Guard: only providers can access this screen
-    if (auth.userModel?.role != 'provider') {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    if (auth.userModel == null) {
+      if (mounted) setState(() => _loading = false);
       return;
     }
+    final uid = auth.userModel!.uid;
 
-    final uid = auth.firebaseUser?.uid;
-    if (uid == null) return;
+    // Try to find a real provider linked to the user's UID in Firestore.
+    List<ProviderModel> providers = [];
+    try {
+      providers = await FirestoreService().getProvidersByOwner(uid);
+    } catch (_) {}
 
-    // Find the provider document owned by this user
-    final db = FirestoreService();
-    // Search providers by ownerId
-    final providers = await db.getProvidersByOwner(uid);
     if (!mounted) return;
 
-    if (providers.isNotEmpty) {
-      final p = providers.first;
-      setState(() {
-        _ownProvider = p;
-        _loading = false;
-      });
-      context.read<ReviewProvider>().loadReviews(p.providerId);
-    } else {
-      setState(() => _loading = false);
+    // Fall back to first seed doctor if no real provider is linked.
+    final ProviderModel? provider = providers.isNotEmpty
+        ? providers.first
+        : context.read<ProviderProvider>().getById('doc_001');
+
+    setState(() { _myProvider = provider; _loading = false; });
+    if (provider != null) {
+      context.read<ReviewProvider>().loadReviews(provider.providerId);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final reviews = context.watch<ReviewProvider>();
+
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Provider Dashboard'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        title: Text('My Dashboard', style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w600)),
       ),
       body: _loading
-          ? const LoadingIndicator(message: 'Loading your dashboard...')
-          : _ownProvider == null
-              ? _buildNoProviderProfile()
-              : _buildDashboard(),
-    );
-  }
-
-  Widget _buildNoProviderProfile() {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(32),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(Icons.business_outlined, size: 80, color: AppColors.divider),
-          SizedBox(height: 20),
-          Text(
-            'No Provider Profile Found',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 12),
-          Text(
-            'Your provider account is not yet linked to a provider listing. Please contact an administrator.',
-            style: TextStyle(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-        ]),
-      ),
-    );
-  }
-
-  Widget _buildDashboard() {
-    final reviews = context.watch<ReviewProvider>();
-    final p = _ownProvider!;
-
-    return RefreshIndicator(
-      onRefresh: _loadData,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildProviderHeader(p),
-          const SizedBox(height: 20),
-          _buildStatsGrid(p),
-          const SizedBox(height: 20),
-          _buildScoreBreakdown(p),
-          const SizedBox(height: 20),
-          if (reviews.isLoading)
-            const LoadingIndicator(message: 'Loading reviews...')
-          else ...[
-            _buildSectionTitle('Recent Patient Reviews'),
-            if (reviews.reviews.isEmpty)
-              _buildEmptyReviews()
-            else
-              ...reviews.reviews.take(5).map((r) => ReviewCard(review: r)),
-            if (reviews.reviews.length > 5) ...[
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () => Navigator.pushNamed(
-                  context,
-                  AppRoutes.reviewsList,
-                  arguments: p.providerId,
+          ? const LoadingIndicator(message: 'Loading dashboard...')
+          : _myProvider == null
+              ? _buildNoProfile()
+              : RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: _loadMyProfile,
+                  child: ListView(
+                    padding: const EdgeInsets.all(AppTheme.containerMargin),
+                    children: [
+                      Text('Performance', style: GoogleFonts.manrope(
+                        fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary,
+                      )),
+                      const SizedBox(height: 4),
+                      Text('Your ${_myProvider!.name} ratings at a glance', style: GoogleFonts.inter(
+                        fontSize: 15, color: AppColors.textSecondary,
+                      )),
+                      const SizedBox(height: 24),
+                      _buildStatsGrid(reviews),
+                      const SizedBox(height: 28),
+                      Text('Rating Breakdown', style: GoogleFonts.manrope(
+                        fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary,
+                      )),
+                      const SizedBox(height: 16),
+                      _buildBreakdownCard(reviews),
+                      const SizedBox(height: 48),
+                    ],
+                  ),
                 ),
-                icon: const Icon(Icons.list_alt),
-                label: Text('See all ${reviews.reviews.length} reviews'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-            ],
-          ],
-          const SizedBox(height: 30),
-        ],
-      ),
     );
   }
 
-  Widget _buildProviderHeader(ProviderModel p) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            p.type == 'pharmacy' ? Icons.local_pharmacy_outlined : Icons.local_hospital_outlined,
-            color: Colors.white, size: 30,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(p.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 4),
-            Text(p.specialty, style: const TextStyle(color: Colors.white70, fontSize: 13)),
-            const SizedBox(height: 4),
-            Text(p.address, style: const TextStyle(color: Colors.white60, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-          ]),
-        ),
-      ]),
-    );
-  }
-
-  Widget _buildStatsGrid(ProviderModel p) {
-    return GridView.count(
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.1,
+  Widget _buildStatsGrid(ReviewProvider reviews) {
+    return Row(
       children: [
-        _buildStatCard('⭐ Rating', p.averageRating.toStringAsFixed(1), AppColors.accent),
-        _buildStatCard('📝 Reviews', p.totalReviews.toString(), AppColors.primary),
-        _buildStatCard('🏆 Score', p.rankingScore.toStringAsFixed(1), AppColors.success),
+        Expanded(child: _buildStatCard(
+          icon: Icons.star_rounded,
+          iconColor: AppColors.starGold,
+          value: _myProvider!.averageRating.toStringAsFixed(1),
+          label: 'Avg Rating',
+        )),
+        const SizedBox(width: 12),
+        Expanded(child: _buildStatCard(
+          icon: Icons.forum_rounded,
+          iconColor: AppColors.secondary,
+          value: reviews.isLoading ? '...' : reviews.reviews.length.toString(),
+          label: 'Reviews',
+        )),
+        const SizedBox(width: 12),
+        Expanded(child: _buildStatCard(
+          icon: Icons.trending_up_rounded,
+          iconColor: AppColors.primary,
+          value: _myProvider!.rankingScore.toStringAsFixed(1),
+          label: 'Score',
+        )),
       ],
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color color) {
+  Widget _buildStatCard({
+    required IconData icon,
+    required Color iconColor,
+    required String value,
+    required String label,
+  }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppColors.divider),
       ),
-      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary), textAlign: TextAlign.center),
+      child: Column(children: [
+        Icon(icon, color: iconColor, size: 24),
+        const SizedBox(height: 8),
+        Text(value, style: GoogleFonts.manrope(
+          fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textPrimary,
+        )),
+        const SizedBox(height: 2),
+        Text(label, style: GoogleFonts.inter(
+          fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.outline,
+        )),
       ]),
     );
   }
 
-  Widget _buildScoreBreakdown(ProviderModel p) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _buildSectionTitle('Ranking Formula'),
-          const SizedBox(height: 12),
-          _buildFormulaRow('Overall Rating (40%)', p.averageRating, AppColors.accent),
-          const SizedBox(height: 8),
-          _buildFormulaRow('Questionnaire Score (60%)', p.rankingScore, AppColors.primary),
-          const Divider(height: 24),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            const Text('Final Ranking Score', style: TextStyle(fontWeight: FontWeight.bold)),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(20)),
-              child: Text(
-                p.rankingScore.toStringAsFixed(2),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ]),
-        ]),
-      ),
-    );
-  }
-
-  Widget _buildFormulaRow(String label, double score, Color color) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-        Text(score.toStringAsFixed(1), style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-      ]),
-      const SizedBox(height: 4),
-      ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: LinearProgressIndicator(
-          value: score / 5.0,
-          backgroundColor: color.withValues(alpha: 0.15),
-          valueColor: AlwaysStoppedAnimation<Color>(color),
-          minHeight: 6,
+  Widget _buildBreakdownCard(ReviewProvider reviews) {
+    if (reviews.isLoading || reviews.reviews.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          border: Border.all(color: AppColors.divider),
         ),
-      ),
-    ]);
-  }
+        child: Column(children: [
+          const Icon(Icons.analytics_outlined, size: 40, color: AppColors.outline),
+          const SizedBox(height: 8),
+          Text('No breakdown data available yet',
+            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
+            textAlign: TextAlign.center),
+        ]),
+      );
+    }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+    // Calculate averages per category
+    final rList = reviews.reviews;
+    double avg(String key) {
+      final vals = rList.where((r) => r.questionnaire.containsKey(key))
+          .map((r) => (r.questionnaire[key] as num).toDouble());
+      if (vals.isEmpty) return 0;
+      return vals.reduce((a, b) => a + b) / vals.length;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(children: [
+        _buildBarRow('Wait Time', avg('waitingTime')),
+        const SizedBox(height: 16),
+        _buildBarRow('Service', avg('serviceQuality')),
+        const SizedBox(height: 16),
+        _buildBarRow('Hygiene', avg('hygiene')),
+        const SizedBox(height: 16),
+        _buildBarRow('Staff', avg('staffCommunication')),
+      ]),
     );
   }
 
-  Widget _buildEmptyReviews() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: const Column(children: [
-        Icon(Icons.rate_review_outlined, size: 48, color: AppColors.divider),
-        SizedBox(height: 12),
-        Text('No reviews yet', style: TextStyle(color: AppColors.textSecondary)),
-        Text('Reviews from patients will appear here.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+  Widget _buildBarRow(String label, double value) {
+    final normalized = (value / 5.0).clamp(0.0, 1.0);
+    return Row(
+      children: [
+        SizedBox(
+          width: 70,
+          child: Text(label, style: GoogleFonts.inter(
+            color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500,
+          )),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+            child: LinearProgressIndicator(
+              value: normalized,
+              minHeight: 8,
+              backgroundColor: AppColors.surfaceContainer,
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(value.toStringAsFixed(1), style: GoogleFonts.inter(
+          fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textPrimary,
+        )),
+      ],
+    );
+  }
+
+  Widget _buildNoProfile() {
+    return Center(
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: const Icon(Icons.business_rounded, size: 48, color: AppColors.outline),
+        ),
+        const SizedBox(height: 24),
+        Text('No provider profile found',
+          style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 48),
+          child: Text(
+            'Contact support to claim and manage your healthcare provider listing.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
+          ),
+        ),
       ]),
     );
   }

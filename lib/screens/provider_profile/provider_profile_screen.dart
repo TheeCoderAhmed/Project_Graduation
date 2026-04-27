@@ -1,13 +1,15 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
+import '../../constants/app_theme.dart';
 import '../../models/provider_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/review_provider.dart';
-import '../../services/firestore_service.dart';
+import '../../providers/provider_provider.dart';
 import '../../widgets/review_card.dart';
 import '../../widgets/common/app_button.dart';
 import '../../widgets/common/loading_indicator.dart';
@@ -34,10 +36,12 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   }
 
   Future<void> _load(String id) async {
-    final p = await FirestoreService().getProvider(id);
+    // Resolve from seed data instantly — no Firestore read needed for providers.
+    final p = context.read<ProviderProvider>().getById(id);
     if (!mounted) return;
     setState(() { _provider = p; _loading = false; });
     if (p != null) {
+      // loadReviews merges real Firestore reviews on top of seed reviews.
       context.read<ReviewProvider>().loadReviews(p.providerId);
     }
   }
@@ -46,9 +50,24 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     final auth = context.read<AuthProvider>();
     if (auth.userModel == null || _provider == null) return;
     final add = !isCurrentlyBookmarked;
+
+    // Optimistic local update.
     auth.toggleBookmark(_provider!.providerId, add);
-    await FirestoreService().toggleBookmark(
-        auth.userModel!.uid, _provider!.providerId, add);
+
+    // Persist to Firestore — real UID, real write.
+    final ok = await context
+        .read<ProviderProvider>()
+        .toggleBookmark(auth.userModel!.uid, _provider!.providerId, add);
+
+    if (!ok && mounted) {
+      // Firestore write failed — roll back the optimistic toggle.
+      auth.revertBookmark(_provider!.providerId, isCurrentlyBookmarked);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not save bookmark. Check your connection.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -60,23 +79,26 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     final isBookmarked = auth.userModel?.bookmarks.contains(_provider!.providerId) ?? false;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: CustomScrollView(slivers: [
         SliverAppBar(
-          expandedHeight: 280,
+          expandedHeight: 260,
           pinned: true,
+          backgroundColor: AppColors.primary,
           surfaceTintColor: Colors.transparent,
-          systemOverlayStyle: const SystemUiOverlayStyle(
-            statusBarBrightness: Brightness.dark,
-          ),
+          systemOverlayStyle: const SystemUiOverlayStyle(statusBarBrightness: Brightness.dark),
           actions: [
             Container(
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.3),
+                color: Colors.black.withValues(alpha: 0.25),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: Icon(isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded, color: Colors.white, size: 26),
+                icon: Icon(
+                  isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                  color: Colors.white, size: 24,
+                ),
                 onPressed: () => _toggleBookmark(isBookmarked),
               ),
             ),
@@ -84,28 +106,27 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             title: Text(
-              _provider!.name, 
-              style: const TextStyle(
-                fontSize: 18, 
-                fontWeight: FontWeight.w700, 
-                color: Colors.white, 
-                shadows: [Shadow(color: Colors.black54, blurRadius: 4)]
-              )
+              _provider!.name,
+              style: GoogleFonts.manrope(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                shadows: [const Shadow(color: Colors.black54, blurRadius: 4)],
+              ),
             ),
             background: Stack(
               fit: StackFit.expand,
               children: [
                 _provider!.photoUrl != null
                     ? CachedNetworkImage(imageUrl: _provider!.photoUrl!, fit: BoxFit.cover)
-                    : Container(color: AppColors.primaryLight),
-                // Gradient overlay for text legibility
+                    : Container(color: AppColors.primaryContainer),
                 const DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [Colors.transparent, Colors.black45],
-                      stops: [0.6, 1.0],
+                      stops: [0.5, 1.0],
                     ),
                   ),
                 ),
@@ -115,14 +136,17 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppTheme.containerMargin),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              // Info rows
               _buildInfoRow(Icons.medical_services_rounded, _provider!.specialty),
               _buildInfoRow(Icons.location_on_rounded, _provider!.address),
               _buildInfoRow(Icons.phone_rounded, _provider!.phone),
               const SizedBox(height: 24),
-              _buildRatingCard(),
+              // Rating card
+              _buildRatingCard(reviews),
               const SizedBox(height: 24),
+              // Write a Review CTA
               AppButton(
                 label: 'Write a Review',
                 icon: Icons.rate_review_rounded,
@@ -132,10 +156,14 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
               ),
               const SizedBox(height: 32),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text('Verified Reviews', style: Theme.of(context).textTheme.titleLarge),
+                Text('Patient Reviews', style: GoogleFonts.manrope(
+                  fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary,
+                )),
                 TextButton(
                   onPressed: () => Navigator.pushNamed(context, AppRoutes.reviewsList, arguments: _provider!.providerId),
-                  child: const Text('See all'),
+                  child: Text('See all', style: GoogleFonts.inter(
+                    fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primary,
+                  )),
                 ),
               ]),
             ]),
@@ -161,40 +189,47 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.surfaceContainer,
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           ),
-          child: Icon(icon, size: 22, color: AppColors.primary),
+          child: Icon(icon, size: 20, color: AppColors.primary),
         ),
-        const SizedBox(width: 16),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500))),
+        const SizedBox(width: 14),
+        Expanded(child: Text(text, style: GoogleFonts.inter(
+          fontSize: 15, fontWeight: FontWeight.w400, color: AppColors.textPrimary,
+        ))),
       ]),
     );
   }
 
-  Widget _buildRatingCard() {
-    final reviews = context.read<ReviewProvider>();
+  Widget _buildRatingCard(ReviewProvider reviews) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        _buildStat(_provider!.averageRating.toStringAsFixed(1), 'Rating', Icons.star_rounded),
-        _buildStat(reviews.isLoading ? '...' : reviews.reviews.length.toString(), 'Reviews', Icons.forum_rounded),
-        _buildStat(_provider!.rankingScore.toStringAsFixed(1), 'Score', Icons.trending_up_rounded),
+        _buildStat(_provider!.averageRating.toStringAsFixed(1), 'Rating', Icons.star_rounded, AppColors.starGold),
+        Container(width: 1, height: 48, color: AppColors.divider),
+        _buildStat(reviews.isLoading ? '...' : reviews.reviews.length.toString(), 'Reviews', Icons.forum_rounded, AppColors.secondary),
+        Container(width: 1, height: 48, color: AppColors.divider),
+        _buildStat(_provider!.rankingScore.toStringAsFixed(1), 'Score', Icons.trending_up_rounded, AppColors.primary),
       ]),
     );
   }
 
-  Widget _buildStat(String value, String label, IconData icon) {
+  Widget _buildStat(String value, String label, IconData icon, Color color) {
     return Column(children: [
-      Icon(icon, color: AppColors.accent, size: 28),
-      const SizedBox(height: 8),
-      Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-      Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+      Icon(icon, color: color, size: 24),
+      const SizedBox(height: 6),
+      Text(value, style: GoogleFonts.manrope(
+        fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary,
+      )),
+      Text(label, style: GoogleFonts.inter(
+        color: AppColors.outline, fontSize: 12, fontWeight: FontWeight.w500,
+      )),
     ]);
   }
 }

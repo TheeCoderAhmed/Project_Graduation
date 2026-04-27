@@ -67,9 +67,7 @@ class DrapoApp extends StatelessWidget {
   }
 }
 
-/// Wraps any route that requires authentication.
-/// If the user signs out, they are immediately redirected to login
-/// with no blank screen flash.
+/// Real Firebase AuthGuard — redirects to login if not signed in.
 class AuthGuard extends StatelessWidget {
   final Widget child;
   const AuthGuard({super.key, required this.child});
@@ -78,7 +76,6 @@ class AuthGuard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLoggedIn = context.watch<AuthProvider>().isLoggedIn;
     if (!isLoggedIn) {
-      // Schedule navigation after the current frame to avoid build-phase errors
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushNamedAndRemoveUntil(
             context, AppRoutes.login, (_) => false);

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_theme.dart';
 import '../../models/review_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/review_provider.dart';
@@ -30,8 +32,29 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      _providerId = ModalRoute.of(context)!.settings.arguments as String;
-      _initialized = true;
+      // Safely cast route argument — if it's missing (bad navigation,
+      // deep link without args) pop immediately rather than crashing.
+      final arg = ModalRoute.of(context)?.settings.arguments;
+      if (arg is String && arg.isNotEmpty) {
+        _providerId = arg;
+        _initialized = true;
+      } else {
+        // Schedule pop after build completes — can't Navigator.pop in didChangeDependencies.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              // ignore: prefer_const_constructors
+              SnackBar(
+                // ignore: prefer_const_constructors
+                content: Text(
+                  'Could not open review form. Please try again.',
+                ),
+              ),
+            );
+            Navigator.pop(context);
+          }
+        });
+      }
     }
   }
 
@@ -42,10 +65,47 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   }
 
   Future<void> _submit() async {
+    // Guard: provider ID must have been resolved from route args.
+    if (!_initialized) return;
+
     final auth = context.read<AuthProvider>();
     if (auth.firebaseUser == null || auth.userModel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to submit a review.')),
+        const SnackBar(
+            content: Text('You must be logged in to submit a review.')),
+      );
+      return;
+    }
+
+    // Rating floor — should always be ≥ 1 given RatingBar minRating:1,
+    // but defend against any programmatic state corruption.
+    if (_overallRating < 1.0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an overall star rating.')),
+      );
+      return;
+    }
+
+    final comment = _commentController.text.trim();
+
+    // Empty check.
+    if (comment.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please add a comment before submitting.')),
+      );
+      return;
+    }
+
+    // Minimum meaningful length — prevents single-character spam reviews.
+    const int minCommentLength = 20;
+    if (comment.length < minCommentLength) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Your comment is too short. Please write at least $minCommentLength characters.',
+          ),
+        ),
       );
       return;
     }
@@ -56,7 +116,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       userId: auth.firebaseUser!.uid,
       userName: auth.userModel!.fullName,
       overallRating: _overallRating,
-      comment: _commentController.text.trim(),
+      comment: comment,
       questionnaire: {
         'waitingTime': _waitingTime,
         'serviceQuality': _serviceQuality,
@@ -66,9 +126,10 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       createdAt: Timestamp.now(),
     );
 
-    try {
-      await context.read<ReviewProvider>().submitReview(review);
-      if (!mounted) return;
+    final result = await context.read<ReviewProvider>().submitReview(review);
+    if (!mounted) return;
+
+    if (result.success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Review submitted successfully! Thank you.'),
@@ -76,10 +137,13 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
         ),
       );
       Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: AppColors.error),
+        SnackBar(
+          content: Text(
+              result.errorMessage ?? 'Submission failed. Please try again.'),
+          backgroundColor: AppColors.error,
+        ),
       );
     }
   }
@@ -89,65 +153,74 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
     final isSubmitting = context.watch<ReviewProvider>().isSubmitting;
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Write a Review'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        title: Text('Tell us about your visit', style: GoogleFonts.manrope(
+          fontSize: 18, fontWeight: FontWeight.w600,
+        )),
       ),
       body: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(AppTheme.containerMargin),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Overall Rating section
+            Text('SERVICE QUALITY', style: GoogleFonts.inter(
+              fontSize: 12, fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary, letterSpacing: 0.8,
+            )),
+            const SizedBox(height: 12),
+            _buildOverallRating(),
+            const SizedBox(height: 28),
+            // Experience details
+            Text('EXPERIENCE DETAILS', style: GoogleFonts.inter(
+              fontSize: 12, fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary, letterSpacing: 0.8,
+            )),
+            const SizedBox(height: 12),
+            _buildQuestionnaireCard(),
+            const SizedBox(height: 28),
+            // Comments
+            Text('ADDITIONAL COMMENTS', style: GoogleFonts.inter(
+              fontSize: 12, fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary, letterSpacing: 0.8,
+            )),
+            const SizedBox(height: 12),
+            _buildCommentField(),
+            const SizedBox(height: 32),
+            AppButton(
+              label: 'Submit Review',
+              icon: Icons.send_rounded,
+              onPressed: isSubmitting ? null : _submit,
+              isLoading: isSubmitting,
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildSectionHeader('Overall Rating', Icons.star_rate_rounded),
-                  const SizedBox(height: 12),
-                  _buildOverallRating(),
-                  const SizedBox(height: 28),
-                  _buildSectionHeader('Experience Details', Icons.checklist_rounded),
-                  const SizedBox(height: 12),
-                  _buildQuestionnaireCard(),
-                  const SizedBox(height: 28),
-                  _buildSectionHeader('Your Comments', Icons.comment_outlined),
-                  const SizedBox(height: 12),
-                  _buildCommentField(),
-                  const SizedBox(height: 32),
-                  AppButton(
-                    label: 'Submit Review',
-                    icon: Icons.send_rounded,
-                    onPressed: isSubmitting ? null : _submit,
-                    isLoading: isSubmitting,
-                  ),
-                  const SizedBox(height: 20),
+                  const Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.outline),
+                  const SizedBox(width: 6),
+                  Text('Your feedback is securely submitted and anonymized',
+                    style: GoogleFonts.inter(fontSize: 12, color: AppColors.outline)),
                 ],
               ),
             ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 20),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
+            const SizedBox(height: 20),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildOverallRating() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         children: [
@@ -156,15 +229,15 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             minRating: 1,
             itemCount: 5,
             itemSize: 44,
-            glow: true,
-            glowColor: AppColors.accent.withValues(alpha: 0.3),
-            itemBuilder: (_, __) => const Icon(Icons.star_rounded, color: AppColors.accent),
+            glow: false,
+            unratedColor: AppColors.divider,
+            itemBuilder: (_, __) => const Icon(Icons.star_rounded, color: AppColors.starGold),
             onRatingUpdate: (r) => setState(() => _overallRating = r),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             _ratingLabel(_overallRating),
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -173,25 +246,23 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
 
   Widget _buildQuestionnaireCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppColors.divider),
       ),
       child: Column(
         children: [
           _buildSliderRow('Waiting Time', Icons.access_time_rounded, _waitingTime,
               (v) => setState(() => _waitingTime = v)),
-          _buildDivider(),
+          const Divider(color: AppColors.divider, height: 24),
           _buildSliderRow('Service Quality', Icons.thumb_up_outlined, _serviceQuality,
               (v) => setState(() => _serviceQuality = v)),
-          _buildDivider(),
+          const Divider(color: AppColors.divider, height: 24),
           _buildSliderRow('Hygiene', Icons.cleaning_services_outlined, _hygiene,
               (v) => setState(() => _hygiene = v)),
-          _buildDivider(),
+          const Divider(color: AppColors.divider, height: 24),
           _buildSliderRow('Staff Communication', Icons.people_outline_rounded, _staffCommunication,
               (v) => setState(() => _staffCommunication = v)),
         ],
@@ -200,66 +271,69 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   }
 
   Widget _buildSliderRow(String label, IconData icon, double value, ValueChanged<double> onChanged) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            Icon(icon, size: 16, color: AppColors.primary),
-            const SizedBox(width: 6),
-            Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                value.toStringAsFixed(1),
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [
+          Icon(icon, size: 18, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Text(label, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
             ),
-          ]),
-          Slider(
-            value: value,
-            min: 1,
-            max: 5,
-            divisions: 8,
-            activeColor: AppColors.primary,
-            inactiveColor: AppColors.divider,
-            onChanged: onChanged,
+            child: Text(
+              value.toStringAsFixed(1),
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+            ),
           ),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Poor', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-              Text('Excellent', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-            ],
-          ),
-        ],
-      ),
+        ]),
+        Slider(
+          value: value,
+          min: 1,
+          max: 5,
+          divisions: 8,
+          onChanged: onChanged,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Poor', style: GoogleFonts.inter(fontSize: 11, color: AppColors.outline)),
+            Text('Excellent', style: GoogleFonts.inter(fontSize: 11, color: AppColors.outline)),
+          ],
+        ),
+      ],
     );
   }
-
-  Widget _buildDivider() => const Divider(height: 1, thickness: 1, color: AppColors.divider);
 
   Widget _buildCommentField() {
     return TextField(
       controller: _commentController,
       maxLines: 5,
       maxLength: 500,
+      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
       decoration: InputDecoration(
-        hintText: 'Share your experience with this provider...',
-        hintStyle: const TextStyle(color: AppColors.textSecondary),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-        ),
+        hintText: 'Share your experience (min. 20 characters)...',
+        hintStyle: GoogleFonts.inter(color: AppColors.outline),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surface,
+        helperText: 'Minimum 20 characters required',
+        helperStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.outline),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
       ),
     );
   }

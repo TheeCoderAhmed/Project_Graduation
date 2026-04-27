@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
+import '../../constants/app_theme.dart';
 import '../../models/provider_model.dart';
 import '../../providers/auth_provider.dart';
-import '../../services/firestore_service.dart';
+import '../../providers/provider_provider.dart';
 import '../../widgets/common/loading_indicator.dart';
 import '../../widgets/provider_card.dart';
 
@@ -41,8 +43,14 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       return;
     }
     setState(() => _loadingBookmarks = true);
-    final providers =
-        await FirestoreService().getBookmarkedProviders(user.bookmarks);
+
+    // Resolve bookmarks from seed data by ID — instant, no network.
+    final providerProvider = context.read<ProviderProvider>();
+    final providers = user.bookmarks
+        .map((id) => providerProvider.getById(id))
+        .whereType<ProviderModel>()
+        .toList();
+
     if (mounted) {
       setState(() {
         _bookmarkedProviders = providers;
@@ -58,49 +66,43 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_rounded),
-            onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
-          ),
-        ],
-      ),
       body: user == null
           ? const Center(child: LoadingIndicator())
-          : Column(
-              children: [
-                _buildProfileHeader(user.fullName, user.email, user.role),
-                Container(
-                  color: AppColors.surface,
-                  child: TabBar(
-                    controller: _tabController,
-                    indicatorColor: AppColors.primary,
-                    indicatorWeight: 3,
-                    labelColor: AppColors.primary,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-                    unselectedLabelColor: AppColors.textSecondary,
-                    tabs: const [
-                      Tab(text: 'Saved Providers'),
-                      Tab(text: 'Account Details'),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildBookmarksTab(),
-                      _buildAccountTab(user.fullName, user.email, user.role),
-                    ],
-                  ),
-                ),
+          : NestedScrollView(
+              headerSliverBuilder: (_, __) => [
+                SliverToBoxAdapter(child: _buildProfileHeader(user.fullName, user.email, user.role)),
               ],
+              body: Column(
+                children: [
+                  // Tab bar
+                  Container(
+                    color: AppColors.surface,
+                    child: TabBar(
+                      controller: _tabController,
+                      indicatorColor: AppColors.primary,
+                      indicatorWeight: 3,
+                      labelColor: AppColors.primary,
+                      labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 14),
+                      unselectedLabelColor: AppColors.outline,
+                      unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
+                      dividerColor: AppColors.divider,
+                      tabs: const [
+                        Tab(text: 'Saved Providers'),
+                        Tab(text: 'Account Details'),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildBookmarksTab(),
+                        _buildAccountTab(user.fullName, user.email, user.role),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }
@@ -108,38 +110,44 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   Widget _buildProfileHeader(String name, String email, String role) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+      padding: EdgeInsets.fromLTRB(AppTheme.containerMargin, MediaQuery.of(context).padding.top + 16, AppTheme.containerMargin, 28),
       decoration: const BoxDecoration(
         color: AppColors.primary,
       ),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 44,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
-            child: Text(
-              name.isNotEmpty ? name[0].toUpperCase() : '?',
-              style: const TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+          // Top bar with settings icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Profile', style: GoogleFonts.manrope(
+                fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white,
+              )),
+              IconButton(
+                icon: const Icon(Icons.settings_rounded, color: Colors.white, size: 22),
+                onPressed: () => Navigator.pushNamed(context, AppRoutes.settings),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 16),
-          Text(
-            name,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
+          // Avatar
+          CircleAvatar(
+            radius: 42,
+            backgroundColor: Colors.white.withValues(alpha: 0.15),
+            child: Text(
+              name.isNotEmpty ? name[0].toUpperCase() : '?',
+              style: GoogleFonts.manrope(fontSize: 32, fontWeight: FontWeight.w700, color: Colors.white),
             ),
           ),
+          const SizedBox(height: 14),
+          Text(name, style: GoogleFonts.manrope(
+            fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white,
+          )),
           const SizedBox(height: 4),
-          Text(
-            email,
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 15, fontWeight: FontWeight.w500),
-          ),
+          Text(email, style: GoogleFonts.inter(
+            color: Colors.white.withValues(alpha: 0.75),
+            fontSize: 14,
+          )),
           const SizedBox(height: 12),
           _buildRoleBadge(role),
         ],
@@ -154,15 +162,20 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       _ => ('Patient', Icons.person_rounded),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 16, color: Colors.white),
+        Icon(icon, size: 14, color: Colors.white),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
+        Text(label, style: GoogleFonts.inter(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        )),
       ]),
     );
   }
@@ -179,9 +192,10 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     }
 
     return RefreshIndicator(
+      color: AppColors.primary,
       onRefresh: _loadBookmarks,
       child: ListView.builder(
-        padding: const EdgeInsets.only(top: 16, bottom: 40),
+        padding: const EdgeInsets.only(top: 16, bottom: 100),
         itemCount: _bookmarkedProviders.length,
         itemBuilder: (_, i) => ProviderCard(
           provider: _bookmarkedProviders[i],
@@ -201,47 +215,45 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       children: [
         _buildFormGroup([
           _buildInfoTile(Icons.person_rounded, 'Full Name', name),
-          const Divider(height: 1, indent: 56),
+          const Divider(height: 1, color: AppColors.divider, indent: 56),
           _buildInfoTile(Icons.email_rounded, 'Email Address', email),
-          const Divider(height: 1, indent: 56),
-          _buildInfoTile(Icons.badge_rounded, 'Account Type', role.capitalize()),
+          const Divider(height: 1, color: AppColors.divider, indent: 56),
+          _buildInfoTile(Icons.badge_rounded, 'Account Type', role._capitalize()),
         ]),
         const SizedBox(height: 24),
         if (role == 'provider') ...[
           _buildFormGroup([
             ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.dashboard_rounded, color: AppColors.primary)),
-              title: const Text('Provider Dashboard', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-              subtitle: const Text('View your ratings & analytics', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                ),
+                child: const Icon(Icons.dashboard_rounded, color: AppColors.secondary, size: 20),
+              ),
+              title: Text('Provider Dashboard', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15)),
+              subtitle: Text('View your ratings & analytics', style: GoogleFonts.inter(fontSize: 13, color: AppColors.outline)),
+              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.outline),
               onTap: () => Navigator.pushNamed(context, AppRoutes.providerDashboard),
             ),
           ]),
           const SizedBox(height: 24),
         ],
-        _buildFormGroup([
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.settings_rounded, color: AppColors.primary)),
-            title: const Text('App Settings', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-            onTap: () => Navigator.pushNamed(context, AppRoutes.settings),
-          ),
-        ]),
-        const SizedBox(height: 32),
+        const SizedBox(height: 100),
       ],
     );
   }
 
   Widget _buildFormGroup(List<Widget> children) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Material(
-        color: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.divider),
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          border: Border.all(color: AppColors.divider),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(children: children),
@@ -257,8 +269,8 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(10),
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
             ),
             child: Icon(icon, color: AppColors.primary, size: 20),
           ),
@@ -267,9 +279,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.outline, fontWeight: FontWeight.w500)),
                 const SizedBox(height: 2),
-                Text(value, style: const TextStyle(fontSize: 16, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+                Text(value, style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -285,13 +297,19 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(color: AppColors.surface, shape: BoxShape.circle, border: Border.all(color: AppColors.divider)),
-            child: Icon(icon, size: 48, color: AppColors.textSecondary),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Icon(icon, size: 44, color: AppColors.outline),
           ),
           const SizedBox(height: 24),
-          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          Text(title, style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: 8),
-          Text(subtitle, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary, fontSize: 15, height: 1.5)),
+          Text(subtitle, textAlign: TextAlign.center, style: GoogleFonts.inter(
+            color: AppColors.textSecondary, fontSize: 14, height: 1.5,
+          )),
         ]),
       ),
     );
@@ -299,5 +317,5 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 }
 
 extension on String {
-  String capitalize() => isEmpty ? this : this[0].toUpperCase() + substring(1);
+  String _capitalize() => isEmpty ? this : this[0].toUpperCase() + substring(1);
 }

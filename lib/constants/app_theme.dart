@@ -3,124 +3,217 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTheme {
-  static ThemeData get lightTheme {
-    final baseTextTheme = GoogleFonts.figtreeTextTheme();
+  // ── Typography helpers ──────────────────────────────────────────────
+  static TextStyle _manrope(double size, FontWeight weight, Color color, {double? height, double? letterSpacing}) =>
+      GoogleFonts.manrope(fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: letterSpacing);
 
+  static TextStyle _inter(double size, FontWeight weight, Color color, {double? height, double? letterSpacing}) =>
+      GoogleFonts.inter(fontSize: size, fontWeight: weight, color: color, height: height, letterSpacing: letterSpacing);
+
+  // ── 8px Spacing Scale ───────────────────────────────────────────────
+  static const double spaceXs  = 4;
+  static const double spaceSm  = 8;
+  static const double spaceMd  = 16;
+  static const double spaceLg  = 24;
+  static const double spaceXl  = 32;
+  static const double spaceXxl = 48;
+  static const double containerMargin = 20;
+
+  // ── Shape Radii ─────────────────────────────────────────────────────
+  static const double radiusSm   = 8;   // inputs, buttons
+  static const double radiusMd   = 12;  // small cards
+  static const double radiusLg   = 16;  // cards, containers
+  static const double radiusXl   = 24;  // onboarding cards
+  static const double radiusFull = 9999; // pills, avatars
+
+  // ── Ambient Shadow ──────────────────────────────────────────────────
+  static List<BoxShadow> get ambientShadow => [
+    BoxShadow(
+      color: AppColors.ambientShadow,
+      blurRadius: 32,
+      offset: const Offset(0, 12),
+      spreadRadius: -8,
+    ),
+  ];
+
+  static List<BoxShadow> get subtleShadow => [
+    BoxShadow(
+      color: AppColors.ambientShadow.withValues(alpha: 0.08),
+      blurRadius: 16,
+      offset: const Offset(0, 4),
+    ),
+  ];
+
+  // ── Theme Data ──────────────────────────────────────────────────────
+  static ThemeData get lightTheme {
     return ThemeData(
+      useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primary,
         primary: AppColors.primary,
-        secondary: AppColors.accent,
+        onPrimary: AppColors.onPrimary,
+        secondary: AppColors.secondary,
+        onSecondary: AppColors.onSecondary,
+        tertiary: AppColors.tertiary,
         surface: AppColors.surface,
         error: AppColors.error,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      
-      // Premium Typography (using Figtree)
-      textTheme: baseTextTheme.copyWith(
-        headlineLarge: baseTextTheme.headlineLarge?.copyWith(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-        headlineMedium: baseTextTheme.headlineMedium?.copyWith(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-        titleLarge: baseTextTheme.titleLarge?.copyWith(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-        titleMedium: baseTextTheme.titleMedium?.copyWith(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-        // Increased line height and size for maximum legibility in healthcare UI
-        bodyLarge: baseTextTheme.bodyLarge?.copyWith(fontSize: 16, color: AppColors.textPrimary, height: 1.5),
-        bodyMedium: baseTextTheme.bodyMedium?.copyWith(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
-        labelLarge: baseTextTheme.labelLarge?.copyWith(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white, letterSpacing: 0.3),
+
+      // ── Typography ────────────────────────────────────────────────
+      textTheme: TextTheme(
+        // Manrope headings
+        displayLarge:  _manrope(40, FontWeight.w700, AppColors.textPrimary, height: 1.2),
+        displayMedium: _manrope(32, FontWeight.w600, AppColors.textPrimary, height: 1.25),
+        displaySmall:  _manrope(24, FontWeight.w600, AppColors.textPrimary, height: 1.3),
+        headlineLarge: _manrope(28, FontWeight.w700, AppColors.textPrimary, height: 1.25),
+        headlineMedium: _manrope(24, FontWeight.w600, AppColors.textPrimary, height: 1.3),
+        headlineSmall:  _manrope(20, FontWeight.w600, AppColors.textPrimary, height: 1.35),
+        // Inter titles & body
+        titleLarge:  _inter(18, FontWeight.w600, AppColors.textPrimary, height: 1.4),
+        titleMedium: _inter(16, FontWeight.w600, AppColors.textPrimary, height: 1.4),
+        titleSmall:  _inter(14, FontWeight.w600, AppColors.textPrimary, height: 1.4),
+        bodyLarge:   _inter(18, FontWeight.w400, AppColors.textPrimary, height: 1.6),
+        bodyMedium:  _inter(16, FontWeight.w400, AppColors.textSecondary, height: 1.6),
+        bodySmall:   _inter(14, FontWeight.w400, AppColors.textSecondary, height: 1.5),
+        labelLarge:  _inter(14, FontWeight.w600, AppColors.onPrimary, letterSpacing: 0.3),
+        labelMedium: _inter(12, FontWeight.w600, AppColors.textSecondary, letterSpacing: 0.8),
+        labelSmall:  _inter(11, FontWeight.w500, AppColors.textSecondary, letterSpacing: 0.5),
       ),
-      
-      // Clean, un-elevated App Bar
-      appBarTheme: const AppBarTheme(
+
+      // ── App Bar ───────────────────────────────────────────────────
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary, size: 22),
+        titleTextStyle: _manrope(18, FontWeight.w600, AppColors.textPrimary),
       ),
-      
-      // Modern chunky buttons with soft corners
+
+      // ── Buttons ───────────────────────────────────────────────────
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.onPrimary,
           elevation: 0,
-          minimumSize: const Size(double.infinity, 54),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          minimumSize: const Size(double.infinity, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(radiusFull),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: _inter(16, FontWeight.w600, AppColors.onPrimary),
         ),
       ),
-      
+
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.divider, width: 1.5),
-          minimumSize: const Size(double.infinity, 54),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          side: const BorderSide(color: AppColors.outline),
+          minimumSize: const Size(double.infinity, 52),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(radiusFull),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: _inter(16, FontWeight.w600, AppColors.primary),
         ),
       ),
-      
+
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(radiusSm),
           ),
-          textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          textStyle: _inter(15, FontWeight.w600, AppColors.primary),
         ),
       ),
 
-      // Thick, generous input fields
+      // ── Inputs ────────────────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
-        hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.7), fontSize: 15),
+        hintStyle: _inter(15, FontWeight.w400, AppColors.outline),
+        labelStyle: _inter(12, FontWeight.w600, AppColors.textSecondary, letterSpacing: 0.8),
+        floatingLabelStyle: _inter(12, FontWeight.w600, AppColors.primary, letterSpacing: 0.8),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(radiusSm),
           borderSide: const BorderSide(color: AppColors.divider),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(radiusSm),
           borderSide: const BorderSide(color: AppColors.divider),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(radiusSm),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(radiusSm),
           borderSide: const BorderSide(color: AppColors.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(radiusSm),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
-      
-      // Bordered flat cards instead of elevation to look instantly more premium
+
+      // ── Cards ─────────────────────────────────────────────────────
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(radiusLg),
           side: const BorderSide(color: AppColors.divider, width: 1),
         ),
         margin: EdgeInsets.zero,
       ),
-      
+
+      // ── Chips ─────────────────────────────────────────────────────
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceContainer,
+        selectedColor: AppColors.primary.withValues(alpha: 0.12),
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusFull)),
+        labelStyle: _inter(13, FontWeight.w500, AppColors.textSecondary),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      ),
+
+      // ── Bottom Nav ────────────────────────────────────────────────
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Colors.white,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.outline,
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        selectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+      ),
+
+      // ── Divider ───────────────────────────────────────────────────
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
         space: 1,
+      ),
+
+      // ── Switch ────────────────────────────────────────────────────
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) =>
+          states.contains(WidgetState.selected) ? AppColors.primary : AppColors.outline),
+        trackColor: WidgetStateProperty.resolveWith((states) =>
+          states.contains(WidgetState.selected) ? AppColors.primary.withValues(alpha: 0.3) : AppColors.divider),
+      ),
+
+      // ── Slider ────────────────────────────────────────────────────
+      sliderTheme: const SliderThemeData(
+        activeTrackColor: AppColors.primary,
+        inactiveTrackColor: AppColors.divider,
+        thumbColor: AppColors.primary,
+        overlayColor: Color(0x20074469),
       ),
     );
   }
