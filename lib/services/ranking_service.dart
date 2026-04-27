@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Recalculates ranking using an incremental formula — reads only the
-/// stored provider document, not all reviews. This is O(1) Firestore reads
-/// instead of O(n) reads for every new review submission.
+/// Recalculates ranking using an incremental moving-average formula.
+/// Reads only the provider document — O(1) Firestore reads per review.
 ///
-/// Formula: rankingScore = (newAvgOverall * 0.4) + (newAvgQuestionnaire * 0.6)
+/// Formula: rankingScore = (avgOverall × 0.4) + (avgQuestionnaire × 0.6)
 ///
-/// NOTE: In production, move this logic to a Cloud Function triggered on
-/// review creation to remove client write access to ranking fields entirely.
+/// Errors here are NON-FATAL: a ranking update failure must never surface
+/// as a review-submission error to the user. The review is already saved.
+/// We silently swallow failures and let the next review correct the average.
 class RankingService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
@@ -16,41 +16,53 @@ class RankingService {
     required double newOverallRating,
     required Map<String, double> newQuestionnaire,
   }) async {
-    final providerDoc =
-        await _db.collection('providers').doc(providerId).get();
-    if (!providerDoc.exists) return;
+    try {
+      final providerDoc =
+          await _db.collection('providers').doc(providerId).get();
 
-    final data = providerDoc.data()!;
-    final int prevTotal = (data['totalReviews'] as num?)?.toInt() ?? 0;
-    final double prevAvgOverall =
-        (data['averageRating'] as num?)?.toDouble() ?? 0.0;
-    final double prevAvgQuestionnaire =
-        (data['avgQuestionnaireScore'] as num?)?.toDouble() ?? 0.0;
+      // Provider doc may not exist in Firestore (seed-only providers).
+      // Use set(merge:true) to create it if needed instead of update().
+      final data = providerDoc.exists ? (providerDoc.data() ?? {}) : {};
 
-    // Incremental moving average — no need to fetch all reviews
-    final int newTotal = prevTotal; // totalReviews was already incremented by submitReview batch
-    final double newAvgOverall = newTotal <= 1
-        ? newOverallRating
-        : ((prevAvgOverall * (newTotal - 1)) + newOverallRating) / newTotal;
+      final int prevTotal = (data['totalReviews'] as num?)?.toInt() ?? 0;
+      final double prevAvgOverall =
+          (data['averageRating'] as num?)?.toDouble() ?? 0.0;
+      final double prevAvgQ =
+          (data['avgQuestionnaireScore'] as num?)?.toDouble() ?? 0.0;
 
-    final double newQuestionnaireScore = newQuestionnaire.values.isEmpty
-        ? 0.0
-        : newQuestionnaire.values.reduce((a, b) => a + b) /
-            newQuestionnaire.values.length;
+      // totalReviews was already incremented by submitReview's batch.
+      final int newTotal = prevTotal;
+      final double newAvgOverall = newTotal <= 1
+          ? newOverallRating
+          : ((prevAvgOverall * (newTotal - 1)) + newOverallRating) / newTotal;
 
-    final double newAvgQuestionnaire = newTotal <= 1
-        ? newQuestionnaireScore
-        : ((prevAvgQuestionnaire * (newTotal - 1)) + newQuestionnaireScore) /
-            newTotal;
+      final double newQScore = newQuestionnaire.values.isEmpty
+          ? 0.0
+          : newQuestionnaire.values.reduce((a, b) => a + b) /
+              newQuestionnaire.values.length;
 
-    final double rankingScore =
-        (newAvgOverall * 0.4) + (newAvgQuestionnaire * 0.6);
+      final double newAvgQ = newTotal <= 1
+          ? newQScore
+          : ((prevAvgQ * (newTotal - 1)) + newQScore) / newTotal;
 
-    await _db.collection('providers').doc(providerId).update({
-      'averageRating': double.parse(newAvgOverall.toStringAsFixed(2)),
-      'avgQuestionnaireScore':
-          double.parse(newAvgQuestionnaire.toStringAsFixed(2)),
-      'rankingScore': double.parse(rankingScore.toStringAsFixed(2)),
-    });
+      final double rankingScore =
+          (newAvgOverall * 0.4) + (newAvgQ * 0.6);
+
+      await _db.collection('providers').doc(providerId).set(
+        {
+          'averageRating':
+              double.parse(newAvgOverall.toStringAsFixed(2)),
+          'avgQuestionnaireScore':
+              double.parse(newAvgQ.toStringAsFixed(2)),
+          'rankingScore':
+              double.parse(rankingScore.toStringAsFixed(2)),
+        },
+        SetOptions(merge: true), // safe whether doc exists or not
+      );
+    } catch (_) {
+      // Intentionally silent — ranking update is best-effort.
+      // The review is already committed; a stale ranking score is
+      // acceptable until the next review corrects it.
+    }
   }
 }

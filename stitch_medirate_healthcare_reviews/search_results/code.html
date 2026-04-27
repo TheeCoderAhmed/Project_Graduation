@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MediRank - Search Providers</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#9ccbf7",
+                        "surface-container-highest": "#e2e2e6",
+                        "surface-bright": "#f9f9fd",
+                        "tertiary-fixed-dim": "#f1be72",
+                        "on-tertiary-container": "#fac67a",
+                        "primary-container": "#2a5c82",
+                        "on-primary-fixed": "#001d32",
+                        "on-surface": "#191c1e",
+                        "inverse-on-surface": "#f0f0f4",
+                        "outline-variant": "#c1c7cf",
+                        "on-secondary-fixed": "#00201f",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#78d6d2",
+                        "inverse-surface": "#2e3133",
+                        "on-primary-fixed-variant": "#124a6f",
+                        "background": "#f9f9fd",
+                        "on-error-container": "#93000a",
+                        "surface": "#f9f9fd",
+                        "secondary-container": "#91f0ec",
+                        "on-surface-variant": "#41474e",
+                        "primary-fixed": "#cde5ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#5a3b00",
+                        "primary": "#074469",
+                        "on-tertiary-fixed-variant": "#614000",
+                        "surface-container": "#edeef1",
+                        "primary-fixed-dim": "#9ccbf7",
+                        "on-tertiary-fixed": "#281800",
+                        "on-secondary-container": "#006e6c",
+                        "secondary": "#006a68",
+                        "on-background": "#191c1e",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#a5d4ff",
+                        "secondary-fixed": "#94f2ef",
+                        "outline": "#72787f",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d9dadd",
+                        "surface-variant": "#e2e2e6",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#f3f3f7",
+                        "surface-container-high": "#e7e8eb",
+                        "on-secondary-fixed-variant": "#00504e",
+                        "tertiary-container": "#76510e",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffddb0",
+                        "surface-tint": "#316289"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "container-margin": "20px",
+                        "xl": "32px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "xxl": "48px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "h1": ["Manrope"],
+                        "h3": ["Manrope"],
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h2": ["Manrope"],
+                        "button": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "h1": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h2": ["32px", {"lineHeight": "1.25", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "button": ["16px", {"lineHeight": "1.0", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-slate-900 flex justify-between items-center px-5 h-16 w-full docked full-width top-0 border-b border-b border-slate-200 dark:border-slate-800 shadow-sm shadow-blue-500/5 transition-colors duration-200 ease-in-out fixed z-40">
+<button class="text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 p-2 -ml-2 rounded-full transition-colors duration-200 ease-in-out flex items-center justify-center">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="font-manrope font-semibold text-lg text-blue-800 dark:text-blue-300 font-bold tracking-tight">
+            MediRank
+        </div>
+<button class="hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors duration-200 ease-in-out">
+<img alt="user_avatar" class="w-8 h-8 rounded-full object-cover" data-alt="professional headshot of a confident woman in a business casual setting with soft even lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZGmArSXrHPwV3E5QFnJRnnO54zQpFyejtqscBc5ob7U_GWwG7hGYMAh8jp6eMek24o_tcf_aDixXh0Sixz98tg0SBNJyPDIoLx0ASGN53_FhjY9kHjGPX3lI0S6OyJ1u0tD60GLwg2ToLX_UZjSyYuXgmNLCKqd7kbasJ-OyTDObiyWiv5_u_9YCzPS4dXMLkIgbwIUoqV-oHzxyQqJGwx3BFjx3KdSuUbZ0ViOQ8SO5FO05Cf6yJ0VyQi-Q3FO1sTuNb1DfB3NI"/>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 pt-[88px] pb-[100px] px-container-margin md:px-lg max-w-2xl mx-auto w-full flex flex-col gap-lg">
+<!-- Search Input -->
+<div class="relative w-full shadow-[0_4px_12px_rgba(7,68,105,0.05)] rounded-lg">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full h-[56px] pl-[48px] pr-md bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-on-surface-variant" placeholder="Search doctors, specialties, or clinics..." type="text"/>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-sm overflow-x-auto pb-xs scrollbar-hide -mx-container-margin px-container-margin md:mx-0 md:px-0">
+<button class="px-md py-[8px] bg-primary/10 border border-primary/20 rounded-full whitespace-nowrap cursor-pointer hover:bg-primary/20 transition-colors shrink-0">
+<span class="font-label-caps text-label-caps text-primary">Highest Rated</span>
+</button>
+<button class="px-md py-[8px] bg-surface-container-lowest border border-outline-variant rounded-full whitespace-nowrap cursor-pointer hover:bg-surface-container-low transition-colors shrink-0">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Shortest Wait Time</span>
+</button>
+<button class="px-md py-[8px] bg-surface-container-lowest border border-outline-variant rounded-full whitespace-nowrap cursor-pointer hover:bg-surface-container-low transition-colors shrink-0">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Distance</span>
+</button>
+<button class="px-md py-[8px] bg-surface-container-lowest border border-outline-variant rounded-full whitespace-nowrap cursor-pointer hover:bg-surface-container-low transition-colors shrink-0">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Accepts Insurance</span>
+</button>
+</div>
+<!-- Results List -->
+<div class="flex flex-col gap-md">
+<!-- Provider Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex gap-md shadow-[0_4px_12px_rgba(7,68,105,0.03)] hover:shadow-[0_8px_24px_rgba(7,68,105,0.08)] transition-shadow cursor-pointer">
+<img alt="Dr. Sarah Jenkins" class="w-[80px] h-[80px] rounded-lg object-cover bg-surface-container shrink-0" data-alt="professional portrait of a female doctor in a white coat smiling warmly with a stethoscope around her neck" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4hNW0oI6aSrpTBZXEf6pHjF_MmxBhSuvijCWSBH-TCw5aK6ENX3EiaptzsC3c9Ybf5cl7wnjkCl6qQLLIMYeo84k-WVl5LsXcR08UsRfBcYvIiOOp2DsaMN2fREmjdjnIGyGdNyIaQjnETiRZXrQLwscRAjUZM5yWyTWpebdtWCsCMPf54HJ6jWcRFWOIdOHUWqhqQb5vUa3JPebRmlwiaIuSReaAii_BBS13VR4r-lii3ywqU9fhm3OLNqVbBYbp1SaE6YlRZCs"/>
+<div class="flex flex-col flex-1 justify-center">
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface leading-tight">Dr. Sarah Jenkins</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Cardiology • City Medical Center</p>
+<div class="flex items-center gap-sm mt-auto">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">4.9</span>
+</div>
+<span class="w-[4px] h-[4px] rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">0.8 miles</span>
+<span class="ml-auto font-label-caps text-label-caps text-secondary bg-secondary-container/30 px-2 py-1 rounded">Next Avail: Today</span>
+</div>
+</div>
+</div>
+<!-- Provider Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex gap-md shadow-[0_4px_12px_rgba(7,68,105,0.03)] hover:shadow-[0_8px_24px_rgba(7,68,105,0.08)] transition-shadow cursor-pointer">
+<img alt="Dr. Marcus Thorne" class="w-[80px] h-[80px] rounded-lg object-cover bg-surface-container shrink-0" data-alt="professional portrait of a male doctor in blue scrubs looking confident with arms crossed in a bright clinical hallway" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0BEjx1MnYutvemYrCzh8cwx28plwbz83P_CX7bIE8chwHSaWOA6Uy7FY1fHohrpfML_O4cvQLK7qmtnRirAZiOOc4gfZyfzCrmQWtwqaoTdUUy6UbOCPAtt4CDsgyEfSTmpR0fNZQfwKKWLFpAyXARWZggULdWvETPysYE9Rf5iXDtFhDfm_yVGushuCQpQY7VNjU52CTUR16x0aDKu-XoozAve2tcoLNACFI26aNWQVLEY4xZDERQN9IpnPIvDHNAluhomaYj9Y"/>
+<div class="flex flex-col flex-1 justify-center">
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface leading-tight">Dr. Marcus Thorne</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Orthopedics • Westside Health</p>
+<div class="flex items-center gap-sm mt-auto">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">4.7</span>
+</div>
+<span class="w-[4px] h-[4px] rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">2.1 miles</span>
+<span class="ml-auto font-label-caps text-label-caps text-primary bg-primary/10 px-2 py-1 rounded">Next Avail: Tomorrow</span>
+</div>
+</div>
+</div>
+<!-- Provider Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex gap-md shadow-[0_4px_12px_rgba(7,68,105,0.03)] hover:shadow-[0_8px_24px_rgba(7,68,105,0.08)] transition-shadow cursor-pointer">
+<div class="w-[80px] h-[80px] rounded-lg bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[32px] text-outline-variant">local_hospital</span>
+</div>
+<div class="flex flex-col flex-1 justify-center">
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface leading-tight">Northview Clinic</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Urgent Care • General Practice</p>
+<div class="flex items-center gap-sm mt-auto">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">4.5</span>
+</div>
+<span class="w-[4px] h-[4px] rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">3.5 miles</span>
+<span class="ml-auto font-label-caps text-label-caps text-secondary bg-secondary-container/30 px-2 py-1 rounded">Walk-ins Welcome</span>
+</div>
+</div>
+</div>
+<!-- Provider Card 4 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex gap-md shadow-[0_4px_12px_rgba(7,68,105,0.03)] hover:shadow-[0_8px_24px_rgba(7,68,105,0.08)] transition-shadow cursor-pointer">
+<img alt="Dr. Emily Chen" class="w-[80px] h-[80px] rounded-lg object-cover bg-surface-container shrink-0" data-alt="professional headshot of an Asian female doctor wearing a lab coat and glasses in a well lit modern office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7bJHPcOxu6XCYFPzcAi1szDGcbfK_aFuoW0-RztQrBcjsduuXtC6kPgjOQ3N-6LVT2yvLJ6PwPvuebk8I9lULalP_Gv7Ze84tLZcATfGXbqabLFGSA8lQ20venamdzxYH85kTKfWIr2iUTGkAJWRYB9svnvPJ1LIoRtup3--1wC_rdcqYD7CXPRDESKhdVL13qBSe_A0G-YTHh1QNLUojPNhUcgIxGz4OZCUMVnfCMy110YEAbWAHdtzyKvUs2plLiTICHK2TdIk"/>
+<div class="flex flex-col flex-1 justify-center">
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface leading-tight">Dr. Emily Chen</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-xs">Dermatology • Skin Wellness Center</p>
+<div class="flex items-center gap-sm mt-auto">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[18px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">4.8</span>
+</div>
+<span class="w-[4px] h-[4px] rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">5.0 miles</span>
+<span class="ml-auto font-label-caps text-label-caps text-outline bg-surface-container px-2 py-1 rounded">Next Avail: Oct 12</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-20 flex justify-around items-center px-4 pb-safe bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_0_rgba(42,92,130,0.08)] z-50 md:hidden">
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">home</span>
+<span class="font-manrope text-[10px] font-medium mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-blue-700 dark:text-blue-400 scale-105 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="font-manrope text-[10px] font-medium mt-1">Search</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">rate_review</span>
+<span class="font-manrope text-[10px] font-medium mt-1">Reviews</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-manrope text-[10px] font-medium mt-1">Analytics</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 opacity-80 hover:text-blue-600 dark:hover:text-blue-300 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">person</span>
+<span class="font-manrope text-[10px] font-medium mt-1">Profile</span>
+</button>
+</nav>
+</body></html>
