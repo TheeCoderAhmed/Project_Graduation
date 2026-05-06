@@ -37,4 +37,18 @@ class AppColors {
 
   // ── Ambient Shadow (used in BoxShadow) ──────────────────────────────
   static Color ambientShadow = const Color(0xFF074469).withValues(alpha: 0.15);
+
+  // ── Category Tints ───────────────────────────────────────────────────
+  static const Color catCardioBg     = Color(0xFFFFEBEE);
+  static const Color catCardioAccent = Color(0xFFE53935);
+  static const Color catPedsBg       = Color(0xFFE8F5E9);
+  static const Color catPedsAccent   = Color(0xFF43A047);
+  static const Color catDermBg       = Color(0xFFFFF8E1);
+  static const Color catDermAccent   = Color(0xFFFFB300);
+  static const Color catPharmBg      = Color(0xFFE3F2FD);
+  static const Color catPharmAccent  = Color(0xFF1E88E5);
+  static const Color catNeuroBg      = Color(0xFFF3E5F5);
+  static const Color catNeuroAccent  = Color(0xFF8E24AA);
+  static const Color catOrthoBg      = Color(0xFFE0F7FA);
+  static const Color catOrthoAccent  = Color(0xFF00ACC1);
 }

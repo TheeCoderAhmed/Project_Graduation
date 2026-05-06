@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../services/firestore_service.dart';
-import '../services/dummy_data_service.dart';
-import '../services/ranking_service.dart';
+
 import '../models/review_model.dart';
 
 class ReviewProvider extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
-  final RankingService _rankingService = RankingService();
+
 
   List<ReviewModel> _reviews = [];
   List<ReviewModel> _userReviews = [];
@@ -25,19 +24,11 @@ class ReviewProvider extends ChangeNotifier {
     Future.microtask(notifyListeners);
 
     try {
-      final realReviews = await _firestoreService.getReviews(providerId);
-      final realIds = realReviews.map((r) => r.reviewId).toSet();
-      final seed = DummyDataService.seedReviewsFor(providerId)
-          .where((r) => !realIds.contains(r.reviewId))
-          .toList();
-      _reviews = [...realReviews, ...seed];
+      _reviews = await _firestoreService.getReviews(providerId);
       _error = null;
-    } catch (_) {
-      // Fall back to seed data so the UI is never blank.
-      _reviews = DummyDataService.seedReviewsFor(providerId);
-      // Don't surface a Firestore index/network error as user-visible
-      // since seed data is showing — it looks correct to the user.
-      _error = null;
+    } catch (e) {
+      _error = _friendlyError(e.toString());
+      _reviews = [];
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -71,13 +62,6 @@ class ReviewProvider extends ChangeNotifier {
 
     try {
       await _firestoreService.submitReview(review);
-
-      // Ranking update is best-effort — errors are swallowed inside the service.
-      await _rankingService.recalculateRanking(
-        providerId: review.providerId,
-        newOverallRating: review.overallRating,
-        newQuestionnaire: review.questionnaire,
-      );
 
       // Optimistic local update only AFTER the Firestore write confirmed.
       _reviews = [review, ..._reviews];

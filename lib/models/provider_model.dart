@@ -46,6 +46,36 @@ class ProviderModel {
     );
   }
 
+  ProviderModel copyWith({
+    String? providerId,
+    String? type,
+    String? name,
+    String? specialty,
+    String? address,
+    String? phone,
+    GeoPoint? location,
+    String? photoUrl,
+    double? averageRating,
+    int? totalReviews,
+    double? rankingScore,
+    String? ownerId,
+  }) {
+    return ProviderModel(
+      providerId: providerId ?? this.providerId,
+      type: type ?? this.type,
+      name: name ?? this.name,
+      specialty: specialty ?? this.specialty,
+      address: address ?? this.address,
+      phone: phone ?? this.phone,
+      location: location ?? this.location,
+      photoUrl: photoUrl ?? this.photoUrl,
+      averageRating: averageRating ?? this.averageRating,
+      totalReviews: totalReviews ?? this.totalReviews,
+      rankingScore: rankingScore ?? this.rankingScore,
+      ownerId: ownerId ?? this.ownerId,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'category': type,

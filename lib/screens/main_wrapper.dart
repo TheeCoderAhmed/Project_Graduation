@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
+import '../providers/auth_provider.dart';
 import 'home/home_screen.dart';
 import 'search/search_screen.dart';
 import 'reviews/reviews_list_screen.dart';
@@ -17,20 +19,57 @@ class MainWrapper extends StatefulWidget {
 class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    SearchScreen(),
-    ReviewsListScreen(),
-    ProviderDashboardScreen(),
-    UserProfileScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final isProvider = auth.userModel?.role == 'provider';
+
+    // Build screens and nav items dynamically based on user role.
+    final List<Widget> screens = [
+      const HomeScreen(),
+      const SearchScreen(),
+      const ReviewsListScreen(),
+      if (isProvider) const ProviderDashboardScreen(),
+      const UserProfileScreen(),
+    ];
+
+    final List<BottomNavigationBarItem> navItems = [
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.home_outlined),
+        activeIcon: Icon(Icons.home_rounded),
+        label: 'Home',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.search_rounded),
+        activeIcon: Icon(Icons.search_rounded),
+        label: 'Search',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.rate_review_outlined),
+        activeIcon: Icon(Icons.rate_review_rounded),
+        label: 'Reviews',
+      ),
+      if (isProvider)
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.analytics_outlined),
+          activeIcon: Icon(Icons.analytics_rounded),
+          label: 'Analytics',
+        ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.person_outline_rounded),
+        activeIcon: Icon(Icons.person_rounded),
+        label: 'Profile',
+      ),
+    ];
+
+    // Clamp index in case it exceeds the new screens list length
+    // (e.g. user role changes dynamically after initial build).
+    final safeIndex = _currentIndex.clamp(0, screens.length - 1);
+
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+        index: safeIndex,
+        children: screens,
       ),
       extendBody: true,
       bottomNavigationBar: Container(
@@ -49,7 +88,7 @@ class _MainWrapperState extends State<MainWrapper> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: BottomNavigationBar(
-              currentIndex: _currentIndex,
+              currentIndex: safeIndex,
               backgroundColor: Colors.transparent,
               elevation: 0,
               selectedItemColor: AppColors.primary,
@@ -65,33 +104,7 @@ class _MainWrapperState extends State<MainWrapper> {
                   _currentIndex = index;
                 });
               },
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  activeIcon: Icon(Icons.home_rounded),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.search_rounded),
-                  activeIcon: Icon(Icons.search_rounded),
-                  label: 'Search',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.rate_review_outlined),
-                  activeIcon: Icon(Icons.rate_review_rounded),
-                  label: 'Reviews',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.analytics_outlined),
-                  activeIcon: Icon(Icons.analytics_rounded),
-                  label: 'Analytics',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline_rounded),
-                  activeIcon: Icon(Icons.person_rounded),
-                  label: 'Profile',
-                ),
-              ],
+              items: navItems,
             ),
           ),
         ),

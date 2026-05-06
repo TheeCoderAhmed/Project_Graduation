@@ -87,6 +87,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ]),
           const SizedBox(height: 28),
 
+          _sectionHeader('ACCOUNT'),
+          _buildFormGroup([
+            _navTile(
+              icon: Icons.lock_reset_rounded,
+              title: 'Reset Password',
+              onTap: _sendResetPasswordEmail,
+            ),
+          ]),
+          const SizedBox(height: 28),
+
           _sectionHeader('SUPPORT & INFO'),
           _buildFormGroup([
             _navTile(
@@ -241,6 +251,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     trailing: onTap != null ? const Icon(Icons.chevron_right_rounded, color: AppColors.outline) : null,
     onTap: onTap,
   );
+
+  Future<void> _sendResetPasswordEmail() async {
+    final auth = context.read<AuthProvider>();
+    final email = auth.userModel?.email;
+    if (email == null || email.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No email address found for your account.')),
+      );
+      return;
+    }
+
+    final msg = await auth.resetPassword(email);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: msg.contains('sent') ? AppColors.primary : AppColors.error,
+      ),
+    );
+  }
 
   void _confirmSignOut() {
     showDialog(

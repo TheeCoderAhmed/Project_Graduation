@@ -63,6 +63,12 @@ class AuthService {
     await _auth.signOut();
   }
 
+  /// Sends a password-reset email via Firebase Auth.
+  /// Throws on invalid email or network error — callers handle the error.
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
   /// Returns null if the document doesn't exist (new user) or on any
   /// network/permission error — callers must handle null gracefully.
   Future<UserModel?> getUserData(String uid) async {

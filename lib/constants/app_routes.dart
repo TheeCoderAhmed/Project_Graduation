@@ -11,4 +11,5 @@ class AppRoutes {
   static const String userProfile       = '/user-profile';
   static const String providerDashboard = '/provider-dashboard';
   static const String settings          = '/settings';
+  static const String notifications     = '/notifications';
 }

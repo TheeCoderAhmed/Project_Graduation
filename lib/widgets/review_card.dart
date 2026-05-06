@@ -4,14 +4,28 @@ import 'package:intl/intl.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_theme.dart';
 import '../models/review_model.dart';
+import 'star_rating_widget.dart';
 
 class ReviewCard extends StatelessWidget {
   final ReviewModel review;
-  const ReviewCard({super.key, required this.review});
+
+  /// Optional provider name to display above the review comment.
+  /// Useful in "My Reviews" mode so the user knows which provider they reviewed.
+  final String? providerName;
+
+  /// Called when the card is tapped. If null, the card is not tappable.
+  final VoidCallback? onTap;
+
+  const ReviewCard({
+    super.key,
+    required this.review,
+    this.providerName,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -22,6 +36,42 @@ class ReviewCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Provider name banner (only in "My Reviews" mode) ──
+          if (providerName != null && providerName!.isNotEmpty) ...[
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                  ),
+                  child: const Icon(Icons.medical_services_rounded,
+                      size: 16, color: AppColors.primary),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    providerName!,
+                    style: GoogleFonts.manrope(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: AppColors.primary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (onTap != null)
+                  const Icon(Icons.chevron_right_rounded,
+                      size: 20, color: AppColors.outline),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColors.divider),
+            const SizedBox(height: 14),
+          ],
+
           Row(
             children: [
               // Avatar — safely extracts first character, falls back to '?'
@@ -114,22 +164,36 @@ class ReviewCard extends StatelessWidget {
               ),
             ),
           ],
-          if (review.questionnaire.isNotEmpty) ...[
+          if (review.questionnaire.waitingTime > 0 || review.questionnaire.serviceQuality > 0) ...[
             const SizedBox(height: 14),
             const Divider(color: AppColors.divider),
             const SizedBox(height: 8),
             _buildQRow('Wait Time',
-                review.questionnaire['waitingTime'] ?? 0.0),
+                review.questionnaire.waitingTime),
             _buildQRow('Service',
-                review.questionnaire['serviceQuality'] ?? 0.0),
+                review.questionnaire.serviceQuality),
             _buildQRow(
-                'Hygiene', review.questionnaire['hygiene'] ?? 0.0),
+                'Hygiene', review.questionnaire.hygiene),
             _buildQRow('Staff',
-                review.questionnaire['staffCommunication'] ?? 0.0),
+                review.questionnaire.staffCommunication),
           ],
         ],
       ),
     );
+
+    // Wrap in InkWell when tappable
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          child: card,
+        ),
+      );
+    }
+
+    return card;
   }
 
   /// Safely extracts the first visible character for the avatar.
@@ -146,7 +210,6 @@ class ReviewCard extends StatelessWidget {
     // Clamp value to 0–5 so star rendering is always safe even if a
     // corrupt Firestore document slips through fromMap's own clamping.
     final value = rawValue.clamp(0.0, 5.0);
-    final filledCount = value.round().clamp(0, 5);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -161,19 +224,9 @@ class ReviewCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          Row(
-            children: List.generate(
-              5,
-              (i) => Icon(
-                i < filledCount
-                    ? Icons.star_rounded
-                    : Icons.star_outline_rounded,
-                size: 16,
-                color: i < filledCount
-                    ? AppColors.starGold
-                    : AppColors.divider,
-              ),
-            ),
+          StarRatingWidget(
+            rating: value,
+            size: 16,
           ),
         ],
       ),

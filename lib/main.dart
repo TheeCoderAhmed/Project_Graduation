@@ -16,6 +16,7 @@ import 'screens/provider_dashboard/provider_dashboard_screen.dart';
 import 'screens/provider_profile/provider_profile_screen.dart';
 import 'screens/questionnaire/questionnaire_screen.dart';
 import 'screens/reviews/reviews_list_screen.dart';
+import 'screens/notifications/notifications_screen.dart';
 import 'screens/search/search_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/splash/splash_screen.dart';
@@ -61,6 +62,7 @@ class DrapoApp extends StatelessWidget {
           AppRoutes.userProfile:        (_) => const AuthGuard(child: UserProfileScreen()),
           AppRoutes.providerDashboard:  (_) => const AuthGuard(child: ProviderDashboardScreen()),
           AppRoutes.settings:           (_) => const AuthGuard(child: SettingsScreen()),
+          AppRoutes.notifications:      (_) => const AuthGuard(child: NotificationsScreen()),
         },
       ),
     );

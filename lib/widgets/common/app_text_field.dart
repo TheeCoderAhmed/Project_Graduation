@@ -13,6 +13,8 @@ class AppTextField extends StatelessWidget {
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final int maxLines;
+  final int? maxLength;
+  final String? helperText;
 
   const AppTextField({
     super.key,
@@ -25,6 +27,8 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.maxLines = 1,
+    this.maxLength,
+    this.helperText,
   });
 
   @override
@@ -35,10 +39,13 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       validator: validator,
       maxLines: maxLines,
+      maxLength: maxLength,
       style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.inter(color: AppColors.outline, fontSize: 15),
+        helperText: helperText,
+        helperStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.outline),
         prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: AppColors.outline, size: 20) : null,
         suffixIcon: suffixIcon,
         filled: true,

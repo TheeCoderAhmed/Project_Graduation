@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/questionnaire_model.dart';
 
 /// Recalculates ranking using an incremental moving-average formula.
 /// Reads only the provider document — O(1) Firestore reads per review.
@@ -14,7 +15,7 @@ class RankingService {
   Future<void> recalculateRanking({
     required String providerId,
     required double newOverallRating,
-    required Map<String, double> newQuestionnaire,
+    required QuestionnaireModel newQuestionnaire,
   }) async {
     try {
       final providerDoc =
@@ -36,10 +37,10 @@ class RankingService {
           ? newOverallRating
           : ((prevAvgOverall * (newTotal - 1)) + newOverallRating) / newTotal;
 
-      final double newQScore = newQuestionnaire.values.isEmpty
-          ? 0.0
-          : newQuestionnaire.values.reduce((a, b) => a + b) /
-              newQuestionnaire.values.length;
+      final double newQScore = (newQuestionnaire.waitingTime +
+              newQuestionnaire.serviceQuality +
+              newQuestionnaire.hygiene +
+              newQuestionnaire.staffCommunication) / 4.0;
 
       final double newAvgQ = newTotal <= 1
           ? newQScore

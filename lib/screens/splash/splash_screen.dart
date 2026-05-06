@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
 import '../../constants/app_theme.dart';
@@ -33,16 +34,26 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _redirect() async {
     // Run animation for at least 1.8 s, but also wait for Firebase auth
     // to resolve — whichever takes longer wins.
+    final prefsFuture = SharedPreferences.getInstance();
     await Future.wait([
       Future.delayed(const Duration(milliseconds: 1800)),
       _waitForAuthResolution(),
     ]);
     if (!mounted) return;
+
+    final navigator = Navigator.of(context);
     final auth = context.read<AuthProvider>();
+    final prefs = await prefsFuture;
+    if (!mounted) return;
+    final onboardingDone = prefs.getBool('onboarding_completed') ?? false;
+
     if (auth.isLoggedIn) {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      navigator.pushReplacementNamed(AppRoutes.home);
+    } else if (onboardingDone) {
+      // User has seen onboarding before — go straight to login.
+      navigator.pushReplacementNamed(AppRoutes.login);
     } else {
-      Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+      navigator.pushReplacementNamed(AppRoutes.onboarding);
     }
   }
 

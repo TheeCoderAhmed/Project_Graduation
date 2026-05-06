@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ? const LoadingIndicator(message: 'Loading providers...')
           : RefreshIndicator(
               color: AppColors.primary,
-              onRefresh: () => context.read<ProviderProvider>().loadHomeData(),
+              onRefresh: () => context.read<ProviderProvider>().loadHomeData(showLoading: false),
               child: ListView(
                 padding: const EdgeInsets.only(top: 0, bottom: 100),
                 children: [
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     ),
                     child: const Icon(Icons.local_hospital_rounded,
-                        color: Colors.white, size: 20),
+                        color: Colors.white, size: 20, semanticLabel: 'DRAPO logo'),
                   ),
                   const SizedBox(width: 10),
                   Text('DRAPO',
@@ -104,14 +104,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         letterSpacing: 1,
                       )),
                 ]),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
+                Semantics(
+                  button: true,
+                  label: 'Notifications',
+                  child: Material(
                     color: Colors.white.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, AppRoutes.notifications);
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(8),
+                        child: Icon(Icons.notifications_outlined,
+                            color: Colors.white, size: 22),
+                      ),
+                    ),
                   ),
-                  child: const Icon(Icons.notifications_outlined,
-                      color: Colors.white, size: 22),
                 ),
               ],
             ),
@@ -154,52 +164,58 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSearchBar(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.search),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          border: Border.all(color: AppColors.divider),
-          boxShadow: AppTheme.subtleShadow,
-        ),
-        child: Row(children: [
-          const Icon(Icons.search_rounded, color: AppColors.outline, size: 22),
-          const SizedBox(width: 12),
-          Text('Search doctors, pharmacies...',
-              style: GoogleFonts.inter(
-                color: AppColors.outline,
-                fontSize: 15,
-              )),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    return Semantics(
+      button: true,
+      label: 'Search for doctors and pharmacies',
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.search),
+        child: ExcludeSemantics(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              border: Border.all(color: AppColors.divider),
+              boxShadow: AppTheme.subtleShadow,
             ),
-            child: Text('Search',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                )),
+            child: Row(children: [
+              const Icon(Icons.search_rounded, color: AppColors.outline, size: 22),
+              const SizedBox(width: 12),
+              Text('Search doctors, pharmacies...',
+                  style: GoogleFonts.inter(
+                    color: AppColors.outline,
+                    fontSize: 15,
+                  )),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                ),
+                child: Text('Search',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    )),
+              ),
+            ]),
           ),
-        ]),
+        ),
       ),
     );
   }
 
   Widget _buildQuickCategories(BuildContext context) {
     final categories = [
-      const _Category('Cardiologist', Icons.favorite_rounded, Color(0xFFFFEBEE), Color(0xFFE53935)),
-      const _Category('Pediatrics', Icons.child_care_rounded, Color(0xFFE8F5E9), Color(0xFF43A047)),
-      const _Category('Dermatology', Icons.face_retouching_natural_rounded, Color(0xFFFFF8E1), Color(0xFFFFB300)),
-      const _Category('Pharmacy', Icons.local_pharmacy_rounded, Color(0xFFE3F2FD), Color(0xFF1E88E5)),
-      const _Category('Neurology', Icons.psychology_rounded, Color(0xFFF3E5F5), Color(0xFF8E24AA)),
-      const _Category('Orthopedics', Icons.accessibility_new_rounded, Color(0xFFE0F7FA), Color(0xFF00ACC1)),
+      const _Category('Cardiologist', Icons.favorite_rounded, AppColors.catCardioBg, AppColors.catCardioAccent),
+      const _Category('Pediatrics', Icons.child_care_rounded, AppColors.catPedsBg, AppColors.catPedsAccent),
+      const _Category('Dermatology', Icons.face_retouching_natural_rounded, AppColors.catDermBg, AppColors.catDermAccent),
+      const _Category('Pharmacy', Icons.local_pharmacy_rounded, AppColors.catPharmBg, AppColors.catPharmAccent),
+      const _Category('Neurology', Icons.psychology_rounded, AppColors.catNeuroBg, AppColors.catNeuroAccent),
+      const _Category('Orthopedics', Icons.accessibility_new_rounded, AppColors.catOrthoBg, AppColors.catOrthoAccent),
     ];
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -227,33 +243,39 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategoryChip(BuildContext context, _Category cat) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, AppRoutes.search);
-      },
-      child: Container(
-        width: 80,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: cat.bg,
-          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          border: Border.all(color: cat.accent.withValues(alpha: 0.15)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(cat.icon, color: cat.accent, size: 28),
-            const SizedBox(height: 6),
-            Text(cat.label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: cat.accent,
-                  height: 1.2,
-                )),
-          ],
+    return Semantics(
+      button: true,
+      label: 'Search for ${cat.label}',
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, AppRoutes.search, arguments: cat.label);
+        },
+        child: ExcludeSemantics(
+          child: Container(
+            width: MediaQuery.sizeOf(context).width * 0.22,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: cat.bg,
+              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+              border: Border.all(color: cat.accent.withValues(alpha: 0.15)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(cat.icon, color: cat.accent, size: 28),
+                const SizedBox(height: 6),
+                Text(cat.label,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: cat.accent,
+                      height: 1.2,
+                    )),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -292,20 +314,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildStat2(String value, String label) {
     return Expanded(
-      child: Column(children: [
-        Text(value,
-            style: GoogleFonts.manrope(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: AppColors.primary,
-            )),
-        Text(label,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            )),
-      ]),
+      child: Semantics(
+        label: '$value $label',
+        child: ExcludeSemantics(
+          child: Column(children: [
+            Text(value,
+                style: GoogleFonts.manrope(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
+                )),
+            Text(label,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                )),
+          ]),
+        ),
+      ),
     );
   }
 
@@ -350,7 +377,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 12),
         if (list.isEmpty)
-          _buildEmptyState(title)
+          _buildEmptyState(title, onRetry: () => context.read<ProviderProvider>().loadHomeData())
         else if (horizontal)
           SizedBox(
             height: 200,
@@ -379,103 +406,126 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHorizontalCard(BuildContext context, ProviderModel provider) {
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, AppRoutes.providerProfile,
-          arguments: provider.providerId),
-      child: Container(
-        width: 160,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          border: Border.all(color: AppColors.divider),
-          boxShadow: AppTheme.subtleShadow,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-              ),
-              child: Icon(
-                provider.type == 'pharmacy'
-                    ? Icons.local_pharmacy_rounded
-                    : Icons.local_hospital_rounded,
-                color: AppColors.primary,
-                size: 28,
-              ),
+    return Semantics(
+      button: true,
+      label: 'View details for ${provider.name}, ${provider.specialty}, Rating: ${provider.averageRating.toStringAsFixed(1)} stars from ${provider.totalReviews} reviews',
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.providerProfile,
+            arguments: provider.providerId),
+        child: ExcludeSemantics(
+          child: Container(
+            width: MediaQuery.sizeOf(context).width * 0.45,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+              border: Border.all(color: AppColors.divider),
+              boxShadow: AppTheme.subtleShadow,
             ),
-            const Spacer(),
-            Text(provider.name,
-                style: GoogleFonts.manrope(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 2),
-            Text(provider.specialty,
-                style: GoogleFonts.inter(
-                    fontSize: 13, color: AppColors.textSecondary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 8),
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.tertiaryFixed,
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.radiusFull),
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                   ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.star_rounded,
-                        size: 14, color: AppColors.tertiary),
-                    const SizedBox(width: 3),
-                    Text(provider.averageRating.toStringAsFixed(1),
-                        style: GoogleFonts.inter(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.tertiary)),
-                  ]),
+                  child: Icon(
+                    provider.type == 'pharmacy'
+                        ? Icons.local_pharmacy_rounded
+                        : Icons.local_hospital_rounded,
+                    color: AppColors.primary,
+                    size: 28,
+                  ),
                 ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text('${provider.totalReviews}',
-                      style: GoogleFonts.inter(
-                          fontSize: 11, color: AppColors.outline),
-                      overflow: TextOverflow.ellipsis),
+                const Spacer(),
+                Text(provider.name,
+                    style: GoogleFonts.manrope(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 2),
+                Text(provider.specialty,
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: AppColors.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.tertiaryFixed,
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusFull),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.star_rounded,
+                            size: 14, color: AppColors.tertiary),
+                        const SizedBox(width: 3),
+                        Text(provider.averageRating.toStringAsFixed(1),
+                            style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.tertiary)),
+                      ]),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text('${provider.totalReviews} reviews',
+                          style: GoogleFonts.inter(
+                              fontSize: 11, color: AppColors.outline),
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(String title) {
+  Widget _buildEmptyState(String title, {VoidCallback? onRetry}) {
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.containerMargin, vertical: 20),
       child: Column(children: [
         const Icon(Icons.search_off_rounded,
-            size: 48, color: AppColors.divider),
+            size: 48, color: AppColors.divider, semanticLabel: 'No results icon'),
         const SizedBox(height: 8),
-        Text('No $title yet',
+        Text('No $title found',
             style: GoogleFonts.inter(
                 color: AppColors.textSecondary, fontSize: 14)),
         const SizedBox(height: 4),
-        Text('Check back soon as providers are added.',
+        Text('Check back soon as providers are added or try refreshing.',
             style: GoogleFonts.inter(
                 color: AppColors.outline, fontSize: 12),
             textAlign: TextAlign.center),
+        if (onRetry != null) ...[
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: const Text('Refresh'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+              ),
+            ),
+          ),
+        ],
       ]),
     );
   }

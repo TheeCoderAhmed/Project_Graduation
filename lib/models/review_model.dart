@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'questionnaire_model.dart';
 
 class ReviewModel {
   final String reviewId;
@@ -7,7 +8,7 @@ class ReviewModel {
   final String userName;
   final double overallRating;
   final String comment;
-  final Map<String, double> questionnaire;
+  final QuestionnaireModel questionnaire;
   final bool isVerified;
   final Timestamp? createdAt;
 
@@ -24,28 +25,22 @@ class ReviewModel {
   });
 
   factory ReviewModel.fromMap(String id, Map<String, dynamic> map) {
-    // Parse questionnaire safely — Firestore can store numeric values as
-    // either int or double. Any malformed entry is clamped to 0.0 rather
-    // than throwing a TypeError that crashes the whole list load.
-    Map<String, double> questionnaire = {};
+    QuestionnaireModel questionnaire;
     try {
       final raw = map['questionnaire'];
-      if (raw is Map) {
-        for (final entry in raw.entries) {
-          final v = entry.value;
-          if (v is num) {
-            // Clamp to valid 0–5 range so the star widget never receives
-            // out-of-range values from corrupt documents.
-            questionnaire[entry.key.toString()] =
-                (v.toDouble()).clamp(0.0, 5.0);
-          }
-          // Non-numeric values are silently dropped rather than crashing.
-        }
+      if (raw is Map<String, dynamic>) {
+        questionnaire = QuestionnaireModel.fromMap(raw);
+      } else if (raw is Map) {
+        questionnaire = QuestionnaireModel.fromMap(Map<String, dynamic>.from(raw));
+      } else {
+        questionnaire = QuestionnaireModel(
+          waitingTime: 0.0, serviceQuality: 0.0, hygiene: 0.0, staffCommunication: 0.0
+        );
       }
     } catch (_) {
-      // If the entire questionnaire field is malformed, default to empty
-      // so the review card renders without the breakdown section.
-      questionnaire = {};
+      questionnaire = QuestionnaireModel(
+        waitingTime: 0.0, serviceQuality: 0.0, hygiene: 0.0, staffCommunication: 0.0
+      );
     }
 
     // Parse overallRating safely — default to 0.0 rather than throwing.
@@ -81,7 +76,7 @@ class ReviewModel {
       'userName': userName,
       'overallRating': overallRating,
       'comment': comment,
-      'questionnaire': questionnaire,
+      'questionnaire': questionnaire.toMap(),
       'isVerified': isVerified,
       'createdAt': FieldValue.serverTimestamp(),
     };

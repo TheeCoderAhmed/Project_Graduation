@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
+import '../../constants/app_routes.dart';
 import '../../constants/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/review_provider.dart';
+import '../../providers/provider_provider.dart';
 import '../../widgets/review_card.dart';
 import '../../widgets/common/loading_indicator.dart';
 
@@ -19,7 +21,9 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
   bool _initDone = false;
   bool _isUserReviews = false;
   String? _providerId;
-  String? _userId;
+  /// Tracks the last UID we triggered a load for so we don't re-fetch
+  /// on every rebuild, but DO re-fetch when auth state changes.
+  String? _loadedForUid;
 
   @override
   void didChangeDependencies() {
@@ -34,32 +38,61 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
       } else {
         // Showing the signed-in user's own review history.
         _isUserReviews = true;
-        _userId = context.read<AuthProvider>().userModel?.uid;
-
-        if (_userId != null) {
-          context.read<ReviewProvider>().loadUserReviews(_userId!);
-        }
-        // If _userId is null the user is logged out — the empty state
-        // below will prompt them with an appropriate message.
+        _tryLoadUserReviews();
       }
+    }
+  }
+
+  /// Called both from didChangeDependencies (initial) and from build()
+  /// when the auth state changes (user logs in while tab is mounted).
+  void _tryLoadUserReviews() {
+    final uid = context.read<AuthProvider>().userModel?.uid;
+    if (uid != null && uid != _loadedForUid) {
+      _loadedForUid = uid;
+      context.read<ReviewProvider>().loadUserReviews(uid);
     }
   }
 
   void _retry() {
     if (_isUserReviews) {
-      if (_userId != null) {
-        context.read<ReviewProvider>().loadUserReviews(_userId!);
+      final uid = context.read<AuthProvider>().userModel?.uid;
+      if (uid != null) {
+        context.read<ReviewProvider>().loadUserReviews(uid);
       }
     } else if (_providerId != null) {
       context.read<ReviewProvider>().loadReviews(_providerId!);
     }
   }
 
+  /// Resolves a provider name from the ProviderProvider cache.
+  String _resolveProviderName(String providerId) {
+    final provider = context.read<ProviderProvider>().getById(providerId);
+    return provider?.name ?? 'Unknown Provider';
+  }
+
+  /// Navigates to the provider profile screen.
+  void _navigateToProvider(String providerId) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.providerProfile,
+      arguments: providerId,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final reviewProv = context.watch<ReviewProvider>();
     final reviewList =
         _isUserReviews ? reviewProv.userReviews : reviewProv.reviews;
+
+    // Re-trigger load when user signs in while the Reviews tab is already
+    // mounted (e.g. inside an IndexedStack in MainWrapper).
+    if (_isUserReviews && auth.userModel?.uid != null) {
+      _tryLoadUserReviews();
+    }
+
+    final isLoggedIn = auth.isLoggedIn;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -70,18 +103,18 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
               fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
-      body: _buildBody(reviewProv, reviewList),
+      body: _buildBody(reviewProv, reviewList, isLoggedIn),
     );
   }
 
-  Widget _buildBody(ReviewProvider reviewProv, List reviews) {
+  Widget _buildBody(ReviewProvider reviewProv, List reviews, bool isLoggedIn) {
     // Still loading.
     if (reviewProv.isLoading) {
       return const LoadingIndicator(message: 'Loading reviews...');
     }
 
     // Not logged in — only possible in user-reviews mode.
-    if (_isUserReviews && _userId == null) {
+    if (_isUserReviews && !isLoggedIn) {
       return _buildMessage(
         icon: Icons.lock_outline_rounded,
         title: 'Sign in to see your reviews',
@@ -90,8 +123,7 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
       );
     }
 
-    // Error state with retry button — only shown in user-reviews mode
-    // because provider reviews fall back silently to seed data.
+    // Error state with retry button.
     if (_isUserReviews && reviewProv.error != null && reviews.isEmpty) {
       return _buildMessage(
         icon: Icons.wifi_off_rounded,
@@ -118,7 +150,20 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
     return ListView.builder(
       padding: const EdgeInsets.only(top: 16, bottom: 100),
       itemCount: reviews.length,
-      itemBuilder: (_, i) => ReviewCard(review: reviews[i]),
+      itemBuilder: (_, i) {
+        final review = reviews[i];
+
+        // In "My Reviews" mode, show the provider name and make tappable
+        if (_isUserReviews) {
+          return ReviewCard(
+            review: review,
+            providerName: _resolveProviderName(review.providerId),
+            onTap: () => _navigateToProvider(review.providerId),
+          );
+        }
+
+        return ReviewCard(review: review);
+      },
     );
   }
 

@@ -96,6 +96,30 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sends a password-reset email. Returns a friendly message for the UI.
+  Future<String> resetPassword(String email) async {
+    try {
+      await _authService.sendPasswordResetEmail(email);
+      return 'Password reset email sent. Check your inbox.';
+    } catch (e) {
+      final raw = e.toString();
+      if (raw.contains('user-not-found')) {
+        return 'No account found with that email.';
+      }
+      if (raw.contains('invalid-email')) {
+        return 'Please enter a valid email address.';
+      }
+      if (raw.contains('network-request-failed') ||
+          raw.contains('connection')) {
+        return 'Check your internet connection and try again.';
+      }
+      if (raw.contains('too-many-requests')) {
+        return 'Too many attempts. Please wait a moment and try again.';
+      }
+      return 'Could not send reset email. Please try again.';
+    }
+  }
+
   /// Optimistic local bookmark toggle. The caller is responsible for
   /// persisting to Firestore via FirestoreService.toggleBookmark().
   void toggleBookmark(String providerId, bool add) {

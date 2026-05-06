@@ -1,6 +1,6 @@
 // THIS FILE IS AUTO-GENERATED. Do not edit manually.
 // To regenerate: run `flutterfire configure` while logged into the correct
-// Firebase account that owns project drapo-7.
+// Firebase account that owns project drapo7.
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'

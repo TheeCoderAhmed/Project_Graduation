@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/provider_provider.dart';
 import '../../providers/review_provider.dart';
 import '../../services/firestore_service.dart';
 import '../../models/provider_model.dart';
+import '../../models/review_model.dart';
 import '../../widgets/common/loading_indicator.dart';
 
 class ProviderDashboardScreen extends StatefulWidget {
@@ -42,10 +42,8 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
 
     if (!mounted) return;
 
-    // Fall back to first seed doctor if no real provider is linked.
-    final ProviderModel? provider = providers.isNotEmpty
-        ? providers.first
-        : context.read<ProviderProvider>().getById('doc_001');
+    final ProviderModel? provider =
+        providers.isNotEmpty ? providers.first : null;
 
     setState(() { _myProvider = provider; _loading = false; });
     if (provider != null) {
@@ -127,7 +125,10 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
     required String value,
     required String label,
   }) {
-    return Container(
+    return Semantics(
+      label: '$value $label',
+      child: ExcludeSemantics(
+        child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -145,6 +146,8 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.outline,
         )),
       ]),
+    ),
+      ),
     );
   }
 
@@ -158,7 +161,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           border: Border.all(color: AppColors.divider),
         ),
         child: Column(children: [
-          const Icon(Icons.analytics_outlined, size: 40, color: AppColors.outline),
+          const Icon(Icons.analytics_outlined, size: 40, color: AppColors.outline, semanticLabel: 'Analytics icon'),
           const SizedBox(height: 8),
           Text('No breakdown data available yet',
             style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
@@ -169,9 +172,8 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
 
     // Calculate averages per category
     final rList = reviews.reviews;
-    double avg(String key) {
-      final vals = rList.where((r) => r.questionnaire.containsKey(key))
-          .map((r) => (r.questionnaire[key] as num).toDouble());
+    double avg(double Function(ReviewModel) getter) {
+      final vals = rList.where((r) => getter(r) > 0).map(getter);
       if (vals.isEmpty) return 0;
       return vals.reduce((a, b) => a + b) / vals.length;
     }
@@ -184,20 +186,23 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
         border: Border.all(color: AppColors.divider),
       ),
       child: Column(children: [
-        _buildBarRow('Wait Time', avg('waitingTime')),
+        _buildBarRow('Wait Time', avg((r) => r.questionnaire.waitingTime)),
         const SizedBox(height: 16),
-        _buildBarRow('Service', avg('serviceQuality')),
+        _buildBarRow('Service', avg((r) => r.questionnaire.serviceQuality)),
         const SizedBox(height: 16),
-        _buildBarRow('Hygiene', avg('hygiene')),
+        _buildBarRow('Hygiene', avg((r) => r.questionnaire.hygiene)),
         const SizedBox(height: 16),
-        _buildBarRow('Staff', avg('staffCommunication')),
+        _buildBarRow('Staff', avg((r) => r.questionnaire.staffCommunication)),
       ]),
     );
   }
 
   Widget _buildBarRow(String label, double value) {
     final normalized = (value / 5.0).clamp(0.0, 1.0);
-    return Row(
+    return Semantics(
+      label: '$label score is ${value.toStringAsFixed(1)} out of 5',
+      child: ExcludeSemantics(
+        child: Row(
       children: [
         SizedBox(
           width: 70,
@@ -222,6 +227,8 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.textPrimary,
         )),
       ],
+    ),
+      ),
     );
   }
 
@@ -235,7 +242,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
             shape: BoxShape.circle,
             border: Border.all(color: AppColors.divider),
           ),
-          child: const Icon(Icons.business_rounded, size: 48, color: AppColors.outline),
+          child: const Icon(Icons.business_rounded, size: 48, color: AppColors.outline, semanticLabel: 'No profile icon'),
         ),
         const SizedBox(height: 24),
         Text('No provider profile found',
@@ -247,6 +254,23 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
             'Contact support to claim and manage your healthcare provider listing.',
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
+          ),
+        ),
+        const SizedBox(height: 24),
+        OutlinedButton.icon(
+          onPressed: () {
+            setState(() => _loading = true);
+            _loadMyProfile();
+          },
+          icon: const Icon(Icons.refresh_rounded),
+          label: const Text('Refresh'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.primary),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+            ),
           ),
         ),
       ]),

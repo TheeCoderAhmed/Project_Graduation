@@ -73,7 +73,35 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Scaffold(body: LoadingIndicator());
-    if (_provider == null) return const Scaffold(body: Center(child: Text('Provider not found')));
+    if (_provider == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline_rounded, size: 64, color: AppColors.divider),
+              const SizedBox(height: 16),
+              Text('Provider not found', style: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              const SizedBox(height: 8),
+              Text('This provider profile may have been removed.', style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14)),
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_rounded),
+                label: const Text('Go back'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     final reviews = context.watch<ReviewProvider>();
     final auth = context.watch<AuthProvider>();
     final isBookmarked = auth.userModel?.bookmarks.contains(_provider!.providerId) ?? false;

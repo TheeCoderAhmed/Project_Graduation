@@ -4,11 +4,11 @@
 
 | Field | Value |
 |---|---|
-| **Project ID** | `drapo-7` |
-| **Project Number** | `330975090300` |
-| **Storage Bucket** | `drapo-7.firebasestorage.app` |
-| **Android App ID** | `1:330975090300:android:74cd1abe3833e500fd9bf9` |
-| **Android Package** | `DRAPO.N7` |
+| **Project ID** | `drapo7` |
+| **Project Number** | `986206394751` |
+| **Storage Bucket** | `drapo7.firebasestorage.app` |
+| **Android App ID** | `1:986206394751:android:e0a1899e51c72245aba24a` |
+| **Android Package** | `DRAPO.T7` |
 
 ---
 
@@ -33,13 +33,13 @@ DRAPO/
 
 ```bash
 firebase login
-# Login with the Google account that owns drapo-7
+# Login with the Google account that owns drapo7
 ```
 
-### 2. Link this directory to the drapo-7 project
+### 2. Link this directory to the drapo7 project
 
 ```bash
-firebase use drapo-7
+firebase use drapo7
 ```
 
 ### 3. Copy `google-services.json` to your Android app
@@ -52,7 +52,7 @@ cp google-services.json <your_flutter_project>/android/app/google-services.json
 
 ```bash
 dart pub global activate flutterfire_cli
-flutterfire configure --project=drapo-7
+flutterfire configure --project=drapo7
 ```
 
 ### 5. Deploy Firebase rules and indexes
@@ -104,7 +104,7 @@ firebase deploy --only firestore:rules,firestore:indexes,storage
 ## Storage Structure
 
 ```
-drapo-7.firebasestorage.app/
+drapo7.firebasestorage.app/
 ├── users/{userId}/profile/          # Profile images (max 5MB, images only)
 ├── discussions/{postId}/            # Post media (max 50MB)
 ├── places/{placeId}/                # Place photos

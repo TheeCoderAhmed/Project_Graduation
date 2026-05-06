@@ -1,14 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_theme.dart';
 import '../../models/review_model.dart';
+import '../../models/questionnaire_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/review_provider.dart';
 import '../../widgets/common/app_button.dart';
+import '../../widgets/common/app_text_field.dart';
+import '../../widgets/star_rating_widget.dart';
 
 class QuestionnaireScreen extends StatefulWidget {
   const QuestionnaireScreen({super.key});
@@ -20,6 +23,7 @@ class QuestionnaireScreen extends StatefulWidget {
 class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   late String _providerId;
   bool _initialized = false;
+  final _formKey = GlobalKey<FormState>();
 
   double _overallRating = 3.0;
   double _waitingTime = 3.0;
@@ -86,29 +90,11 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       return;
     }
 
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     final comment = _commentController.text.trim();
-
-    // Empty check.
-    if (comment.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Please add a comment before submitting.')),
-      );
-      return;
-    }
-
-    // Minimum meaningful length — prevents single-character spam reviews.
-    const int minCommentLength = 20;
-    if (comment.length < minCommentLength) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Your comment is too short. Please write at least $minCommentLength characters.',
-          ),
-        ),
-      );
-      return;
-    }
 
     final review = ReviewModel(
       reviewId: '',
@@ -117,12 +103,12 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       userName: auth.userModel!.fullName,
       overallRating: _overallRating,
       comment: comment,
-      questionnaire: {
-        'waitingTime': _waitingTime,
-        'serviceQuality': _serviceQuality,
-        'hygiene': _hygiene,
-        'staffCommunication': _staffCommunication,
-      },
+      questionnaire: QuestionnaireModel(
+        waitingTime: _waitingTime,
+        serviceQuality: _serviceQuality,
+        hygiene: _hygiene,
+        staffCommunication: _staffCommunication,
+      ),
       createdAt: Timestamp.now(),
     );
 
@@ -161,9 +147,11 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.containerMargin),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Overall Rating section
             Text('SERVICE QUALITY', style: GoogleFonts.inter(
               fontSize: 12, fontWeight: FontWeight.w600,
@@ -209,6 +197,7 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
             const SizedBox(height: 20),
           ],
         ),
+        ),
       ),
     );
   }
@@ -224,14 +213,10 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
       ),
       child: Column(
         children: [
-          RatingBar.builder(
-            initialRating: _overallRating,
-            minRating: 1,
-            itemCount: 5,
-            itemSize: 44,
-            glow: false,
-            unratedColor: AppColors.divider,
-            itemBuilder: (_, __) => const Icon(Icons.star_rounded, color: AppColors.starGold),
+          StarRatingWidget(
+            rating: _overallRating,
+            size: 44,
+            ignoreGestures: false,
             onRatingUpdate: (r) => setState(() => _overallRating = r),
           ),
           const SizedBox(height: 10),
@@ -310,31 +295,22 @@ class _QuestionnaireScreenState extends State<QuestionnaireScreen> {
   }
 
   Widget _buildCommentField() {
-    return TextField(
+    return AppTextField(
       controller: _commentController,
+      label: '',
+      hint: 'Share your experience (min. 20 characters)...',
       maxLines: 5,
       maxLength: 500,
-      style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        hintText: 'Share your experience (min. 20 characters)...',
-        hintStyle: GoogleFonts.inter(color: AppColors.outline),
-        filled: true,
-        fillColor: AppColors.surface,
-        helperText: 'Minimum 20 characters required',
-        helperStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.outline),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-          borderSide: const BorderSide(color: AppColors.divider),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-          borderSide: const BorderSide(color: AppColors.divider),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-      ),
+      helperText: 'Minimum 20 characters required',
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Please add a comment before submitting.';
+        }
+        if (value.trim().length < 20) {
+          return 'Your comment is too short. Please write at least 20 characters.';
+        }
+        return null;
+      },
     );
   }
 

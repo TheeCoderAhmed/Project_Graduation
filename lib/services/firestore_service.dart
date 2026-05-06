@@ -7,20 +7,25 @@ class FirestoreService {
 
   // ── PROVIDERS ──────────────────────────────────────
   Future<List<ProviderModel>> getTopProviders({String? type}) async {
-    final query = _db
-        .collection('providers')
-        .orderBy('rankingScore', descending: true)
-        .limit(30);
+    Query<Map<String, dynamic>> query = _db.collection('providers');
+    
+    if (type != null) {
+      query = query.where('type', isEqualTo: type);
+    }
+    
+    query = query.orderBy('rankingScore', descending: true).limit(30);
 
     final snapshot = await query.get();
-    var results = snapshot.docs
+    return snapshot.docs
         .map((d) => ProviderModel.fromMap(d.id, d.data()))
         .toList();
+  }
 
-    if (type != null) {
-      results = results.where((p) => p.type == type).toList();
-    }
-    return results;
+  Future<List<ProviderModel>> getAllProviders() async {
+    final snapshot = await _db.collection('providers').get();
+    return snapshot.docs
+        .map((d) => ProviderModel.fromMap(d.id, d.data()))
+        .toList();
   }
 
   Future<ProviderModel?> getProvider(String providerId) async {
@@ -50,41 +55,26 @@ class FirestoreService {
   }
 
   Future<bool> hasAlreadyReviewed(String userId, String providerId) async {
-    final snapshot = await _db
+    final doc = await _db
         .collection('reviews')
-        .where('userId', isEqualTo: userId)
-        .where('providerId', isEqualTo: providerId)
-        .limit(1)
+        .doc(_reviewId(userId, providerId))
         .get();
-    return snapshot.docs.isNotEmpty;
+    return doc.exists;
   }
 
-  /// Writes the review and increments totalReviews atomically.
-  ///
-  /// Because seed providers don't exist in Firestore, the provider-doc
-  /// increment uses set(merge:true) instead of update() so it never
-  /// throws "document not found".
   Future<void> submitReview(ReviewModel review) async {
-    final alreadyReviewed =
-        await hasAlreadyReviewed(review.userId, review.providerId);
-    if (alreadyReviewed) {
-      throw Exception('You have already reviewed this provider.');
-    }
+    final reviewRef = _db
+        .collection('reviews')
+        .doc(_reviewId(review.userId, review.providerId));
 
-    final batch = _db.batch();
+    await _db.runTransaction((transaction) async {
+      final existingReview = await transaction.get(reviewRef);
+      if (existingReview.exists) {
+        throw Exception('You have already reviewed this provider.');
+      }
 
-    final reviewRef = _db.collection('reviews').doc();
-    batch.set(reviewRef, review.toMap());
-
-    // set(merge:true) is safe whether the provider doc exists or not.
-    final providerRef = _db.collection('providers').doc(review.providerId);
-    batch.set(
-      providerRef,
-      {'totalReviews': FieldValue.increment(1)},
-      SetOptions(merge: true),
-    );
-
-    await batch.commit();
+      transaction.set(reviewRef, review.toMap());
+    });
   }
 
   Future<List<ReviewModel>> getUserReviews(String userId) async {
@@ -143,4 +133,14 @@ class FirestoreService {
         .map((d) => ProviderModel.fromMap(d.id, d.data()))
         .toList();
   }
+
+  // ── ALL REVIEWS (for real-time stats aggregation) ──
+  Future<List<ReviewModel>> getAllReviews() async {
+    final snapshot = await _db.collection('reviews').get();
+    return snapshot.docs
+        .map((d) => ReviewModel.fromMap(d.id, d.data()))
+        .toList();
+  }
+
+  String _reviewId(String userId, String providerId) => '${userId}_$providerId';
 }

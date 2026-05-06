@@ -23,14 +23,49 @@ service cloud.firestore {
       return isAuth() && getUserRole() == 'patient';
     }
 
+    function isValidClientRole(role) {
+      return role in ['patient', 'provider'];
+    }
+
+    function isValidRating(value) {
+      return value is number && value >= 1 && value <= 5;
+    }
+
+    function isValidQuestionnaire(questionnaire) {
+      return questionnaire is map
+        && questionnaire.keys().hasOnly([
+          'waitingTime',
+          'serviceQuality',
+          'hygiene',
+          'staffCommunication'
+        ])
+        && isValidRating(questionnaire.waitingTime)
+        && isValidRating(questionnaire.serviceQuality)
+        && isValidRating(questionnaire.hygiene)
+        && isValidRating(questionnaire.staffCommunication);
+    }
+
     // ── USERS ──────────────────────────────────────────────────────────────
     // Users can only read/write their OWN document. No cross-user reads.
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId)
-        // Prevent users from escalating their own role
-        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'uid',
+          'fullName',
+          'email',
+          'role',
+          'profilePhotoUrl',
+          'bookmarks'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && isValidClientRole(request.resource.data.role)
+        && request.resource.data.bookmarks is list
+        && request.resource.data.bookmarks.size() == 0;
+      allow update: if isAdmin() || (isOwner(userId)
+        // Users can update profile/bookmark fields, but never identity or role.
+        && request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['fullName', 'profilePhotoUrl', 'bookmarks']));
       allow delete: if false;
     }
 
@@ -54,11 +89,25 @@ service cloud.firestore {
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if isPatient()
+        // One review per patient/provider pair, enforced by deterministic ID.
+        && reviewId == request.auth.uid + '_' + request.resource.data.providerId
+        && exists(/databases/$(database)/documents/providers/$(request.resource.data.providerId))
+        && request.resource.data.keys().hasOnly([
+          'providerId',
+          'userId',
+          'userName',
+          'overallRating',
+          'comment',
+          'questionnaire',
+          'isVerified',
+          'createdAt'
+        ])
         // Submitted userId must match the authenticated user
         && request.resource.data.userId == request.auth.uid
+        && request.resource.data.isVerified == false
         // Rating must be between 1 and 5
-        && request.resource.data.overallRating >= 1
-        && request.resource.data.overallRating <= 5;
+        && isValidRating(request.resource.data.overallRating)
+        && isValidQuestionnaire(request.resource.data.questionnaire);
       allow update: if false;
       allow delete: if isAdmin() ||
         (isAuth() && resource.data.userId == request.auth.uid);

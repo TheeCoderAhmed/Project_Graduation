@@ -121,7 +121,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         AppTextField(
                           label: '', hint: 'Enter your full name',
                           controller: _nameCtrl, prefixIcon: Icons.person_outline,
-                          validator: (v) => v != null && v.isNotEmpty ? null : 'Enter your name',
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return 'Name is required';
+                            if (v.trim().length < 2) return 'Please enter your full name';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 20),
                         _label('EMAIL'),
@@ -130,7 +134,11 @@ class _SignupScreenState extends State<SignupScreen> {
                           label: '', hint: 'Enter your email',
                           controller: _emailCtrl, keyboardType: TextInputType.emailAddress,
                           prefixIcon: Icons.email_outlined,
-                          validator: (v) => v != null && v.contains('@') ? null : 'Enter a valid email',
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return 'Email is required';
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v.trim())) return 'Enter a valid email address';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 20),
                         _label('PASSWORD'),
@@ -143,7 +151,11 @@ class _SignupScreenState extends State<SignupScreen> {
                             icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppColors.outline),
                             onPressed: () => setState(() => _obscure = !_obscure),
                           ),
-                          validator: (v) => v != null && v.length >= 6 ? null : 'Min 6 characters',
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Password is required';
+                            if (v.length < 6) return 'Password must be at least 6 characters';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 20),
                         _label('I AM A...'),

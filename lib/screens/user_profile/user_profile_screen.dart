@@ -188,6 +188,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         icon: Icons.bookmark_border_rounded,
         title: 'No Saved Providers',
         subtitle: 'Providers you save will appear here for easy access',
+        onRetry: _loadBookmarks,
       );
     }
 
@@ -290,7 +291,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     );
   }
 
-  Widget _buildEmptyState({required IconData icon, required String title, required String subtitle}) {
+  Widget _buildEmptyState({required IconData icon, required String title, required String subtitle, VoidCallback? onRetry}) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -310,6 +311,21 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           Text(subtitle, textAlign: TextAlign.center, style: GoogleFonts.inter(
             color: AppColors.textSecondary, fontSize: 14, height: 1.5,
           )),
+          if (onRetry != null) ...[
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Refresh'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
+              ),
+            ),
+          ],
         ]),
       ),
     );

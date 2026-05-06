@@ -8,20 +8,24 @@
   "storage": {
     "rules": "storage.rules"
   },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22"
+  },
   "flutter": {
     "platforms": {
       "android": {
         "default": {
-          "projectId": "drapo-7",
-          "appId": "1:330975090300:android:74cd1abe3833e500fd9bf9",
+          "projectId": "drapo7",
+          "appId": "1:986206394751:android:e0a1899e51c72245aba24a",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "drapo-7",
+          "projectId": "drapo7",
           "configurations": {
-            "android": "1:330975090300:android:74cd1abe3833e500fd9bf9"
+            "android": "1:986206394751:android:e0a1899e51c72245aba24a"
           }
         }
       }

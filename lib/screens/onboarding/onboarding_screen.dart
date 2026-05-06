@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_routes.dart';
 import '../../constants/app_theme.dart';
@@ -44,11 +45,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
+  /// Mark onboarding as completed and navigate to login.
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, AppRoutes.login);
+  }
+
   void _next() {
     if (_current < _pages.length - 1) {
       _controller.nextPage(duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
     } else {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
+      _completeOnboarding();
     }
   }
 
@@ -63,8 +72,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             top: -80,
             right: -60,
             child: Container(
-              width: 240,
-              height: 240,
+              width: MediaQuery.sizeOf(context).width * 0.6,
+              height: MediaQuery.sizeOf(context).width * 0.6,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
@@ -85,7 +94,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(right: 8, top: 4),
                     child: TextButton(
-                      onPressed: () => Navigator.pushReplacementNamed(context, AppRoutes.login),
+                      onPressed: _completeOnboarding,
                       child: Text('Skip', style: GoogleFonts.inter(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -158,7 +167,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     fontSize: 14,
                   )),
                   GestureDetector(
-                    onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.login),
+                    onTap: _completeOnboarding,
                     child: Text('Log in', style: GoogleFonts.inter(
                       color: AppColors.primary,
                       fontSize: 14,

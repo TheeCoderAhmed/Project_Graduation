@@ -107,7 +107,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           controller: _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
                           prefixIcon: Icons.email_outlined,
-                          validator: (v) => v != null && v.contains('@') ? null : 'Enter a valid email',
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return 'Email is required';
+                            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v.trim())) return 'Enter a valid email address';
+                            return null;
+                          },
                         ),
                         const SizedBox(height: 20),
                         // Password label
@@ -131,9 +135,25 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             onPressed: () => setState(() => _obscure = !_obscure),
                           ),
-                          validator: (v) => v != null && v.length >= 6 ? null : 'Min 6 characters',
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Password is required';
+                            if (v.length < 6) return 'Password must be at least 6 characters';
+                            return null;
+                          },
                         ),
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: GestureDetector(
+                            onTap: _showForgotPasswordDialog,
+                            child: Text('Forgot password?', style: GoogleFonts.inter(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            )),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         AppButton(label: 'Sign In', onPressed: _login, isLoading: auth.isLoading),
                       ],
                     ),
@@ -196,4 +216,61 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  void _showForgotPasswordDialog() {
+    final resetEmailCtrl = TextEditingController(text: _emailCtrl.text);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
+        title: Text('Reset Password', style: GoogleFonts.manrope(fontWeight: FontWeight.w700)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your email address and we\'ll send you a link to reset your password.',
+              style: GoogleFonts.inter(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              label: '',
+              hint: 'Email address',
+              controller: resetEmailCtrl,
+              keyboardType: TextInputType.emailAddress,
+              prefixIcon: Icons.email_outlined,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
+            ),
+            onPressed: () async {
+              final email = resetEmailCtrl.text.trim();
+              if (email.isEmpty) return;
+              Navigator.pop(dialogContext);
+              final msg = await context.read<AuthProvider>().resetPassword(email);
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(msg),
+                  backgroundColor: msg.contains('sent') ? AppColors.primary : AppColors.error,
+                ),
+              );
+            },
+            child: const Text('Send Reset Link'),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
