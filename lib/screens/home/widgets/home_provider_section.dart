@@ -1,0 +1,225 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../constants/app_colors.dart';
+import '../../../constants/app_routes.dart';
+import '../../../constants/app_theme.dart';
+import '../../../models/provider_model.dart';
+import '../../../widgets/provider_card.dart';
+
+// A titled list section for providers on the home screen.
+//
+// Used twice:
+//   horizontal: true  → "Top Rated Doctors" (horizontal scroll, compact cards)
+//   horizontal: false → "Pharmacies Near Me" (vertical list, full-width ProviderCard)
+class HomeProviderSection extends StatelessWidget {
+  final String title;
+  final List<ProviderModel> list;
+  // When true, renders a horizontally scrollable row of compact cards.
+  // When false, renders a vertical stack using the standard ProviderCard widget.
+  final bool horizontal;
+  // Called when the user taps the Refresh button on the empty state.
+  final VoidCallback? onRetry;
+
+  const HomeProviderSection({
+    super.key,
+    required this.title,
+    required this.list,
+    this.horizontal = false,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Section header: title + "View all" button ──
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title,
+                  style: GoogleFonts.manrope(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  )),
+              // "View all" only appears when there is at least one provider
+              if (list.isNotEmpty)
+                TextButton(
+                  onPressed: () => Navigator.pushNamed(context, AppRoutes.search),
+                  child: Text('View all',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      )),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // ── Content: empty state, horizontal scroll, or vertical list ──
+        if (list.isEmpty)
+          _buildEmptyState()
+        else if (horizontal)
+          SizedBox(
+            height: 200,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+              itemCount: list.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 16),
+              itemBuilder: (_, i) => _buildHorizontalCard(context, list[i]),
+            ),
+          )
+        else
+          ...list.map((p) => Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.containerMargin - 16, vertical: 4),
+                child: ProviderCard(
+                  provider: p,
+                  onTap: () => Navigator.pushNamed(
+                      context, AppRoutes.providerProfile,
+                      arguments: p.providerId),
+                ),
+              )),
+      ],
+    );
+  }
+
+  // Compact card used inside the horizontal scroll row (Top Rated Doctors).
+  // Wider full-width cards use ProviderCard widget instead.
+  Widget _buildHorizontalCard(BuildContext context, ProviderModel provider) {
+    return Semantics(
+      button: true,
+      label: 'View details for ${provider.name}, ${provider.specialty}, '
+          'Rating: ${provider.averageRating.toStringAsFixed(1)} stars '
+          'from ${provider.totalReviews} reviews',
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.providerProfile,
+            arguments: provider.providerId),
+        child: ExcludeSemantics(
+          child: Container(
+            // 45% of screen width — adjust to show more/fewer cards at once
+            width: MediaQuery.sizeOf(context).width * 0.45,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+              border: Border.all(color: AppColors.divider),
+              boxShadow: AppTheme.subtleShadow,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Provider type icon (hospital or pharmacy)
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    // To make this icon container circular: change to BorderRadius.circular(9999)
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                  ),
+                  child: Icon(
+                    provider.type == 'pharmacy'
+                        ? Icons.local_pharmacy_rounded
+                        : Icons.local_hospital_rounded,
+                    color: AppColors.primary,
+                    size: 28,
+                  ),
+                ),
+                const Spacer(),
+                Text(provider.name,
+                    style: GoogleFonts.manrope(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 2),
+                Text(provider.specialty,
+                    style: GoogleFonts.inter(
+                        fontSize: 13, color: AppColors.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    // Gold rating badge — star icon + numeric score
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.tertiaryFixed, // warm amber pill background
+                        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                      ),
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.star_rounded,
+                            size: 14, color: AppColors.tertiary),
+                        const SizedBox(width: 3),
+                        Text(provider.averageRating.toStringAsFixed(1),
+                            style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.tertiary)),
+                      ]),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text('${provider.totalReviews} reviews',
+                          style: GoogleFonts.inter(
+                              fontSize: 11, color: AppColors.outline),
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Shown when the provider list is empty (no data loaded yet or no results).
+  Widget _buildEmptyState() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.containerMargin, vertical: 20),
+      child: Column(children: [
+        const Icon(Icons.search_off_rounded,
+            size: 48, color: AppColors.divider, semanticLabel: 'No results icon'),
+        const SizedBox(height: 8),
+        Text('No $title found',
+            style: GoogleFonts.inter(
+                color: AppColors.textSecondary, fontSize: 14)),
+        const SizedBox(height: 4),
+        Text('Check back soon as providers are added or try refreshing.',
+            style: GoogleFonts.inter(color: AppColors.outline, fontSize: 12),
+            textAlign: TextAlign.center),
+        // Refresh button only appears if the caller supplied an onRetry callback
+        if (onRetry != null) ...[
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: const Text('Refresh'),
+            // Pill-shaped primary button — shape controlled by AppTheme.radiusFull
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+              ),
+            ),
+          ),
+        ],
+      ]),
+    );
+  }
+}

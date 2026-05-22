@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text('Sign in to your MediRank account',
+                        Text('Sign in to your DRAPO account',
                           style: GoogleFonts.inter(
                             fontSize: 15,
                             color: AppColors.textSecondary,
@@ -145,12 +145,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
                             onTap: _showForgotPasswordDialog,
-                            child: Text('Forgot password?', style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            )),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: Text('Forgot password?', style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              )),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -166,12 +170,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 14,
                   )),
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.signup),
-                    child: Text('Sign up', style: GoogleFonts.inter(
-                      color: AppColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    )),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                      child: Text('Sign up', style: GoogleFonts.inter(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      )),
+                    ),
                   ),
                 ]),
                 const SizedBox(height: 32),

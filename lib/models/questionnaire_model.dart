@@ -29,6 +29,11 @@ class QuestionnaireModel {
     );
   }
 
+  /// Mean of all four criteria scores (0.0–5.0).
+  /// Convenience getter for showing one combined questionnaire score.
+  double get average =>
+      (waitingTime + serviceQuality + hygiene + staffCommunication) / 4.0;
+
   Map<String, dynamic> toMap() {
     return {
       'waitingTime': waitingTime,

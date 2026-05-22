@@ -151,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: const Icon(Icons.local_hospital_rounded, color: AppColors.primary, size: 20),
               ),
               const SizedBox(height: 12),
-              Text('MediRank', style: GoogleFonts.manrope(
+              Text('DRAPO', style: GoogleFonts.manrope(
                 fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary,
               )),
               const SizedBox(height: 2),

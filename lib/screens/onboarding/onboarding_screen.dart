@@ -106,7 +106,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 const SizedBox(height: 24),
                 _buildLogo(),
                 const SizedBox(height: 8),
-                Text('MediRank', style: GoogleFonts.manrope(
+                Text('DRAPO', style: GoogleFonts.manrope(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,
@@ -167,12 +167,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     fontSize: 14,
                   )),
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: _completeOnboarding,
-                    child: Text('Log in', style: GoogleFonts.inter(
-                      color: AppColors.primary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    )),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                      child: Text('Log in', style: GoogleFonts.inter(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      )),
+                    ),
                   ),
                 ]),
                 const SizedBox(height: 32),

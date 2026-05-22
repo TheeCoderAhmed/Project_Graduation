@@ -132,7 +132,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'MediRank',
+                  'DRAPO',
                   style: GoogleFonts.manrope(
                     fontSize: 32,
                     fontWeight: FontWeight.w700,

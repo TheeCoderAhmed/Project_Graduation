@@ -162,15 +162,15 @@ class _SearchScreenState extends State<SearchScreen> {
                   filled: true,
                   fillColor: AppColors.surface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     borderSide: const BorderSide(color: AppColors.divider),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     borderSide: const BorderSide(color: AppColors.divider),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     borderSide: const BorderSide(color: AppColors.primary, width: 2),
                   ),
                 ),

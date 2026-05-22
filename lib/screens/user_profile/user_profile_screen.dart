@@ -112,7 +112,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(AppTheme.containerMargin, MediaQuery.of(context).padding.top + 16, AppTheme.containerMargin, 28),
       decoration: const BoxDecoration(
-        color: AppColors.primary,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.primary, AppColors.primaryContainer],
+        ),
       ),
       child: Column(
         children: [

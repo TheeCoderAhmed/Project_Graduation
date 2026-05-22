@@ -112,7 +112,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.textPrimary,
                         )),
                         const SizedBox(height: 4),
-                        Text('Join MediRank today', style: GoogleFonts.inter(
+                        Text('Join DRAPO today', style: GoogleFonts.inter(
                           fontSize: 15, color: AppColors.textSecondary,
                         )),
                         const SizedBox(height: 28),
@@ -178,10 +178,14 @@ class _SignupScreenState extends State<SignupScreen> {
                     color: AppColors.textSecondary, fontSize: 14,
                   )),
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.pushReplacementNamed(context, AppRoutes.login),
-                    child: Text('Log in', style: GoogleFonts.inter(
-                      color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600,
-                    )),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                      child: Text('Log in', style: GoogleFonts.inter(
+                        color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w600,
+                      )),
+                    ),
                   ),
                 ]),
                 const SizedBox(height: 32),
