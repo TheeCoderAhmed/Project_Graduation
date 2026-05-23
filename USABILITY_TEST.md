@@ -201,3 +201,23 @@ test/unit/sus_calculator_test.dart → 21 unit tests
 ```
 
 The test suite covers: boundary scores (0, 50, 100), item-level formula correctness, all six participant scores from this study, `averageScore()`, `grade()` bands, and error handling for invalid input.
+
+---
+
+## 10. Scope & Limitations
+
+This study measured the build available on the test date: patient browsing, provider profiles, reviews, search, and bookmarking (tasks T1–T5). The SUS score of **78.75** reflects **that** build and those flows.
+
+Features added **after** this study have **not** yet been usability-tested and are therefore out of scope for the 78.75 figure:
+
+| Feature added later | Usability status |
+|---------------------|------------------|
+| Patient / Provider / Admin role split + per-role navigation | Not yet SUS-tested |
+| Provider dashboard — practice info + admin-approved changes | Not yet SUS-tested |
+| Community reviews (review off-app doctors) + searchable list | Not yet SUS-tested |
+| Provider reply to reviews | Not yet SUS-tested |
+| Signup identity fields (gender, T.C. Kimlik, hospital/department/room) | Not yet SUS-tested |
+
+**Why we did not re-score:** SUS requires real participant sessions; inventing scores for untested features would invalidate the metric. The 78.75 stays as an honest record of the tested build.
+
+**Recommended next round:** a second 6-participant SUS session with tasks covering the community-review flow (add + find an off-app doctor), a provider replying to a review, and an admin approving a practice change. The high-priority fix from this study (search-bar affordance) should also be re-measured to confirm P5's cascade failure is resolved.

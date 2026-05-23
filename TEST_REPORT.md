@@ -2,8 +2,8 @@
 
 **Project:** DRAPO — Healthcare Provider Review Platform  
 **Platform:** Flutter (Dart) / Firebase  
-**Testing Period:** 5-day sprint  
-**Total Tests:** 109+ automated tests across unit, widget, and A/B phases
+**Testing Period:** 5-day sprint (+ regression pass after the patient/provider/community feature expansion)  
+**Total Tests:** 154 automated tests across unit, widget, and A/B phases
 
 ---
 
@@ -34,7 +34,10 @@ The testing plan was divided into three phases aligned with SE graduation requir
 | `test/unit/questionnaire_model_test.dart` | `lib/models/questionnaire_model.dart` | 13 |
 | `test/unit/review_model_test.dart` | `lib/models/review_model.dart` | 22 |
 | `test/unit/provider_model_test.dart` | `lib/models/provider_model.dart` | 21 |
-| **Total** | | **56** |
+| `test/unit/community_doctor_model_test.dart` | `lib/models/community_doctor_model.dart` | 10 |
+| **Total** | | **66** |
+
+> **Added after the feature expansion:** `community_doctor_model_test.dart` covers the off-app doctor model introduced with community reviews — `buildId()` grouping (same name + hospital → same id, case/space-insensitive), `averageRating` math (incl. divide-by-zero guard), and `fromMap()` safety (missing, null, and wrong-type fields).
 
 ### 2.2 Coverage per Model
 
@@ -308,6 +311,7 @@ ProviderModel _fakeProvider({String? photoUrl}) =>
 | Unit | `questionnaire_model_test.dart` | 13 | ✅ Pass |
 | Unit | `review_model_test.dart` | 22 | ✅ Pass |
 | Unit | `provider_model_test.dart` | 21 | ✅ Pass |
+| Unit | `community_doctor_model_test.dart` | 10 | ✅ Pass |
 | Unit | `ab_test_service_test.dart` | 8 | ✅ Pass |
 | Unit | `sus_calculator_test.dart` | 21 | ✅ Pass |
 | Widget | `review_card_test.dart` | 21 | ✅ Pass |
@@ -315,7 +319,7 @@ ProviderModel _fakeProvider({String? photoUrl}) =>
 | Widget | `provider_card_test.dart` | 13 | ✅ Pass |
 | Widget | `home_search_bar_test.dart` | 7 | ✅ Pass |
 | Widget | `ab_stats_bar_host_test.dart` | 6 | ✅ Pass |
-| **Total** | | **144** | ✅ |
+| **Total** | | **154** | ✅ |
 
 ---
 
@@ -362,7 +366,12 @@ HTML report: `coverage/html/index.html`
 | Area | Reason Excluded |
 |------|-----------------|
 | `ReviewModel.toMap()` | Calls `FieldValue.serverTimestamp()` — requires live Firebase platform; belongs in integration tests |
+| `CommunityReviewModel.toMap()` | Same — uses `FieldValue.serverTimestamp()`; `fromMap()` is pure but the write path needs Firebase |
 | `HomeScreen` full widget test | Requires `ProviderProvider` + `AuthProvider` backed by Firebase; out of scope for this sprint |
-| `FirestoreService` | Direct Firestore access — requires Firebase Emulator Suite setup |
+| `FirestoreService` (incl. community aggregation transaction, practice-change, admin approve/reject) | Direct Firestore access + transactions — requires Firebase Emulator Suite setup |
+| `CommunityProvider` / `AuthProvider` / `ReviewProvider` (state) | Depend on `FirestoreService` → need the emulator or mocks; out of scope for this sprint |
+| Admin screen + provider dashboard (practice pending/approve UI) | Require Firebase-backed providers; manual-tested only |
 | Navigation flows (end-to-end) | Out of scope; covered by manual usability testing (Day 4) |
 | Image upload / Storage | Firebase Storage requires platform binaries; integration test territory |
+
+> **Note on the regression pass:** after the feature expansion (patient/provider/admin split, practice-change approval, community reviews) the full suite was re-run — **154/154 pass**, and `flutter analyze` reports **0 issues** across `lib/` and `test/`. New backend logic (the community aggregation transaction, practice-change/approve methods) is exercised manually because it needs the Firebase emulator; only the pure model logic (`CommunityDoctorModel`) was added to the automated suite.
