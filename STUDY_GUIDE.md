@@ -168,6 +168,9 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - "How do multiple reviews of the same off-app doctor group together?" → They aggregate into one `community_doctors` record. The record ID is a slug built from name + hospital (`CommunityDoctorModel.buildId`), so two patients reviewing the same doctor land on the same listing and the average is shared
 - "How does the Community search work?" → `community_screen.dart` calls `setQuery`; `CommunityProvider.filteredDoctors` matches the text against name, hospital, or department (case-insensitive)
 - "Where does the community doctor detail get its breakdown?" → From the stored sums (`waitSum` etc.) divided by `totalReviews` — same bar UI as the provider dashboard
+- "Do my community reviews show in the My Reviews tab?" → Yes. `reviews_list_screen.dart` merges in-app reviews + the user's community reviews into one date-sorted list. Off-app ones are labelled `Doctor · Hospital (off-app)` and aren't tappable (there's no provider profile for them)
+- "How do you refresh the My Reviews list?" → Pull down — the list is wrapped in a `RefreshIndicator` whose `onRefresh` re-runs the load. (The tab stays alive in the `IndexedStack`, so it doesn't auto-refetch on switch.)
+- "Why was the community FAB lifted up?" → It sat behind the translucent bottom nav (`MainWrapper` uses `extendBody`), so it's wrapped in `Padding(bottom: 72)` to clear the bar
 
 ---
 
@@ -236,6 +239,7 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - "What does `requestPracticeChange` do?" → Writes the doctor's edits to the `pending*` fields + `practiceChangeStatus='pending'`. It never touches the live fields
 - "What do `approvePracticeChange` / `rejectPracticeChange` do?" → Approve copies `pending*` onto the live fields and clears them; reject just clears the pending fields. Both are admin-only (enforced by M5's rules)
 - "What happens if the Firestore write fails during signup?" → `auth_service.dart` deletes the just-created Auth account so there's no orphaned login with no user document
+- "How does My Reviews load both kinds of review?" → `review_provider.dart` `loadUserReviews` calls `getUserReviews` (in-app) and `getUserCommunityReviews` (off-app) together with `Future.wait`, then exposes both lists for the screen to merge
 
 ---
 
@@ -320,6 +324,7 @@ All tests live in `test/`. You never need to edit them — just know what each f
 | `test/unit/questionnaire_model_test.dart` | `fromMap()` parsing, clamping 0–5, `average` getter |
 | `test/unit/review_model_test.dart` | `fromMap()` safety: null fields, bad types, empty map |
 | `test/unit/provider_model_test.dart` | `fromMap()`, `copyWith()`, `toMap()` round-trip |
+| `test/unit/community_doctor_model_test.dart` | `buildId()` grouping (same name+hospital → same id), `averageRating` math, `fromMap()` safety |
 | `test/unit/ab_test_service_test.dart` | Same userId → same variant; 50/50 distribution; edge cases |
 | `test/unit/sus_calculator_test.dart` | SUS formula correctness, boundary scores, grade bands |
 | `test/widget/review_card_test.dart` | ReviewCard renders correctly, taps fire callback |
