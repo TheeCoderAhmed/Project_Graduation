@@ -249,6 +249,24 @@ class FirestoreService {
     return list;
   }
 
+  /// All community reviews written by one user, newest first. Used by the
+  /// patient's "My Reviews" tab so off-app reviews appear alongside in-app ones.
+  Future<List<CommunityReviewModel>> getUserCommunityReviews(
+      String userId) async {
+    final snapshot = await _db
+        .collection('community_reviews')
+        .where('userId', isEqualTo: userId)
+        .get();
+    final list = snapshot.docs
+        .map((d) => CommunityReviewModel.fromMap(d.id, d.data()))
+        .toList();
+    list.sort((a, b) {
+      if (a.createdAt == null || b.createdAt == null) return 0;
+      return b.createdAt!.compareTo(a.createdAt!);
+    });
+    return list;
+  }
+
   /// Submits a community review and aggregates it into the doctor listing in
   /// one atomic transaction. The doctor doc is created on first review and
   /// incremented thereafter, so averages stay correct without a Cloud Function.

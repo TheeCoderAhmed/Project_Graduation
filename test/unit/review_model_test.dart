@@ -8,7 +8,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drapo/models/review_model.dart';
-import 'package:drapo/models/questionnaire_model.dart';
 
 // A valid Firestore-shaped map — used as the base for most tests.
 Map<String, dynamic> _validMap() => {

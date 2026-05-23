@@ -40,21 +40,21 @@ void main() {
 
   group('HomeStatsBar — column labels', () {
     testWidgets('renders Doctors label', (tester) async {
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: [], pharmacies: [])));
+      await tester.pumpWidget(_wrap(const HomeStatsBar(doctors: [], pharmacies: [])));
       await tester.pumpAndSettle();
 
       expect(_statText('Doctors'), findsOneWidget);
     });
 
     testWidgets('renders Pharmacies label', (tester) async {
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: [], pharmacies: [])));
+      await tester.pumpWidget(_wrap(const HomeStatsBar(doctors: [], pharmacies: [])));
       await tester.pumpAndSettle();
 
       expect(_statText('Pharmacies'), findsOneWidget);
     });
 
     testWidgets('renders Reviews label', (tester) async {
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: [], pharmacies: [])));
+      await tester.pumpWidget(_wrap(const HomeStatsBar(doctors: [], pharmacies: [])));
       await tester.pumpAndSettle();
 
       expect(_statText('Reviews'), findsOneWidget);
@@ -65,7 +65,7 @@ void main() {
 
   group('HomeStatsBar — counts', () {
     testWidgets('shows 0 for all columns when both lists are empty', (tester) async {
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: [], pharmacies: [])));
+      await tester.pumpWidget(_wrap(const HomeStatsBar(doctors: [], pharmacies: [])));
       await tester.pumpAndSettle();
 
       // Three separate "0" stat values — one per column
@@ -74,7 +74,7 @@ void main() {
 
     testWidgets('shows correct doctor count', (tester) async {
       final doctors = [_fakeProvider(), _fakeProvider(), _fakeProvider()];
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: [])));
+      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: const [])));
       await tester.pumpAndSettle();
 
       expect(_statText('3'), findsOneWidget);
@@ -82,7 +82,7 @@ void main() {
 
     testWidgets('shows correct pharmacy count', (tester) async {
       final pharmacies = [_fakeProvider(), _fakeProvider()];
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: [], pharmacies: pharmacies)));
+      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: const [], pharmacies: pharmacies)));
       await tester.pumpAndSettle();
 
       expect(_statText('2'), findsOneWidget);
@@ -116,7 +116,7 @@ void main() {
       // 3 doctors, each with 333 reviews = 999 total reviews.
       // Doctor count (3) and review count (999) are different — no collision.
       final doctors = List.generate(3, (_) => _fakeProvider(reviews: 333));
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: [])));
+      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: const [])));
       await tester.pumpAndSettle();
 
       expect(_statText('999'), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
 
     testWidgets('exactly 1000 reviews displayed as "1.0k"', (tester) async {
       final doctors = [_fakeProvider(reviews: 1000)];
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: [])));
+      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: const [])));
       await tester.pumpAndSettle();
 
       expect(_statText('1.0k'), findsOneWidget);
@@ -134,7 +134,7 @@ void main() {
 
     testWidgets('1200 reviews displayed as "1.2k"', (tester) async {
       final doctors = [_fakeProvider(reviews: 1200)];
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: [])));
+      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: const [])));
       await tester.pumpAndSettle();
 
       expect(_statText('1.2k'), findsOneWidget);
@@ -142,7 +142,7 @@ void main() {
 
     testWidgets('5500 reviews displayed as "5.5k"', (tester) async {
       final doctors = [_fakeProvider(reviews: 5500)];
-      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: [])));
+      await tester.pumpWidget(_wrap(HomeStatsBar(doctors: doctors, pharmacies: const [])));
       await tester.pumpAndSettle();
 
       expect(_statText('5.5k'), findsOneWidget);

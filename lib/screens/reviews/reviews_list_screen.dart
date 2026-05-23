@@ -7,6 +7,7 @@ import '../../constants/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/review_provider.dart';
 import '../../providers/provider_provider.dart';
+import '../../models/review_model.dart';
 import '../../widgets/review_card.dart';
 import '../../widgets/common/loading_indicator.dart';
 
@@ -133,8 +134,11 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
       );
     }
 
+    // In "My Reviews" mode, merge in-app reviews + community (off-app) reviews.
+    final communityReviews = _isUserReviews ? reviewProv.userCommunityReviews : const [];
+
     // Empty — genuinely no reviews yet.
-    if (reviews.isEmpty) {
+    if (reviews.isEmpty && communityReviews.isEmpty) {
       return _buildMessage(
         icon: Icons.rate_review_outlined,
         title: _isUserReviews
@@ -147,23 +151,59 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 16, bottom: 100),
-      itemCount: reviews.length,
-      itemBuilder: (_, i) {
-        final review = reviews[i];
+    if (!_isUserReviews) {
+      return ListView.builder(
+        padding: const EdgeInsets.only(top: 16, bottom: 100),
+        itemCount: reviews.length,
+        itemBuilder: (_, i) => ReviewCard(review: reviews[i]),
+      );
+    }
 
-        // In "My Reviews" mode, show the provider name and make tappable
-        if (_isUserReviews) {
-          return ReviewCard(
-            review: review,
-            providerName: _resolveProviderName(review.providerId),
-            onTap: () => _navigateToProvider(review.providerId),
-          );
-        }
+    // "My Reviews": build a combined, date-sorted list of cards. Community
+    // reviews are mapped to ReviewModel so they render in the same card.
+    final entries = <_MyReviewEntry>[];
+    for (final r in reviewProv.userReviews) {
+      entries.add(_MyReviewEntry(
+        review: r,
+        providerName: _resolveProviderName(r.providerId),
+        onTap: () => _navigateToProvider(r.providerId),
+        sortKey: r.createdAt?.millisecondsSinceEpoch ?? 0,
+      ));
+    }
+    for (final c in reviewProv.userCommunityReviews) {
+      entries.add(_MyReviewEntry(
+        review: ReviewModel(
+          reviewId: c.reviewId,
+          providerId: c.communityDoctorId,
+          userId: c.userId,
+          userName: c.userName,
+          overallRating: c.overallRating,
+          comment: c.comment,
+          questionnaire: c.questionnaire,
+          createdAt: c.createdAt,
+        ),
+        // Off-app doctors aren't tappable provider profiles; show identity.
+        providerName: c.hospital.isNotEmpty
+            ? '${c.doctorName} · ${c.hospital} (off-app)'
+            : '${c.doctorName} (off-app)',
+        onTap: null,
+        sortKey: c.createdAt?.millisecondsSinceEpoch ?? 0,
+      ));
+    }
+    entries.sort((a, b) => b.sortKey.compareTo(a.sortKey));
 
-        return ReviewCard(review: review);
-      },
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: () async => _retry(),
+      child: ListView.builder(
+        padding: const EdgeInsets.only(top: 16, bottom: 100),
+        itemCount: entries.length,
+        itemBuilder: (_, i) => ReviewCard(
+          review: entries[i].review,
+          providerName: entries[i].providerName,
+          onTap: entries[i].onTap,
+        ),
+      ),
     );
   }
 
@@ -228,4 +268,19 @@ class _ReviewsListScreenState extends State<ReviewsListScreen> {
       ),
     );
   }
+}
+
+/// One row in the "My Reviews" list — wraps an in-app or community review so
+/// both render in the same card and sort together by date.
+class _MyReviewEntry {
+  final ReviewModel review;
+  final String? providerName;
+  final VoidCallback? onTap;
+  final int sortKey;
+  _MyReviewEntry({
+    required this.review,
+    required this.providerName,
+    required this.onTap,
+    required this.sortKey,
+  });
 }

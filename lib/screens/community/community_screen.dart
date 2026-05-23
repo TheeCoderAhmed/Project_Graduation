@@ -41,13 +41,18 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        onPressed: () =>
-            Navigator.pushNamed(context, AppRoutes.addCommunityReview),
-        icon: const Icon(Icons.rate_review_rounded),
-        label: const Text('Review a doctor'),
+      // Lift the FAB above the translucent bottom nav (MainWrapper uses
+      // extendBody, so the nav overlaps the body's bottom edge).
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 72),
+        child: FloatingActionButton.extended(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          onPressed: () =>
+              Navigator.pushNamed(context, AppRoutes.addCommunityReview),
+          icon: const Icon(Icons.rate_review_rounded),
+          label: const Text('Review a doctor'),
+        ),
       ),
       body: SafeArea(
         child: Column(

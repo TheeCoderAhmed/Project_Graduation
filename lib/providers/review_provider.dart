@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/firestore_service.dart';
 
 import '../models/review_model.dart';
+import '../models/community_review_model.dart';
 
 class ReviewProvider extends ChangeNotifier {
   final FirestoreService _firestoreService = FirestoreService();
@@ -9,12 +10,15 @@ class ReviewProvider extends ChangeNotifier {
 
   List<ReviewModel> _reviews = [];
   List<ReviewModel> _userReviews = [];
+  List<CommunityReviewModel> _userCommunityReviews = [];
   bool _isLoading = false;
   bool _isSubmitting = false;
   String? _error;
 
   List<ReviewModel> get reviews => _reviews;
   List<ReviewModel> get userReviews => _userReviews;
+  /// Off-app (community) reviews written by the current user, for "My Reviews".
+  List<CommunityReviewModel> get userCommunityReviews => _userCommunityReviews;
   bool get isLoading => _isLoading;
   bool get isSubmitting => _isSubmitting;
   String? get error => _error;
@@ -40,11 +44,18 @@ class ReviewProvider extends ChangeNotifier {
     Future.microtask(notifyListeners);
 
     try {
-      _userReviews = await _firestoreService.getUserReviews(userId);
+      // Load both in-app and community (off-app) reviews this user wrote.
+      final results = await Future.wait([
+        _firestoreService.getUserReviews(userId),
+        _firestoreService.getUserCommunityReviews(userId),
+      ]);
+      _userReviews = results[0] as List<ReviewModel>;
+      _userCommunityReviews = results[1] as List<CommunityReviewModel>;
       _error = null;
     } catch (e) {
       _error = _friendlyError(e.toString());
       _userReviews = [];
+      _userCommunityReviews = [];
     } finally {
       _isLoading = false;
       notifyListeners();
