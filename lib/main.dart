@@ -8,7 +8,11 @@ import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/provider_provider.dart';
 import 'providers/review_provider.dart';
+import 'providers/community_provider.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/community/community_doctor_detail_screen.dart';
+import 'screens/community/add_community_review_screen.dart';
+import 'screens/admin/admin_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/main_wrapper.dart';
 import 'screens/onboarding/onboarding_screen.dart';
@@ -40,6 +44,7 @@ class DrapoApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProviderProvider()),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
+        ChangeNotifierProvider(create: (_) => CommunityProvider()),
       ],
       child: MaterialApp(
         title: 'DRAPO',
@@ -63,6 +68,9 @@ class DrapoApp extends StatelessWidget {
           AppRoutes.providerDashboard:  (_) => const AuthGuard(child: ProviderDashboardScreen()),
           AppRoutes.settings:           (_) => const AuthGuard(child: SettingsScreen()),
           AppRoutes.notifications:      (_) => const AuthGuard(child: NotificationsScreen()),
+          AppRoutes.communityDoctor:    (_) => const CommunityDoctorDetailScreen(),
+          AppRoutes.addCommunityReview: (_) => const AuthGuard(child: AddCommunityReviewScreen()),
+          AppRoutes.admin:              (_) => const AuthGuard(child: AdminScreen()),
         },
       ),
     );

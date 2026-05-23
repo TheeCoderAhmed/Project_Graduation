@@ -17,6 +17,8 @@ class AuthService {
     required String password,
     required String fullName,
     required String role,
+    String? tcKimlik,
+    String? gender,
   }) async {
     UserCredential credential;
     try {
@@ -33,6 +35,8 @@ class AuthService {
       fullName: fullName,
       email: email,
       role: role,
+      tcKimlik: tcKimlik,
+      gender: gender,
     );
 
     try {

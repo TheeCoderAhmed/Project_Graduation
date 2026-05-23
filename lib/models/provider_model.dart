@@ -13,6 +13,16 @@ class ProviderModel {
   final int totalReviews;
   final double rankingScore;
   final String? ownerId;
+  final String? gender; // "male" | "female" | null — drives doctor avatar
+  final String? hospital; // hospital/clinic the doctor practices at
+  final String? department; // ward/department the doctor works in
+  final String? room; // room/office number
+  // Pending practice change awaiting admin approval. Live fields above are
+  // only mutated by an admin; the doctor's edits land here first.
+  final String? pendingHospital;
+  final String? pendingDepartment;
+  final String? pendingRoom;
+  final String? practiceChangeStatus; // 'pending' | null
 
   ProviderModel({
     required this.providerId,
@@ -27,7 +37,19 @@ class ProviderModel {
     this.totalReviews = 0,
     this.rankingScore = 0.0,
     this.ownerId,
+    this.gender,
+    this.hospital,
+    this.department,
+    this.room,
+    this.pendingHospital,
+    this.pendingDepartment,
+    this.pendingRoom,
+    this.practiceChangeStatus,
   });
+
+  /// True when the doctor has submitted a practice change still awaiting
+  /// admin approval.
+  bool get hasPendingPracticeChange => practiceChangeStatus == 'pending';
 
   factory ProviderModel.fromMap(String id, Map<String, dynamic> map) {
     return ProviderModel(
@@ -43,6 +65,14 @@ class ProviderModel {
       totalReviews: map['totalReviews'] ?? 0,
       rankingScore: (map['rankingScore'] ?? 0.0).toDouble(),
       ownerId: map['ownerId'],
+      gender: map['gender'],
+      hospital: map['hospital'],
+      department: map['department'],
+      room: map['room'],
+      pendingHospital: map['pendingHospital'],
+      pendingDepartment: map['pendingDepartment'],
+      pendingRoom: map['pendingRoom'],
+      practiceChangeStatus: map['practiceChangeStatus'],
     );
   }
 
@@ -59,6 +89,14 @@ class ProviderModel {
     int? totalReviews,
     double? rankingScore,
     String? ownerId,
+    String? gender,
+    String? hospital,
+    String? department,
+    String? room,
+    String? pendingHospital,
+    String? pendingDepartment,
+    String? pendingRoom,
+    String? practiceChangeStatus,
   }) {
     return ProviderModel(
       providerId: providerId ?? this.providerId,
@@ -73,6 +111,14 @@ class ProviderModel {
       totalReviews: totalReviews ?? this.totalReviews,
       rankingScore: rankingScore ?? this.rankingScore,
       ownerId: ownerId ?? this.ownerId,
+      gender: gender ?? this.gender,
+      hospital: hospital ?? this.hospital,
+      department: department ?? this.department,
+      room: room ?? this.room,
+      pendingHospital: pendingHospital ?? this.pendingHospital,
+      pendingDepartment: pendingDepartment ?? this.pendingDepartment,
+      pendingRoom: pendingRoom ?? this.pendingRoom,
+      practiceChangeStatus: practiceChangeStatus ?? this.practiceChangeStatus,
     );
   }
 
@@ -90,6 +136,14 @@ class ProviderModel {
       'totalReviews': totalReviews,
       'rankingScore': rankingScore,
       'ownerId': ownerId,
+      'gender': gender,
+      'hospital': hospital,
+      'department': department,
+      'room': room,
+      'pendingHospital': pendingHospital,
+      'pendingDepartment': pendingDepartment,
+      'pendingRoom': pendingRoom,
+      'practiceChangeStatus': practiceChangeStatus,
     };
   }
 }

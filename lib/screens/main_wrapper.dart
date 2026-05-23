@@ -5,6 +5,7 @@ import '../constants/app_colors.dart';
 import '../providers/auth_provider.dart';
 import 'home/home_screen.dart';
 import 'search/search_screen.dart';
+import 'community/community_screen.dart';
 import 'reviews/reviews_list_screen.dart';
 import 'provider_dashboard/provider_dashboard_screen.dart';
 import 'user_profile/user_profile_screen.dart';
@@ -24,43 +25,64 @@ class _MainWrapperState extends State<MainWrapper> {
     final auth = context.watch<AuthProvider>();
     final isProvider = auth.userModel?.role == 'provider';
 
-    // Build screens and nav items dynamically based on user role.
-    final List<Widget> screens = [
-      const HomeScreen(),
-      const SearchScreen(),
-      const ReviewsListScreen(),
-      if (isProvider) const ProviderDashboardScreen(),
-      const UserProfileScreen(),
-    ];
+    // Two distinct experiences:
+    //  - Provider: their own Dashboard (listing + incoming reviews) + Profile.
+    //    No browsing, searching, reviewing, or bookmarking — those are patient
+    //    actions and make no sense for the business being reviewed.
+    //  - Patient: browse, search, read reviews, manage their profile.
+    final List<Widget> screens = isProvider
+        ? const [
+            ProviderDashboardScreen(),
+            UserProfileScreen(),
+          ]
+        : const [
+            HomeScreen(),
+            SearchScreen(),
+            CommunityScreen(),
+            ReviewsListScreen(),
+            UserProfileScreen(),
+          ];
 
-    final List<BottomNavigationBarItem> navItems = [
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.home_outlined),
-        activeIcon: Icon(Icons.home_rounded),
-        label: 'Home',
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.search_rounded),
-        activeIcon: Icon(Icons.search_rounded),
-        label: 'Search',
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.rate_review_outlined),
-        activeIcon: Icon(Icons.rate_review_rounded),
-        label: 'Reviews',
-      ),
-      if (isProvider)
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.analytics_outlined),
-          activeIcon: Icon(Icons.analytics_rounded),
-          label: 'Analytics',
-        ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.person_outline_rounded),
-        activeIcon: Icon(Icons.person_rounded),
-        label: 'Profile',
-      ),
-    ];
+    final List<BottomNavigationBarItem> navItems = isProvider
+        ? const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_outlined),
+              activeIcon: Icon(Icons.dashboard_rounded),
+              label: 'Dashboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline_rounded),
+              activeIcon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ]
+        : const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search_rounded),
+              activeIcon: Icon(Icons.search_rounded),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.groups_outlined),
+              activeIcon: Icon(Icons.groups_rounded),
+              label: 'Community',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.rate_review_outlined),
+              activeIcon: Icon(Icons.rate_review_rounded),
+              label: 'Reviews',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline_rounded),
+              activeIcon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ];
 
     // Clamp index in case it exceeds the new screens list length
     // (e.g. user role changes dynamically after initial build).

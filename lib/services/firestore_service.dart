@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/provider_model.dart';
 import '../models/review_model.dart';
+import '../models/community_doctor_model.dart';
+import '../models/community_review_model.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -32,6 +34,71 @@ class FirestoreService {
     final doc = await _db.collection('providers').doc(providerId).get();
     if (doc.exists) return ProviderModel.fromMap(doc.id, doc.data()!);
     return null;
+  }
+
+  /// Creates the provider's own listing, keyed by their UID so each provider
+  /// account maps 1:1 to one listing. ownerId must equal the UID (enforced by
+  /// security rules) so the dashboard can find it via getProvidersByOwner().
+  Future<void> createProviderListing(ProviderModel provider) async {
+    await _db
+        .collection('providers')
+        .doc(provider.providerId)
+        .set(provider.toMap());
+  }
+
+  /// Doctor requests a change to their practice details (hospital / department
+  /// / room). The live fields are NOT touched — the new values land in the
+  /// pending* fields with status 'pending' until an admin approves. Security
+  /// rules block the doctor from writing the live fields directly.
+  Future<void> requestPracticeChange(
+    String providerId, {
+    required String hospital,
+    required String department,
+    required String room,
+  }) async {
+    await _db.collection('providers').doc(providerId).update({
+      'pendingHospital': hospital,
+      'pendingDepartment': department,
+      'pendingRoom': room,
+      'practiceChangeStatus': 'pending',
+    });
+  }
+
+  // ── ADMIN: PRACTICE CHANGE APPROVALS ───────────────
+  /// Providers with a practice change awaiting admin review.
+  Future<List<ProviderModel>> getPendingPracticeChanges() async {
+    final snapshot = await _db
+        .collection('providers')
+        .where('practiceChangeStatus', isEqualTo: 'pending')
+        .get();
+    return snapshot.docs
+        .map((d) => ProviderModel.fromMap(d.id, d.data()))
+        .toList();
+  }
+
+  /// Admin approves: copies the pending values onto the live fields and clears
+  /// the pending state. Allowed by rules only for admins (live practice fields
+  /// are locked to providers).
+  Future<void> approvePracticeChange(ProviderModel p) async {
+    await _db.collection('providers').doc(p.providerId).update({
+      'hospital': p.pendingHospital ?? p.hospital,
+      'department': p.pendingDepartment ?? p.department,
+      'room': p.pendingRoom ?? p.room,
+      'pendingHospital': null,
+      'pendingDepartment': null,
+      'pendingRoom': null,
+      'practiceChangeStatus': null,
+    });
+  }
+
+  /// Admin rejects: discards the pending values, keeps live fields unchanged.
+  Future<void> rejectPracticeChange(String providerId) async {
+    await _db.collection('providers').doc(providerId).update({
+      'pendingHospital': null,
+      'pendingDepartment': null,
+      'pendingRoom': null,
+      'practiceChangeStatus': null,
+    });
   }
 
   // ── REVIEWS ────────────────────────────────────────
@@ -74,6 +141,16 @@ class FirestoreService {
       }
 
       transaction.set(reviewRef, review.toMap());
+    });
+  }
+
+  /// Provider posts (or edits) their public reply to a review. Only the two
+  /// reply fields are written — security rules reject any other change and
+  /// verify the caller owns the listing.
+  Future<void> addProviderReply(String reviewId, String reply) async {
+    await _db.collection('reviews').doc(reviewId).update({
+      'providerReply': reply,
+      'providerReplyAt': FieldValue.serverTimestamp(),
     });
   }
 
@@ -143,4 +220,80 @@ class FirestoreService {
   }
 
   String _reviewId(String userId, String providerId) => '${userId}_$providerId';
+
+  // ── COMMUNITY (off-app doctor) REVIEWS ─────────────
+  /// All community doctor listings, highest rated first.
+  Future<List<CommunityDoctorModel>> getCommunityDoctors() async {
+    final snapshot = await _db.collection('community_doctors').get();
+    final list = snapshot.docs
+        .map((d) => CommunityDoctorModel.fromMap(d.id, d.data()))
+        .toList();
+    list.sort((a, b) => b.averageRating.compareTo(a.averageRating));
+    return list;
+  }
+
+  /// All reviews for one community doctor, newest first.
+  Future<List<CommunityReviewModel>> getCommunityReviews(
+      String communityDoctorId) async {
+    final snapshot = await _db
+        .collection('community_reviews')
+        .where('communityDoctorId', isEqualTo: communityDoctorId)
+        .get();
+    final list = snapshot.docs
+        .map((d) => CommunityReviewModel.fromMap(d.id, d.data()))
+        .toList();
+    list.sort((a, b) {
+      if (a.createdAt == null || b.createdAt == null) return 0;
+      return b.createdAt!.compareTo(a.createdAt!);
+    });
+    return list;
+  }
+
+  /// Submits a community review and aggregates it into the doctor listing in
+  /// one atomic transaction. The doctor doc is created on first review and
+  /// incremented thereafter, so averages stay correct without a Cloud Function.
+  /// One review per patient per doctor — enforced by the deterministic ID.
+  Future<void> submitCommunityReview(CommunityReviewModel review) async {
+    final doctorRef =
+        _db.collection('community_doctors').doc(review.communityDoctorId);
+    final reviewRef = _db
+        .collection('community_reviews')
+        .doc(_reviewId(review.userId, review.communityDoctorId));
+
+    await _db.runTransaction((tx) async {
+      final existing = await tx.get(reviewRef);
+      if (existing.exists) {
+        throw Exception('You have already reviewed this doctor.');
+      }
+      final doctorSnap = await tx.get(doctorRef);
+      final q = review.questionnaire;
+
+      if (!doctorSnap.exists) {
+        tx.set(doctorRef, {
+          'name': review.doctorName,
+          'hospital': review.hospital,
+          'department': review.department,
+          'specialty': review.specialty,
+          'totalReviews': 1,
+          'ratingSum': review.overallRating,
+          'waitSum': q.waitingTime,
+          'serviceSum': q.serviceQuality,
+          'hygieneSum': q.hygiene,
+          'staffSum': q.staffCommunication,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        tx.update(doctorRef, {
+          'totalReviews': FieldValue.increment(1),
+          'ratingSum': FieldValue.increment(review.overallRating),
+          'waitSum': FieldValue.increment(q.waitingTime),
+          'serviceSum': FieldValue.increment(q.serviceQuality),
+          'hygieneSum': FieldValue.increment(q.hygiene),
+          'staffSum': FieldValue.increment(q.staffCommunication),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+      tx.set(reviewRef, review.toMap());
+    });
+  }
 }

@@ -116,20 +116,22 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
           surfaceTintColor: Colors.transparent,
           systemOverlayStyle: const SystemUiOverlayStyle(statusBarBrightness: Brightness.dark),
           actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: Icon(
-                  isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
-                  color: Colors.white, size: 24,
+            // Bookmarking is a patient action only.
+            if (auth.userModel?.role == 'patient')
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
                 ),
-                onPressed: () => _toggleBookmark(isBookmarked),
+                child: IconButton(
+                  icon: Icon(
+                    isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_outline_rounded,
+                    color: Colors.white, size: 24,
+                  ),
+                  onPressed: () => _toggleBookmark(isBookmarked),
+                ),
               ),
-            ),
           ],
           flexibleSpace: FlexibleSpaceBar(
             titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -168,21 +170,27 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               // Info rows
               _buildInfoRow(Icons.medical_services_rounded, _provider!.specialty),
+              if (_provider!.hospital != null && _provider!.hospital!.isNotEmpty)
+                _buildInfoRow(Icons.local_hospital_rounded, _provider!.hospital!),
               _buildInfoRow(Icons.location_on_rounded, _provider!.address),
               _buildInfoRow(Icons.phone_rounded, _provider!.phone),
               const SizedBox(height: 24),
               // Rating card
               _buildRatingCard(reviews),
               const SizedBox(height: 24),
-              // Write a Review CTA
-              AppButton(
-                label: 'Write a Review',
-                icon: Icons.rate_review_rounded,
-                onPressed: () => Navigator.pushNamed(
-                  context, AppRoutes.questionnaire, arguments: _provider!.providerId,
+              // Write a Review CTA — patients only. Providers receive reviews,
+              // they don't write them.
+              if (auth.userModel?.role == 'patient') ...[
+                AppButton(
+                  label: 'Write a Review',
+                  icon: Icons.rate_review_rounded,
+                  onPressed: () => Navigator.pushNamed(
+                    context, AppRoutes.questionnaire, arguments: _provider!.providerId,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
+              ] else
+                const SizedBox(height: 8),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text('Patient Reviews', style: GoogleFonts.manrope(
                   fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary,

@@ -12,4 +12,8 @@ class AppRoutes {
   static const String providerDashboard = '/provider-dashboard';
   static const String settings          = '/settings';
   static const String notifications     = '/notifications';
+  static const String community            = '/community';
+  static const String communityDoctor      = '/community-doctor';
+  static const String addCommunityReview    = '/add-community-review';
+  static const String admin                  = '/admin';
 }

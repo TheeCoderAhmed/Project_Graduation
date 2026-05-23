@@ -186,33 +186,39 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
               child: Row(
                 children: [
-                  // Type filter chips
-                  ...['all', 'doctor', 'pharmacy'].map((f) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(
-                        f == 'all' ? 'All' : f == 'doctor' ? 'Doctors' : 'Pharmacies',
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: _filter == f ? AppColors.primary : AppColors.textSecondary,
-                        ),
+                  // Type filter chips — scrollable so they never overflow
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: ['all', 'doctor', 'pharmacy'].map((f) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            label: Text(
+                              f == 'all' ? 'All' : f == 'doctor' ? 'Doctors' : 'Pharmacies',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _filter == f ? AppColors.primary : AppColors.textSecondary,
+                              ),
+                            ),
+                            selected: _filter == f,
+                            selectedColor: AppColors.primary.withValues(alpha: 0.12),
+                            backgroundColor: AppColors.surfaceContainer,
+                            side: _filter == f
+                                ? const BorderSide(color: AppColors.primary)
+                                : BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                            ),
+                            showCheckmark: false,
+                            onSelected: (_) => setState(() => _filter = f),
+                          ),
+                        )).toList(),
                       ),
-                      selected: _filter == f,
-                      selectedColor: AppColors.primary.withValues(alpha: 0.12),
-                      backgroundColor: AppColors.surfaceContainer,
-                      side: _filter == f
-                          ? const BorderSide(color: AppColors.primary)
-                          : BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                      ),
-                      showCheckmark: false,
-                      onSelected: (_) => setState(() => _filter = f),
                     ),
-                  )),
-                  const Spacer(),
-                  // Sort button
+                  ),
+                  // Sort button — pinned right, never pushed off-screen
                   _buildSortButton(),
                 ],
               ),

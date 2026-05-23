@@ -4,6 +4,10 @@
 *.pyc
 *.swp
 .DS_Store
+
+google-services.json
+serviceAccountKey.json
+**/serviceAccountKey.json
 .atom/
 .build/
 .buildlog/

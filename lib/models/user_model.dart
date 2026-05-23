@@ -5,6 +5,8 @@ class UserModel {
   final String role; // "patient" | "provider" | "admin"
   final String? profilePhotoUrl;
   final List<String> bookmarks;
+  final String? tcKimlik; // Private national ID — person accounts only
+  final String? gender;   // "male" | "female" — person accounts only
 
   UserModel({
     required this.uid,
@@ -13,6 +15,8 @@ class UserModel {
     required this.role,
     this.profilePhotoUrl,
     this.bookmarks = const [],
+    this.tcKimlik,
+    this.gender,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -23,6 +27,8 @@ class UserModel {
       role: map['role'] ?? 'patient',
       profilePhotoUrl: map['profilePhotoUrl'],
       bookmarks: List<String>.from(map['bookmarks'] ?? []),
+      tcKimlik: map['tcKimlik'],
+      gender: map['gender'],
     );
   }
 
@@ -33,6 +39,8 @@ class UserModel {
     String? role,
     String? profilePhotoUrl,
     List<String>? bookmarks,
+    String? tcKimlik,
+    String? gender,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -41,6 +49,8 @@ class UserModel {
       role: role ?? this.role,
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
       bookmarks: bookmarks ?? this.bookmarks,
+      tcKimlik: tcKimlik ?? this.tcKimlik,
+      gender: gender ?? this.gender,
     );
   }
 
@@ -52,6 +62,8 @@ class UserModel {
       'role': role,
       'profilePhotoUrl': profilePhotoUrl,
       'bookmarks': bookmarks,
+      'tcKimlik': tcKimlik,
+      'gender': gender,
     };
   }
 }

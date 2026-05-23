@@ -56,7 +56,9 @@ service cloud.firestore {
           'email',
           'role',
           'profilePhotoUrl',
-          'bookmarks'
+          'bookmarks',
+          'tcKimlik',
+          'gender'
         ])
         && request.resource.data.uid == request.auth.uid
         && isValidClientRole(request.resource.data.role)
@@ -75,12 +77,27 @@ service cloud.firestore {
     // or admin can update them to prevent manipulation.
     match /providers/{providerId} {
       allow read: if true;
-      allow create: if isAdmin();
+      // Admins create any listing. A provider may claim ONE listing keyed by
+      // their own UID, with ownerId == uid and all score fields starting at 0
+      // so a new account cannot seed itself a fake rating.
+      allow create: if isAdmin() ||
+        (isAuth()
+          && providerId == request.auth.uid
+          && getUserRole() == 'provider'
+          && request.resource.data.ownerId == request.auth.uid
+          && request.resource.data.averageRating == 0
+          && request.resource.data.rankingScore == 0
+          && request.resource.data.totalReviews == 0);
       allow update: if isAdmin() ||
         (isAuth() && resource.data.ownerId == request.auth.uid
-          // Prevent providers from touching their own scores
+          // Providers can't touch their own scores, and can't change their
+          // LIVE practice fields directly — those edits land in the pending*
+          // fields and are applied by an admin after review.
           && !request.resource.data.diff(resource.data)
-              .affectedKeys().hasAny(['averageRating', 'rankingScore', 'totalReviews']));
+              .affectedKeys().hasAny([
+                'averageRating', 'rankingScore', 'totalReviews',
+                'hospital', 'department', 'room'
+              ]));
       allow delete: if isAdmin();
     }
 
@@ -106,6 +123,49 @@ service cloud.firestore {
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.isVerified == false
         // Rating must be between 1 and 5
+        && isValidRating(request.resource.data.overallRating)
+        && isValidQuestionnaire(request.resource.data.questionnaire);
+      // The only allowed update is the listing owner posting/editing a reply.
+      // Patients cannot edit a review's content after submission.
+      allow update: if isAuth()
+        && request.resource.data.diff(resource.data)
+            .affectedKeys().hasOnly(['providerReply', 'providerReplyAt'])
+        && get(/databases/$(database)/documents/providers/$(resource.data.providerId))
+            .data.ownerId == request.auth.uid;
+      allow delete: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+    }
+
+    // ── COMMUNITY DOCTORS (off-app, patient-built listings) ────────────────
+    // Aggregated listings of doctors not on DRAPO. Anyone can read. Patients
+    // create/aggregate them when submitting a community review. Score fields
+    // are community-sourced by design, so we only constrain the field set and
+    // require an authenticated patient. Admins can clean up.
+    match /community_doctors/{doctorId} {
+      allow read: if true;
+      allow create, update: if isPatient()
+        && request.resource.data.keys().hasOnly([
+          'name', 'hospital', 'department', 'specialty',
+          'totalReviews', 'ratingSum',
+          'waitSum', 'serviceSum', 'hygieneSum', 'staffSum',
+          'updatedAt'
+        ]);
+      allow delete: if isAdmin();
+    }
+
+    // ── COMMUNITY REVIEWS (reviews of off-app doctors) ─────────────────────
+    // Anyone can read. Only patients can create, one per doctor (deterministic
+    // ID). No edits after submission. Author or admin can delete.
+    match /community_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isPatient()
+        && reviewId == request.auth.uid + '_' + request.resource.data.communityDoctorId
+        && request.resource.data.keys().hasOnly([
+          'communityDoctorId', 'userId', 'userName', 'doctorName',
+          'hospital', 'department', 'specialty',
+          'overallRating', 'comment', 'questionnaire', 'createdAt'
+        ])
+        && request.resource.data.userId == request.auth.uid
         && isValidRating(request.resource.data.overallRating)
         && isValidQuestionnaire(request.resource.data.questionnaire);
       allow update: if false;

@@ -9,6 +9,7 @@ import '../../services/firestore_service.dart';
 import '../../models/provider_model.dart';
 import '../../models/review_model.dart';
 import '../../widgets/common/loading_indicator.dart';
+import '../../widgets/review_card.dart';
 
 class ProviderDashboardScreen extends StatefulWidget {
   const ProviderDashboardScreen({super.key});
@@ -80,15 +81,297 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
                       const SizedBox(height: 24),
                       _buildStatsGrid(reviews),
                       const SizedBox(height: 28),
+                      if (_myProvider!.type == 'doctor') ...[
+                        Text('Practice Information', style: GoogleFonts.manrope(
+                          fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary,
+                        )),
+                        const SizedBox(height: 16),
+                        _buildPracticeCard(),
+                        const SizedBox(height: 28),
+                      ],
                       Text('Rating Breakdown', style: GoogleFonts.manrope(
                         fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary,
                       )),
                       const SizedBox(height: 16),
                       _buildBreakdownCard(reviews),
+                      const SizedBox(height: 28),
+                      Text('Patient Reviews', style: GoogleFonts.manrope(
+                        fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary,
+                      )),
+                      const SizedBox(height: 8),
+                      ..._buildReviewsList(reviews),
                       const SizedBox(height: 48),
                     ],
                   ),
                 ),
+    );
+  }
+
+  List<Widget> _buildReviewsList(ReviewProvider reviews) {
+    if (reviews.isLoading) {
+      return [const Padding(padding: EdgeInsets.all(24), child: LoadingIndicator())];
+    }
+    if (reviews.reviews.isEmpty) {
+      return [
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Column(children: [
+            const Icon(Icons.forum_outlined, size: 40, color: AppColors.outline),
+            const SizedBox(height: 8),
+            Text('No reviews yet',
+                style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14)),
+          ]),
+        ),
+      ];
+    }
+    // ReviewCard already renders any existing reply. Below it we add the
+    // reply action so the provider can respond or edit their response.
+    return reviews.reviews.map((r) {
+      final hasReply = r.providerReply != null && r.providerReply!.isNotEmpty;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ReviewCard(review: r),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => _showReplyDialog(r),
+                icon: Icon(hasReply ? Icons.edit_rounded : Icons.reply_rounded, size: 16),
+                label: Text(hasReply ? 'Edit reply' : 'Reply'),
+              ),
+            ),
+          ),
+        ],
+      );
+    }).toList();
+  }
+
+  Future<void> _showReplyDialog(ReviewModel review) async {
+    final ctrl = TextEditingController(text: review.providerReply ?? '');
+    final text = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
+        title: Text('Reply to ${review.userName}',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 18)),
+        content: TextField(
+          controller: ctrl,
+          maxLines: 4,
+          maxLength: 500,
+          decoration: const InputDecoration(
+            hintText: 'Write a professional response...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
+            ),
+            onPressed: () => Navigator.pop(dialogContext, ctrl.text.trim()),
+            child: const Text('Post Reply'),
+          ),
+        ],
+      ),
+    );
+
+    if (text == null || text.isEmpty || !mounted) return;
+    final ok = await context.read<ReviewProvider>().replyToReview(review.reviewId, text);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Reply posted' : 'Could not post reply'),
+        backgroundColor: ok ? AppColors.primary : AppColors.error,
+      ),
+    );
+  }
+
+  Widget _buildPracticeCard() {
+    final p = _myProvider!;
+    final pending = p.hasPendingPracticeChange;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _practiceRow(Icons.local_hospital_outlined, 'Hospital', p.hospital),
+          const SizedBox(height: 14),
+          _practiceRow(Icons.account_tree_outlined, 'Department', p.department),
+          const SizedBox(height: 14),
+          _practiceRow(Icons.meeting_room_outlined, 'Room / Office', p.room),
+          if (pending) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.starGold.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                border: Border.all(color: AppColors.starGold.withValues(alpha: 0.4)),
+              ),
+              child: Row(children: [
+                const Icon(Icons.hourglass_top_rounded, size: 18, color: AppColors.starGold),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Change pending approval',
+                          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${p.pendingHospital ?? '-'} · ${p.pendingDepartment ?? '-'}'
+                        '${(p.pendingRoom ?? '').isNotEmpty ? ' · ${p.pendingRoom}' : ''}',
+                        style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ],
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: pending ? null : _showPracticeDialog,
+              icon: const Icon(Icons.edit_rounded, size: 16),
+              label: Text(pending ? 'Awaiting approval' : 'Request a change'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _practiceRow(IconData icon, String label, String? value) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 18),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: GoogleFonts.inter(fontSize: 12, color: AppColors.outline, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 2),
+              Text(
+                (value == null || value.isEmpty) ? 'Not set' : value,
+                style: GoogleFonts.inter(fontSize: 15, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showPracticeDialog() async {
+    final hospitalCtrl = TextEditingController(text: _myProvider!.hospital ?? '');
+    final deptCtrl = TextEditingController(text: _myProvider!.department ?? '');
+    final roomCtrl = TextEditingController(text: _myProvider!.room ?? '');
+    final formKey = GlobalKey<FormState>();
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
+        title: Text('Request practice change',
+            style: GoogleFonts.manrope(fontWeight: FontWeight.w700, fontSize: 18)),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Updates are reviewed by an admin before going live.',
+                  style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary)),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: hospitalCtrl,
+                decoration: const InputDecoration(labelText: 'Hospital / Clinic', border: OutlineInputBorder()),
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: deptCtrl,
+                decoration: const InputDecoration(labelText: 'Department', border: OutlineInputBorder()),
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: roomCtrl,
+                decoration: const InputDecoration(labelText: 'Room / Office (optional)', border: OutlineInputBorder()),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
+            ),
+            onPressed: () {
+              if (formKey.currentState!.validate()) Navigator.pop(dialogContext, true);
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
+
+    if (saved != true || !mounted) return;
+    bool ok = true;
+    try {
+      await FirestoreService().requestPracticeChange(
+        _myProvider!.providerId,
+        hospital: hospitalCtrl.text.trim(),
+        department: deptCtrl.text.trim(),
+        room: roomCtrl.text.trim(),
+      );
+    } catch (_) {
+      ok = false;
+    }
+    if (!mounted) return;
+    if (ok) {
+      setState(() {
+        _myProvider = _myProvider!.copyWith(
+          pendingHospital: hospitalCtrl.text.trim(),
+          pendingDepartment: deptCtrl.text.trim(),
+          pendingRoom: roomCtrl.text.trim(),
+          practiceChangeStatus: 'pending',
+        );
+      });
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Change submitted for approval' : 'Could not submit change'),
+        backgroundColor: ok ? AppColors.primary : AppColors.error,
+      ),
     );
   }
 
@@ -161,7 +444,7 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           border: Border.all(color: AppColors.divider),
         ),
         child: Column(children: [
-          const Icon(Icons.analytics_outlined, size: 40, color: AppColors.outline, semanticLabel: 'Analytics icon'),
+          const Icon(Icons.insights_rounded, size: 40, color: AppColors.outline, semanticLabel: 'Reviews chart icon'),
           const SizedBox(height: 8),
           Text('No breakdown data available yet',
             style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14),
@@ -245,13 +528,13 @@ class _ProviderDashboardScreenState extends State<ProviderDashboardScreen> {
           child: const Icon(Icons.business_rounded, size: 48, color: AppColors.outline, semanticLabel: 'No profile icon'),
         ),
         const SizedBox(height: 24),
-        Text('No provider profile found',
+        Text('Listing not loaded',
           style: GoogleFonts.manrope(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
         const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48),
           child: Text(
-            'Contact support to claim and manage your healthcare provider listing.',
+            "We couldn't load your listing right now. Check your connection and refresh.",
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
           ),

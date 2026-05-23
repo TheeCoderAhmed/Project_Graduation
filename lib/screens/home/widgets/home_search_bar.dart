@@ -33,13 +33,18 @@ class HomeSearchBar extends StatelessWidget {
               // Magnifier icon on the left
               const Icon(Icons.search_rounded, color: AppColors.outline, size: 22),
               const SizedBox(width: 12),
-              // Placeholder text — not a real input
-              Text('Search doctors, pharmacies...',
-                  style: GoogleFonts.inter(
-                    color: AppColors.outline,
-                    fontSize: 15,
-                  )),
-              const Spacer(),
+              // Placeholder text — not a real input. Expanded so it shrinks
+              // instead of overflowing on narrow screens.
+              Expanded(
+                child: Text('Search doctors, pharmacies...',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      color: AppColors.outline,
+                      fontSize: 15,
+                    )),
+              ),
+              const SizedBox(width: 12),
               // "Search" pill badge on the right — purely decorative
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

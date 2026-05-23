@@ -11,6 +11,10 @@ class ReviewModel {
   final QuestionnaireModel questionnaire;
   final bool isVerified;
   final Timestamp? createdAt;
+  // Provider's public reply to this review (set via a separate update,
+  // never on create — that's why these are absent from toMap()).
+  final String? providerReply;
+  final Timestamp? providerReplyAt;
 
   ReviewModel({
     required this.reviewId,
@@ -22,6 +26,8 @@ class ReviewModel {
     required this.questionnaire,
     this.isVerified = false,
     required this.createdAt,
+    this.providerReply,
+    this.providerReplyAt,
   });
 
   factory ReviewModel.fromMap(String id, Map<String, dynamic> map) {
@@ -66,6 +72,25 @@ class ReviewModel {
       createdAt: map['createdAt'] is Timestamp
           ? map['createdAt'] as Timestamp
           : Timestamp.now(),
+      providerReply: map['providerReply']?.toString(),
+      providerReplyAt:
+          map['providerReplyAt'] is Timestamp ? map['providerReplyAt'] as Timestamp : null,
+    );
+  }
+
+  ReviewModel copyWith({String? providerReply, Timestamp? providerReplyAt}) {
+    return ReviewModel(
+      reviewId: reviewId,
+      providerId: providerId,
+      userId: userId,
+      userName: userName,
+      overallRating: overallRating,
+      comment: comment,
+      questionnaire: questionnaire,
+      isVerified: isVerified,
+      createdAt: createdAt,
+      providerReply: providerReply ?? this.providerReply,
+      providerReplyAt: providerReplyAt ?? this.providerReplyAt,
     );
   }
 

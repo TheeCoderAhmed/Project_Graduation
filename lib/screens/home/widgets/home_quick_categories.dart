@@ -57,9 +57,9 @@ class HomeQuickCategories extends StatelessWidget {
         onTap: () => Navigator.pushNamed(context, AppRoutes.search, arguments: cat.label),
         child: ExcludeSemantics(
           child: Container(
-            // 22% of screen width — adjust to make chips wider or narrower
-            width: MediaQuery.sizeOf(context).width * 0.22,
-            padding: const EdgeInsets.all(12),
+            // Sizes to its label on one line, with a minimum width floor.
+            constraints: const BoxConstraints(minWidth: 76),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               color: cat.bg,     // light tinted background per specialty
               borderRadius: BorderRadius.circular(AppTheme.radiusLg),
@@ -67,12 +67,14 @@ class HomeQuickCategories extends StatelessWidget {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(cat.icon, color: cat.accent, size: 28),
                 const SizedBox(height: 6),
                 Text(cat.label,
                     textAlign: TextAlign.center,
-                    maxLines: 2,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,

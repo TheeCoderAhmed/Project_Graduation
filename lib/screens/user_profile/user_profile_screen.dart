@@ -22,12 +22,17 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   late TabController _tabController;
   List<ProviderModel> _bookmarkedProviders = [];
   bool _loadingBookmarks = false;
+  bool _isProvider = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadBookmarks());
+    // Providers don't have saved listings — they only see Account Details.
+    _isProvider = context.read<AuthProvider>().userModel?.role == 'provider';
+    _tabController = TabController(length: _isProvider ? 1 : 2, vsync: this);
+    if (!_isProvider) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _loadBookmarks());
+    }
   }
 
   @override
@@ -86,19 +91,23 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                       unselectedLabelColor: AppColors.outline,
                       unselectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
                       dividerColor: AppColors.divider,
-                      tabs: const [
-                        Tab(text: 'Saved Providers'),
-                        Tab(text: 'Account Details'),
-                      ],
+                      tabs: _isProvider
+                          ? const [Tab(text: 'Account Details')]
+                          : const [
+                              Tab(text: 'Saved Providers'),
+                              Tab(text: 'Account Details'),
+                            ],
                     ),
                   ),
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,
-                      children: [
-                        _buildBookmarksTab(),
-                        _buildAccountTab(user.fullName, user.email, user.role),
-                      ],
+                      children: _isProvider
+                          ? [_buildAccountTab(user.fullName, user.email, user.role, user.tcKimlik, user.gender)]
+                          : [
+                              _buildBookmarksTab(),
+                              _buildAccountTab(user.fullName, user.email, user.role, user.tcKimlik, user.gender),
+                            ],
                     ),
                   ),
                 ],
@@ -214,7 +223,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     );
   }
 
-  Widget _buildAccountTab(String name, String email, String role) {
+  Widget _buildAccountTab(String name, String email, String role, String? tcKimlik, String? gender) {
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 24),
       children: [
@@ -224,28 +233,36 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           _buildInfoTile(Icons.email_rounded, 'Email Address', email),
           const Divider(height: 1, color: AppColors.divider, indent: 56),
           _buildInfoTile(Icons.badge_rounded, 'Account Type', role._capitalize()),
+          if (gender != null && gender.isNotEmpty) ...[
+            const Divider(height: 1, color: AppColors.divider, indent: 56),
+            _buildInfoTile(Icons.wc_rounded, 'Gender', gender._capitalize()),
+          ],
+          // Private: only ever rendered on the owner's own profile.
+          if (tcKimlik != null && tcKimlik.isNotEmpty) ...[
+            const Divider(height: 1, color: AppColors.divider, indent: 56),
+            _buildInfoTile(Icons.verified_user_rounded, 'T.C. Kimlik No', tcKimlik),
+          ],
         ]),
-        const SizedBox(height: 24),
-        if (role == 'provider') ...[
-          _buildFormGroup([
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                ),
-                child: const Icon(Icons.dashboard_rounded, color: AppColors.secondary, size: 20),
-              ),
-              title: Text('Provider Dashboard', style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 15)),
-              subtitle: Text('View your ratings & analytics', style: GoogleFonts.inter(fontSize: 13, color: AppColors.outline)),
-              trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.outline),
-              onTap: () => Navigator.pushNamed(context, AppRoutes.providerDashboard),
-            ),
-          ]),
+        if (role == 'admin') ...[
           const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.pushNamed(context, AppRoutes.admin),
+              icon: const Icon(Icons.admin_panel_settings_rounded),
+              label: const Text('Admin Panel · Approvals'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
+              ),
+            ),
+          ),
         ],
+        const SizedBox(height: 24),
         const SizedBox(height: 100),
       ],
     );

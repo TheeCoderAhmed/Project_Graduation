@@ -78,6 +78,25 @@ class ReviewProvider extends ChangeNotifier {
     }
   }
 
+  /// Provider replies to a review. Updates Firestore then patches the local
+  /// list so the reply shows immediately. Returns true on success.
+  Future<bool> replyToReview(String reviewId, String reply) async {
+    try {
+      await _firestoreService.addProviderReply(reviewId, reply);
+      _reviews = _reviews
+          .map((r) => r.reviewId == reviewId
+              ? r.copyWith(providerReply: reply, providerReplyAt: null)
+              : r)
+          .toList();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = _friendlyError(e.toString());
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

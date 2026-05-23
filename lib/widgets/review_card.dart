@@ -177,6 +177,40 @@ class ReviewCard extends StatelessWidget {
             _buildQRow('Staff',
                 review.questionnaire.staffCommunication),
           ],
+          // ── Provider's reply ──
+          if (review.providerReply != null && review.providerReply!.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
+                    const Icon(Icons.reply_rounded, size: 16, color: AppColors.primary),
+                    const SizedBox(width: 6),
+                    Text('Response from provider',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        )),
+                  ]),
+                  const SizedBox(height: 8),
+                  Text(review.providerReply!,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                        height: 1.5,
+                      )),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

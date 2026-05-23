@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // A/B test: assign variant based on logged-in user ID.
     // Falls back to 'anonymous' when no user is signed in.
-    final userId = auth.userModel?.userId ?? 'anonymous';
+    final userId = auth.userModel?.uid ?? 'anonymous';
     final abVariant = AbTestService.assignVariant(userId);
 
     return Scaffold(

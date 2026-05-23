@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/auth_service.dart';
+import '../services/firestore_service.dart';
 import '../models/user_model.dart';
+import '../models/provider_model.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final FirestoreService _firestore = FirestoreService();
 
   User? _firebaseUser;
   UserModel? _userModel;
@@ -38,6 +41,16 @@ class AuthProvider extends ChangeNotifier {
     required String password,
     required String fullName,
     required String role,
+    // Provider-only listing fields. Required when role == 'provider'.
+    String? providerType,
+    String? specialty,
+    String? address,
+    String? phone,
+    String? gender,
+    String? hospital,
+    String? department,
+    String? room,
+    String? tcKimlik, // Private (doctors) — stored on the user doc only.
   }) async {
     _isLoading = true;
     _error = null;
@@ -48,9 +61,34 @@ class AuthProvider extends ChangeNotifier {
         password: password,
         fullName: fullName,
         role: role,
+        tcKimlik: tcKimlik,
+        gender: gender,
       );
       _userModel = userModel;
       _firebaseUser = FirebaseAuth.instance.currentUser;
+
+      // Provider accounts claim a listing keyed by their UID, so the dashboard
+      // can immediately resolve it. Non-fatal: account already exists.
+      if (role == 'provider') {
+        try {
+          await _firestore.createProviderListing(ProviderModel(
+            providerId: userModel.uid,
+            ownerId: userModel.uid,
+            type: providerType ?? 'doctor',
+            name: fullName,
+            specialty: specialty ?? '',
+            address: address ?? '',
+            phone: phone ?? '',
+            gender: (providerType ?? 'doctor') == 'doctor' ? gender : null,
+            hospital: (providerType ?? 'doctor') == 'doctor' ? hospital : null,
+            department: (providerType ?? 'doctor') == 'doctor' ? department : null,
+            room: (providerType ?? 'doctor') == 'doctor' ? room : null,
+          ));
+        } catch (_) {
+          // Listing write failed (e.g. offline). The provider can still sign in;
+          // the dashboard shows a claim/retry state until it succeeds.
+        }
+      }
       return true;
     } catch (e) {
       _error = _friendlyError(e.toString());
