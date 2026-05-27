@@ -111,6 +111,8 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - [`lib/screens/home/widgets/home_stats_bar.dart`](lib/screens/home/widgets/home_stats_bar.dart) — doctors/pharmacies/reviews count strip
 - [`lib/screens/home/widgets/home_provider_section.dart`](lib/screens/home/widgets/home_provider_section.dart) — titled provider list sections
 - [`lib/widgets/ab_stats_bar_host.dart`](lib/widgets/ab_stats_bar_host.dart) — shows or hides HomeStatsBar based on A/B variant
+- [`lib/screens/notifications/notifications_screen.dart`](lib/screens/notifications/notifications_screen.dart) — notifications screen (the home header's bell icon opens it)
+- [`lib/screens/settings/settings_screen.dart`](lib/screens/settings/settings_screen.dart) — settings (notification toggle, language)
 
 **Common teacher questions:**
 - "Make the logo box circular" → `home_header.dart` — find the logo `Container` → change `BorderRadius.circular(AppTheme.radiusMd)` to `BorderRadius.circular(9999)`
@@ -121,6 +123,9 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - "What is the A/B test on the home screen?" → Some users see the stats bar (doctors/pharmacies/reviews counts), others don't. `AbStatsBarHost` in `ab_stats_bar_host.dart` checks the variant and renders or hides it
 - "What is `AbVariant.control` vs `AbVariant.treatment`?" → Control = stats bar visible (current design). Treatment = stats bar hidden. Assigned by `AbTestService` based on the logged-in user's ID
 - "What does `if (variant == AbVariant.treatment) return const SizedBox.shrink()` do?" → Returns an invisible empty widget — effectively hides the stats bar for treatment users
+- "What is the Notifications screen?" → `notifications_screen.dart` — a static placeholder showing an empty-state ("You're all caught up!"). No backend yet; it's the destination of the home header's bell icon. If asked to change the message, edit the `Text` strings there.
+- "How do settings persist?" → `settings_screen.dart` uses **`SharedPreferences`** (on-device key-value storage) to save the push-notification toggle + language. Loaded in `initState` via `_loadPrefs`; a failed write is non-fatal (UI already updated). No Firebase — it's local-only.
+- "Change the available languages" → `settings_screen.dart` → the `_languages` list (`English`, `Turkish`, `Arabic`).
 
 ---
 
@@ -133,6 +138,7 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - [`lib/screens/main_wrapper.dart`](lib/screens/main_wrapper.dart) — bottom navigation (different per role)
 - [`lib/widgets/provider_card.dart`](lib/widgets/provider_card.dart) — the card shown in search results and home
 - [`lib/widgets/common/provider_avatar.dart`](lib/widgets/common/provider_avatar.dart) — gender/type-based avatar
+- [`lib/main.dart`](lib/main.dart) — app entry point (you're the *explainer*; it's team-edited — see the table below)
 
 **Common teacher questions:**
 - "Change ProviderCard corners to be more rounded" → `provider_card.dart` → `BorderRadius.circular(AppTheme.radiusLg)` → increase value
@@ -144,6 +150,20 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - "Why can't the doctor just edit their hospital directly?" → Security rules block providers from writing the live `hospital`/`department`/`room` fields. Their edits go to `pendingHospital` etc.; only an admin copies them across (anti-tamper, so listings stay trustworthy)
 - "What does the Admin screen do?" → `admin_screen.dart` lists every provider with `practiceChangeStatus == 'pending'`, shows a `current → pending` diff, and **Approve** (copy pending to live, clear pending) or **Reject** (discard pending). The actual writes are `approvePracticeChange` / `rejectPracticeChange` in `firestore_service.dart`
 - "Where is the Admin screen opened from?" → A button in the Profile → Account Details tab, shown only when `role == 'admin'`
+- "What does `main.dart` do?" → App entry point: `main()` initialises Firebase then `runApp`. `DrapoApp` sets up the `MultiProvider` (the shared state objects), the `MaterialApp` theme, and the `routes:` map (route name → screen). `AuthGuard` wraps protected routes and redirects to login if signed out.
+- "Why is `main.dart` so simple / who owns it?" → Intentionally **thin wiring only** (no logic) — like in real projects it's a shared file every member edits when adding a screen or provider, kept small to avoid merge conflicts. You're the explainer; everyone added their own lines (table below).
+
+**Who touched `main.dart`:**
+
+| Member | What they added |
+|--------|-----------------|
+| M1 (Auth) | `splash`, `onboarding`, `login`, `signup` routes |
+| M2 (Home) | `notifications`, `settings` routes |
+| M3 (you) | `home`→`MainWrapper`, `search`, `providerProfile`, `providerDashboard`, `admin` routes + skeleton |
+| M4 (Reviews/Community) | `reviewsList`, `questionnaire`, `userProfile`, `communityDoctor`, `addCommunityReview` routes |
+| M6 (Services/State) | the `MultiProvider` list — `AuthProvider`, `ProviderProvider`, `ReviewProvider`, `CommunityProvider` |
+
+(M5 = models/rules, no `main.dart` wiring.) Each member can point to their own route/provider line if asked.
 
 ---
 
@@ -156,6 +176,7 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - [`lib/screens/community/community_screen.dart`](lib/screens/community/community_screen.dart) — browsable list of off-app doctors
 - [`lib/screens/community/community_doctor_detail_screen.dart`](lib/screens/community/community_doctor_detail_screen.dart) — one doctor + their reviews
 - [`lib/screens/community/add_community_review_screen.dart`](lib/screens/community/add_community_review_screen.dart) — review-an-off-app-doctor form
+- [`lib/screens/user_profile/user_profile_screen.dart`](lib/screens/user_profile/user_profile_screen.dart) — profile tab (saved providers, account details, admin button)
 
 **Common teacher questions:**
 - "Change the avatar shape from circle to square" → `review_card.dart` → `CircleAvatar` → replace with a `Container` with `BorderRadius.circular(AppTheme.radiusMd)`
@@ -171,6 +192,9 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - "Do my community reviews show in the My Reviews tab?" → Yes. `reviews_list_screen.dart` merges in-app reviews + the user's community reviews into one date-sorted list. Off-app ones are labelled `Doctor · Hospital (off-app)` and aren't tappable (there's no provider profile for them)
 - "How do you refresh the My Reviews list?" → Pull down — the list is wrapped in a `RefreshIndicator` whose `onRefresh` re-runs the load. (The tab stays alive in the `IndexedStack`, so it doesn't auto-refetch on switch.)
 - "Why was the community FAB lifted up?" → It sat behind the translucent bottom nav (`MainWrapper` uses `extendBody`), so it's wrapped in `Padding(bottom: 72)` to clear the bar
+- "What's on the Profile screen?" → `user_profile_screen.dart`: gradient header (name, email, role badge) + tabs. Patient sees **Saved Providers** + **Account Details**; provider/admin see only Account Details. Account Details shows name/email/role and, for the owner only, gender + T.C. Kimlik. Admins also get an **Admin Panel** button here.
+- "Why does the profile show different tabs?" → `_isProvider` is read in `initState`; the `TabController` length is 1 (provider/admin) or 2 (patient). Providers have no bookmarks → no Saved tab.
+- "Where do Saved Providers come from?" → The user's `bookmarks` list (on their `users` doc, managed by `AuthProvider`/`FirestoreService` — M6's code). The profile screen just displays them as `ProviderCard`s.
 
 ---
 
@@ -196,7 +220,7 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - "What is `fromMap`?" → Converts raw Firestore data (a Map) into a typed Dart object
 - "What is `toMap`?" → Converts a Dart object back into a Map to save to Firestore
 - "What is `copyWith`?" → Returns a copy of the object with some fields changed (the original is never mutated)
-- "What is `QuestionnaireModel.average`?" → A getter that returns the mean of all four criteria scores: `(waitingTime + serviceQuality + hygiene + staffCommunication) / 4.0`
+- "What is `QuestionnaireModel.average`?" → A getter returning the plain mean of all four criteria: `(waitingTime + serviceQuality + hygiene + staffCommunication) / 4.0`. Used to **display** one review's combined sub-score. (Provider *ranking* uses a different, AHP-weighted formula in the Cloud Function — see the ranking note in *Security & data protection*.)
 - "What new fields are on `ProviderModel`?" → `gender`, `hospital`, `department`, `room` (live values) plus `pendingHospital`/`pendingDepartment`/`pendingRoom` and `practiceChangeStatus` for changes awaiting admin approval. `hasPendingPracticeChange` is a getter that returns true when status is `'pending'`
 - "What new fields are on `ReviewModel`?" → `providerReply` + `providerReplyAt`. They're read in `fromMap` but **not** written in `toMap` — the reply is set by a separate update so it can't break the strict create rule
 - "What's stored on `UserModel` that's private?" → `tcKimlik` and `gender`. They live only on the user's own `users` doc; the public `providers` collection never stores TC Kimlik (KVKK / data-protection)
@@ -216,6 +240,9 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - [`lib/providers/provider_provider.dart`](lib/providers/provider_provider.dart) — provider list state
 - [`lib/providers/review_provider.dart`](lib/providers/review_provider.dart) — review submission state
 - [`lib/providers/community_provider.dart`](lib/providers/community_provider.dart) — community list/search/submit state
+- [`functions/src/aggregation.js`](functions/src/aggregation.js) — Cloud Function: AHP-weighted provider ranking (`calculateProviderStats`)
+- [`functions/src/index.js`](functions/src/index.js) — Cloud Function entry/triggers
+- [`lib/widgets/common/loading_indicator.dart`](lib/widgets/common/loading_indicator.dart) — shared spinner widget
 
 > **Member 6 — 40-minute crash path** (your half is "how the app reads/writes + holds state"):
 > 1. **`notifyListeners()` + `watch` vs `read`** — a provider holds state; `notifyListeners()` rebuilds widgets that used `context.watch`; `read` reads once without rebuilding.
@@ -240,6 +267,26 @@ If the teacher points at code you don't instantly recognise, stay calm and use t
 - "What do `approvePracticeChange` / `rejectPracticeChange` do?" → Approve copies `pending*` onto the live fields and clears them; reject just clears the pending fields. Both are admin-only (enforced by M5's rules)
 - "What happens if the Firestore write fails during signup?" → `auth_service.dart` deletes the just-created Auth account so there's no orphaned login with no user document
 - "How does My Reviews load both kinds of review?" → `review_provider.dart` `loadUserReviews` calls `getUserReviews` (in-app) and `getUserCommunityReviews` (off-app) together with `Future.wait`, then exposes both lists for the screen to merge
+- "How is the ranking score computed?" → In the Cloud Function `functions/src/aggregation.js` (`calculateProviderStats`), server-side. Each review's questionnaire is **AHP-weighted** (`staff 0.35 + hygiene 0.25 + service 0.25 + wait 0.15`); then `rankingScore = averageRating × 0.4 + avgQuestionnaireScore × 0.6`. The full formula + the weight rationale is the ranking note in *Security & data protection*. The app only displays the result — it can't write it (rules lock it)
+- "Why is ranking in a Cloud Function and not the app?" → Trust. If the app computed/wrote the score, a tampered client could fake its own ranking. A server-side function the client can't touch keeps it honest
+- "What is `LoadingIndicator`?" → A small shared widget (`loading_indicator.dart`) showing a spinner + optional message; reused by every screen while data loads
+
+---
+
+## Shared / generated / config files (no single member owns these)
+
+If the teacher points at one of these, any member can give the one-line answer below — they're infrastructure, not a feature.
+
+| File | What to say |
+|------|-------------|
+| `lib/firebase_options.dart` | Auto-generated by the FlutterFire CLI — Firebase project keys per platform. Nobody hand-edits or studies it. |
+| `firebase.json` | Firebase config — which rules/indexes/functions files to deploy. |
+| `firestore.indexes.json` | Composite query indexes (see the indexes Q in *Security*). |
+| `google-services.json` | Android Firebase config (generated by Firebase console). |
+| `pubspec.yaml` | Dependency + asset manifest — the packages the app uses. |
+| `analysis_options.yaml` | Lint rules for `flutter analyze`. |
+| `functions/test/aggregation.test.js` | JS unit test for the ranking Cloud Function (Node/Jest-style, separate from the Dart `flutter test` suite). |
+| `ServiceAccountKey.json` | **Secret** — Firebase admin key. Must be gitignored, **never committed**. Used only by local seed/admin scripts. |
 
 ---
 
@@ -310,8 +357,17 @@ The backend is locked down by **Firestore security rules** (`firestore.rules`) a
 - "Who can become an admin?" → Nobody via signup — `isValidClientRole` allows only `patient`/`provider`. An admin's `role` is set manually in the Firebase console, and `isAdmin()` reads that role from the user's own doc.
 - "Who can upload images?" → Only the owner, to their own `users/{uid}/profile/` path, images under 5 MB. Everything else in Storage is denied.
 - "Where are the rules?" → `firestore.rules` and `storage.rules` in the project root. There is a final `match /{document=**} { allow read, write: if false; }` that denies anything not explicitly allowed.
+- "What are the Firestore indexes for?" → `firestore.indexes.json` declares the composite indexes Firestore needs for the app's sorted/filtered queries: `providers` (type + rankingScore↓) for top-rated lists per type, `reviews` (providerId + createdAt↓) and (userId + createdAt↓) for a provider's reviews and "My Reviews", and `community_reviews` (communityDoctorId + createdAt↓) for one off-app doctor's reviews. Legacy indexes from the old template were removed.
 
-**If asked "how is a provider's ranking calculated?"** → Each provider document stores a precomputed `rankingScore` and `averageRating`, shown read-only on the Provider Profile and Provider Dashboard. The score fields are locked by the security rules so the client cannot change them — in production they would be recalculated by a trusted Cloud Function, not the app.
+**If asked "how is a provider's ranking calculated?"** → A trusted **Cloud Function** (`functions/src/aggregation.js`, `calculateProviderStats`) computes it server-side, then writes the read-only `rankingScore` / `averageRating` / `avgQuestionnaireScore` onto the provider doc. The client only displays them; security rules block the app from editing them.
+
+The formula (matches Appendix B of the final report):
+- **Questionnaire score per review** uses **AHP weights** (Analytic Hierarchy Process — weights from pairwise importance, sum to 1.0): `staffCommunication ×0.35 + hygiene ×0.25 + serviceQuality ×0.25 + waitingTime ×0.15`. (Staff communication weighted highest as the strongest driver of trust.)
+- **`averageRating`** = mean of all `overallRating` stars.
+- **`avgQuestionnaireScore`** = mean of the AHP questionnaire scores above.
+- **`rankingScore`** = `averageRating × 0.4 + avgQuestionnaireScore × 0.6` — so the structured questionnaire counts more than the single star tap.
+
+> Note: this AHP weighting is **only** for the server-side ranking. The in-app `QuestionnaireModel.average` getter is a plain unweighted mean used to *display* one review's sub-scores — don't confuse the two.
 
 ---
 
