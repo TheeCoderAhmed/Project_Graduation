@@ -3,7 +3,12 @@ const test = require("node:test");
 
 const { calculateProviderStats } = require("../src/aggregation");
 
-test("calculateProviderStats averages overall and questionnaire scores", () => {
+test("calculateProviderStats applies AHP weights to the questionnaire", () => {
+  // Review 1: q-score = 4*0.35 + 5*0.25 + 4*0.25 + 5*0.15 = 4.40
+  // Review 2: q-score = 2*0.35 + 4*0.25 + 3*0.25 + 3*0.15 = 2.90
+  // avgQuestionnaire = (4.40 + 2.90) / 2                   = 3.65
+  // averageRating    = (5 + 3) / 2                          = 4.00
+  // rankingScore     = 4.00 * 0.4 + 3.65 * 0.6              = 3.79
   const stats = calculateProviderStats([
     {
       overallRating: 5,
@@ -28,8 +33,8 @@ test("calculateProviderStats averages overall and questionnaire scores", () => {
   assert.deepEqual(stats, {
     totalReviews: 2,
     averageRating: 4,
-    avgQuestionnaireScore: 3.75,
-    rankingScore: 3.85,
+    avgQuestionnaireScore: 3.65,
+    rankingScore: 3.79,
   });
 });
 
