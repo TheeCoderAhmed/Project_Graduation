@@ -52,6 +52,13 @@ class AuthProvider extends ChangeNotifier {
     String? room,
     String? tcKimlik, // Private (doctors) — stored on the user doc only.
   }) async {
+    if (password.length < 8) {
+      _error = 'Password must be at least 8 characters.';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
