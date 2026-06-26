@@ -10,15 +10,6 @@ questionnaires and produces AHP-inspired weighted rankings.
 - **Backend:** Firebase Authentication, Firestore (NoSQL), Cloud Functions v2 (Node.js)
 - **Tests:** `flutter_test` (155 Dart tests across unit + widget + A/B) and `node:test` (2 server-side aggregation tests)
 
-## Firebase project
-
-| Field            | Value                                       |
-| ---------------- | ------------------------------------------- |
-| Project ID       | `drapo7`                                    |
-| Project Number   | `986206394751`                              |
-| Storage Bucket   | `drapo7.firebasestorage.app`                |
-| Android App ID   | `1:986206394751:android:e0a1899e51c72245aba24a` |
-| Android Package  | `DRAPO.T7`                                  |
 
 ## Repository layout
 
@@ -74,32 +65,6 @@ with AHP-inspired weights on the four service-quality criteria:
 | Waiting Time        |   0.15 |
 
 See `functions/src/aggregation.js` and Appendix B of the final report.
-
-## Local setup
-
-```bash
-# 1. Install Flutter dependencies
-flutter pub get
-
-# 2. Install Cloud Function dependencies
-(cd functions && npm install)
-
-# 3. Run the app on a connected device or emulator
-flutter run
-
-# 4. Run all Dart tests
-flutter test
-
-# 5. Run the Cloud Function tests
-(cd functions && node --test test/aggregation.test.js)
-```
-
-## Deploying Firebase artifacts
-
-```bash
-firebase deploy --only firestore:rules,firestore:indexes,storage
-firebase deploy --only functions
-```
 
 ## Documentation
 
