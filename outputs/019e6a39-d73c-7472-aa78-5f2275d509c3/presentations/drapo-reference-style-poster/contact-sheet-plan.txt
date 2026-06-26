@@ -1,0 +1,13 @@
+Poster plan:
+- Size: 1080 x 1920 portrait.
+- Theme: black/dark medical board, burgundy headers inspired by reference, DRAPO cyan/teal/amber accent system.
+- Top identity: project title and CMPE/ISE/SE 494 Senior Project line.
+- Left column: Team, Objective, Application Areas, Project Evidence figure space.
+- Center column: Design and Architecture, Methods/Tools.
+- Right column: Interfaces, Conclusion, References.
+
+Proof objects:
+- Architecture flow: Flutter app -> Firebase Auth/Firestore -> Cloud Function ranking -> rules/admin/community paths.
+- Interfaces: three mobile screen assets.
+- Metrics: 154 Dart tests, 2 JS aggregation tests, 78.1% coverage, 78.75 SUS, 86.7% task completion.
+- Formula: rankingScore = 0.4 rating + 0.6 weighted questionnaire.

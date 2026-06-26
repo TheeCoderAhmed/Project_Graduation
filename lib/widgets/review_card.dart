@@ -146,7 +146,8 @@ class ReviewCard extends StatelessWidget {
                       color: AppColors.secondary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.verified_rounded,
+                    child: const Icon(Icons.check,
+                    
                         color: AppColors.secondary, size: 16),
                   ),
                 ),

@@ -28,6 +28,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _departmentCtrl = TextEditingController();
   final _roomCtrl = TextEditingController();
   final _tcCtrl = TextEditingController();
+  final _fatherCtrl = TextEditingController();
   String _role = 'patient';
   String _providerType = 'doctor'; // doctor | pharmacy
   String? _gender; // male | female — doctors only
@@ -44,7 +45,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _nameCtrl.dispose(); _emailCtrl.dispose(); _passCtrl.dispose();
     _specialtyCtrl.dispose(); _addressCtrl.dispose(); _phoneCtrl.dispose();
     _hospitalCtrl.dispose(); _departmentCtrl.dispose(); _roomCtrl.dispose();
-    _tcCtrl.dispose();
+    _tcCtrl.dispose(); _fatherCtrl.dispose();
     super.dispose();
   }
 
@@ -183,6 +184,18 @@ class _SignupScreenState extends State<SignupScreen> {
                           validator: (v) {
                             if (v == null || v.isEmpty) return 'Password is required';
                             if (v.length < 6) return 'Password must be at least 6 characters';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        _label("FATHER'S NAME"),
+                        const SizedBox(height: 8),
+                        AppTextField(
+                          label: '', hint: 'Enter your father\'s name',
+                          controller: _fatherCtrl,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return 'Father\'s name is required';
+                            if (v.trim().length < 2) return 'Please enter your father\'s name';
                             return null;
                           },
                         ),
