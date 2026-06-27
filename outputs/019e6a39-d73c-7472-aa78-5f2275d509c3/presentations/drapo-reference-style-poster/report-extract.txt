@@ -1,0 +1,761 @@
+[Normal] 2025-26 Spring
+[Normal] <CMPE/ISE/SE> 494 Senior Project Report
+[Normal] DRAPO
+[Normal] Declaration of generative AI and AI-assisted technologies
+[Normal] in the project report writing process
+[Normal] During the preparation of this ISE/SE/CMPE 494 Graduation Project report, we, the authors, used ChatGPT, Gemini, Google AI Studio, Cursor, DeepSeek, and GitHub Copilot in order to translate some parts of the report, debug the Flutter and Firebase codebase, translate pseudocode into functional Dart code, generate UI widget code from descriptions, expand our thinking regarding the ranking algorithms, and assist while structuring the report. After using these tools and services, we reviewed and edited the content as needed and take full responsibility for the content of this Graduation Project Report.
+[Normal] Abstract
+[Normal] Information asymmetry regarding service quality remains a common issue in the healthcare sector, leading to poor patient experiences, increased waiting times, and limited provider accountability. Most traditional healthcare information systems focus mainly on clinical data management and do not sufficiently consider patient satisfaction or experiential feedback. To address this problem, this project proposes a patient-centered evaluation and feedback platform that improves transparency in the selection of healthcare providers.
+[Normal] The proposed system is developed using Flutter for the mobile application interface and Firebase for authentication and real-time database management. It enables users to compare doctors and pharmacies through structured reviews, star ratings, and post-visit questionnaires stored in a centralized mobile platform. The main objective is to reduce the effect of unverified opinions and improve decision-making by presenting more reliable provider rankings. Unlike integrated hospital information systems, DRAPO is designed as an independent standalone platform focused entirely on patient-centered healthcare service evaluation.
+[Normal] The project also includes the design and implementation of a secure mobile environment with authenticated user access and protected cloud data storage. To evaluate providers fairly, the system applies a weighted provider evaluation approach based on structured patient feedback and predefined service quality criteria.
+[Normal] These methods assign weights to important criteria such as communication skills, waiting time, cleanliness, empathy, and service efficiency. For example, communication quality may receive a higher weight than waiting time depending on expert evaluation.
+[Normal] To improve realism and fairness, feedback from healthcare professionals such as doctors and pharmacists will be considered during questionnaire design and criteria weighting. The expected outcome of the project is to provide useful data-driven guidance for patients while also helping healthcare providers understand and improve patient satisfaction. Keywords: Healthcare Evaluation, Patient Experience, Flutter, Firebase, AHP, Healthcare Ranking System
+[Normal] Acknowledgements (if any)
+[Normal] We would like to express our deepest appreciation to all those who provided us the possibility to complete this project. A special gratitude we give to our senior project supervisor, Prof. Dr. Hürevren KILIÇ, for the invaluable guidance, support, and encouragement throughout the development of the DRAPO platform.
+[Normal] Table of Contents
+[Normal] Acronyms
+[Heading 1] Ch1: Introduction
+[Heading 2] 1.1 Problem Statement
+[Normal] Access to healthcare services has improved significantly through digital ... systems such as national digital health services like e-Nabız, hospital portals, and electronic health record services. However, patients still face an important problem when choosing healthcare providers: the lack of reliable and structured information about service quality from the patient perspective.
+[Normal] Most existing systems focus on clinical records, or basic location information. They usually do not provide enough insight into practical service factors such as waiting time, communication quality, staff behavior, cleanliness, or overall patient experience. As a result, many people rely on informal recommendations, social media comments, or limited star ratings that may be biased, outdated, or incomplete.
+[Normal] This information gap can lead to poor healthcare decisions, dissatisfaction, and reduced trust in service providers. At the same time, doctors, pharmacies, and clinic administrators may not receive organized feedback that can help them identify weaknesses and improve their services.
+[Normal] To address this issue, the DRAPO project proposes a patient-centered evaluation platform where users can submit structured feedback after receiving healthcare services. The platform aims to transform individual experiences into useful and measurable insights, helping patients make better choices while encouraging providers to improve service quality.
+[Heading 2] 1.2 Scope
+[Normal] DRAPO is a patient-centered healthcare evaluation platform designed to improve transparency in healthcare service selection through structured patient feedback and data-driven provider rankings. The system is developed as a mobile application where users can evaluate healthcare providers such as doctors, pharmacies, and clinics based on real patient service experiences.
+[Normal] The project focuses on non-clinical service quality factors that directly affect patient satisfaction. Instead of managing medical records or treatment processes, the platform emphasizes measurable experience criteria such as waiting time, communication quality, professionalism, and cleanliness.
+[Normal] The key aspects of the project include:
+[Normal] • User Authentication: Secure user registration, login, password recovery, and profile management using Firebase Authentication. This ensures that only authorized users can access personal accounts and submit trusted feedback.
+[Normal] • Provider Search and Categories: Users can search for doctors, pharmacies, and clinics by name, specialty, or location. The platform also provides categorized browsing options such as doctors, pharmacies, and nearby providers for easier navigation.
+[Normal] • Structured Evaluation System: After receiving a healthcare service, users can complete post-visit questionnaires and star ratings based on criteria such as waiting time, Waiting Time, Service Quality, Hygiene, and Staff Communication. This transforms experiences into measurable service data.
+[Normal] • Anonymous Reviews: Users may submit feedback anonymously if they prefer not to reveal their identity publicly. This encourages more honest evaluations while maintaining privacy.
+[Normal] • Weighted Ranking Algorithm: Provider rankings are calculated using weighted criteria rather than simple average ratings. Important factors such as Staff Communication or Hygiene can have greater influence on the final score, producing more realistic rankings.
+[Normal] • Provider Profiles: Each healthcare provider has a profile page containing name, specialization, rating score, review count, and service quality indicators. This allows patients to compare providers before making decisions.
+[Normal] • Analytics Dashboard: Healthcare providers or administrators can monitor rating trends, total reviews, score distributions, strengths, and improvement areas through visual dashboards and summaries.
+[Normal] • Cloud Backend Infrastructure: Firebase Firestore is used to securely manage provider data, user reviews, provider rankings, questionnaires, and analytics data. Real-time synchronization ensures that updates are reflected immediately across the platform.
+[Normal] • Privacy Protection: The system is designed to protect users through secure authentication and controlled data storage. No confidential medical records, diagnoses, prescriptions, or treatment histories are stored in the platform.
+[Normal] • Scalability and Adaptability: Although the first version may operate with a limited provider database, the platform architecture supports future expansion to more cities, additional healthcare categories, and increased user traffic without redesigning the core system.
+[Normal] • Societal Impact: By reducing information asymmetry in healthcare provider selection, the platform can help patients make better decisions, encourage competition based on service quality, and improve public trust in healthcare services.
+[Normal] DRAPO does not aim to replace full-scale hospital management systems, prescription systems, or official medical record platforms. It is intended as an independent decision-support and patient feedback platform that enhances healthcare service selection through transparent evaluations and healthcare provider discovery and evaluation features. While the rating model focuses on non-clinical service quality, provider categorization also includes medical specialties for easier discovery.
+[Heading 1] Ch2: Project Plan
+[Heading 2] 2.1 Methodology
+[Normal] The methodology we decided to use for the development of the DRAPO platform is the Agile Scrum methodology, as it emphasizes flexibility, iterative development, and continuous improvement. Scrum allows the team to respond to changing requirements without disrupting the overall workflow, making it an ideal choice for dynamic software development environments.
+[Normal] Since the DRAPO project includes mobile application development, backend integration, database management, ranking algorithm design, and user experience optimization, certain requirements may evolve during the implementation process. Features such as questionnaire structure, scoring logic, interface usability, and analytics modules may require repeated testing and refinement. Scrum provides an effective framework for managing these changes in an organized manner.
+[Normal] Although Scrum is based on planned sprint cycles, it also supports continuous backlog refinement throughout the project lifecycle. Therefore, we provide a detailed backlog of all tasks required for this project, including both functional and non-functional requirement specifications. Each task includes assigned responsibility, estimated completion duration, implementation priority, and dependency where necessary.
+[Normal] Development activities are organized through sprint planning and progress tracking. Tasks are monitored using a management board with categories such as to do, backlog, in progress, review, and done. This system provides clear visibility of project status and helps ensure that no critical deliverable or deadline is overlooked.
+[Normal] The use of Scrum is especially beneficial for DRAPO because the project requires coordination between multiple technical components, including the Flutter mobile application, Firebase backend services, user feedback modules, and weighted ranking calculations. Regular sprint reviews allow the team to evaluate completed features, identify technical issues early, and continuously improve system quality.
+[Normal] The main advantages of using Scrum for this project include faster delivery of working modules, stronger team coordination, better task prioritization, early risk detection, and the ability to adapt the platform efficiently throughout the software development lifecycle.
+[toc 1] Scrum Workflow
+[Normal] Sprint Planning: Project goals, tasks, and priorities are determined at the beginning of each sprint.
+[Normal] Development Phase: Team members implement assigned modules such as Flutter user interface screens, Firebase integration, and ranking functions.
+[Normal] Daily Coordination: Team members monitor progress and discuss technical issues regularly.
+[Normal] Sprint Review: Completed features are tested and demonstrated to evaluate sprint outcomes.
+[Normal] Retrospective: The team reviews strengths, weaknesses, and improvements for the next sprint.
+[toc 1] Research Methodology
+[Normal] Since DRAPO also includes evaluation system design, a research-oriented methodology is adopted together with software development activities.
+[Normal] Literature Review: Existing healthcare review platforms and decision-support systems are examined.
+[Normal] Criteria Identification: Four measurable service quality factors — Waiting Time, Staff Communication, Service Quality, and Hygiene — are determined through healthcare literature review and pairwise importance analysis.
+[Normal] Algorithm Design: An AHP-inspired weighted evaluation approach is used to develop provider rankings, assigning differential weights to the four criteria based on their relative impact on patient satisfaction.
+[Normal] Prototype Testing: The mobile application is tested for usability, functionality, and performance.
+[Normal] Validation: User feedback and system results are analyzed to improve overall quality and reliability.
+[Heading 2] 2.2. Time Schedule (Gantt Chart)
+[Heading 2] 2.3. Deliverables List
+[Heading 1] Ch3: Literature Review
+[Heading 2] 3.1 Introduction
+[Normal] The healthcare sector has undergone significant digital transformation in recent years(WHO, 2023). Many healthcare organizations now use online systems for prescription management and patient record storage. Although these systems improve efficiency, they mainly focus on administrative and clinical functions. Patients still have limited access to structured and reliable information regarding experiential service quality, such as waiting times, communication skills, staff behavior, and overall satisfaction. As a result, many individuals rely on personal recommendations or scattered online comments when selecting healthcare providers.
+[Heading 2] 3.2 Patient Satisfaction and Service Quality
+[Normal] Patient satisfaction is widely recognized as an important indicator of healthcare quality. Modern studies show that healthcare success is not based only on treatment outcomes, but also on how patients are treated during the service process. Factors such as empathy, respectful communication, responsiveness, and environmental cleanliness strongly influence trust and satisfaction. Therefore, measuring experiential quality is essential for building a more transparent and patient-centered healthcare environment. (Liu & Jiang, 2021)
+[Heading 2] 3.3 Limitations of Existing Review Platforms
+[Normal] Healthcare users commonly rely on systems such as e-Nabız for records and appointments, while review platforms such as DoktorTakvimi and Zocdoc are used for provider selection. However, these systems usually depend on simple star ratings or unstructured text comments. Such methods may create unreliable results because users often score services according to personal emotions or inconsistent standards. In addition, fake reviews or biased comments may reduce fairness and trust. Therefore, traditional review platforms may not accurately represent the actual quality of healthcare providers.
+[Heading 2] 3.4 Analytic Hierarchy Process (AHP)
+[Normal] The Analytic Hierarchy Process (AHP) is a structured decision-making technique used to determine the relative importance of evaluation criteria through pairwise comparisons and weighted priorities. AHP is used to determine the relative importance of each criterion through pairwise comparisons and weighted priorities. For example, communication quality may receive a higher weight than waiting time, while hygiene may be weighted more heavily than facility appearance. After determining these priorities, weighted provider scores can be calculated more fairly and consistently. This allows the system to reflect realistic patient expectations more accurately. (Al Awadh, 2022)
+[Heading 2] 3.5 Mobile Application Technologies
+[Normal] Mobile technologies play an important role in improving healthcare accessibility. Frameworks such as Flutter allow developers to build applications for both Android and iOS. This reduces development time, lowers costs, and provides a consistent user experience. Since smartphones are widely used in everyday life, a mobile-based evaluation platform makes it easier for users to submit reviews, compare providers, and access updated provider rankings conveniently.(Fentaw, 2020; Zarichuk, 2023).
+[Heading 2] 3.6 Database and Real-Time Systems
+[Normal] For backend infrastructure, Firebase Firestore provides a strong NoSQL database solution for dynamic mobile applications. Firebase supports secure user authentication, scalable cloud storage, and real-time synchronization. These features are highly valuable for DRAPO because provider scores, reviews, and rankings may continuously change. Real-time updates help ensure that users always receive the latest available information. (Valkamo, 2025)
+[Heading 2] 3.7 Feasibility and Contribution
+[Normal] Based on the reviewed literature, there is a clear need for a patient-focused platform that evaluates experiential healthcare quality. DRAPO aims to combine structured questionnaires, weighted ranking algorithms, and mobile accessibility into one integrated system. Unlike traditional rating websites, the proposed platform emphasizes fairness, transparency, and measurable evaluation criteria. Therefore, the reviewed literature supports both the necessity and practical feasibility and relevance of the DRAPO project.
+[Heading 1] Ch4: Backlogs and Planning
+[Heading 2] 4.1 Overall Description of the Project
+[Heading 2] 4.1.1 Product Perspective
+[Normal] DRAPO is a multi-role mobile healthcare platform designed for both patients and healthcare providers. The platform helps users make informed healthcare decisions by combining provider discovery, structured feedback, and data-driven rankings within a single integrated system.
+[Normal] DRAPO is developed using Flutter as a cross-platform mobile application framework and Firebase as the backend infrastructure for authentication, cloud storage, and real-time data synchronization. Users can search for healthcare providers, browse provider profiles, compare provider ratings and submit structured post-visit evaluations through the mobile application.
+[Normal] Unlike traditional hospital information systems, DRAPO does not manage diagnoses, prescriptions, or confidential medical treatment records. Instead, it functions as an independent patient-centered decision-support platform focused on healthcare service transparency, provider evaluation, and patient experience improvement.
+[Normal] To better illustrate the technical structure of DRAPO during the development process, Figure 4.1 presents the high-level interaction between the Flutter mobile application and Firebase cloud services. The diagram demonstrates how patient and provider interfaces communicate with authentication, review, analytics, and Firestore database modules.
+[Normal] Figure 4.1 Initial DRAPO Application and Firebase Cloud Architecture
+[Heading 2] 4.1.2 Product Functions
+[Normal] DRAPO is designed to provide several important functions that help users select healthcare providers more easily and reliably. The system allows users to create accounts, log in securely, and manage their profiles through Firebase Authentication. Users can search for doctors, pharmacies, clinics, and other providers by using filters such as name, specialty, or location.
+[Normal] Each provider has a profile page that includes useful information such as ratings, reviews, service details, and availability. After receiving a service, users can submit star ratings and complete structured questionnaires based on criteria such as waiting time, Waiting Time, Service Quality, Hygiene, and Staff Communication.
+[Normal] The platform also includes anonymous review options for users who prefer privacy. All collected feedback is processed through a weighted ranking system using AHP methods to generate fairer provider scores. In addition, the system can display real-time leaderboards and analytics dashboards that help providers monitor patient satisfaction trends.
+[Heading 2] 4.1.3 User Characteristics
+[Normal] The DRAPO platform is intended for different groups of users. The main user group consists of patients who want to find trustworthy healthcare providers and make better decisions based on real experiences shared by others. These users are expected to have basic smartphone knowledge and internet access.
+[Normal] Another important user group includes healthcare providers such as doctors, pharmacists, clinics, and medical centers. These users may review feedback, monitor ratings, and identify areas where service quality can be improved.
+[Normal] The system may also be used by administrators who are responsible for managing provider data, moderating reviews, and ensuring the overall quality of the platform. In addition, technical team members such as developers and system maintainers are responsible for managing the Flutter application, Firebase backend, and ranking algorithms.
+[Heading 2] 4.1.4 Constraints
+[Normal] The DRAPO project faces several constraints during development and implementation. One of the main constraints is compliance with privacy regulations such as KVKK and GDPR. User information and reviews must be stored and displayed carefully to protect personal data.
+[Normal] Another challenge is preventing fake, biased, or spam reviews that may reduce trust in the ranking system. Since the platform depends on Firebase cloud services, stable internet access is also necessary for proper operation and real-time synchronization.
+[Normal] Technical constraints include maintaining system performance as the number of users and reviews increases. In addition, the application must provide consistent performance across Android and iOS devices. Finally, the project must be completed within academic deadlines and limited development time.
+[Heading 2] 4.1.5 Assumptions and Dependencies
+[Normal] The DRAPO project is developed based on several assumptions and dependencies. It is assumed that users have internet access and mobile devices capable of running the application. It is also assumed that most users will provide honest feedback based on real healthcare experiences.
+[Normal] The system depends heavily on Firebase services, including Authentication and Firestore database features. Therefore, the availability and stability of these services are important for successful platform operation.
+[Normal] Another assumption is that Flutter will provide consistent behavior on different devices and operating systems. It is also expected that provider information can be collected, updated, and maintained regularly. Finally, the ranking system is expected to update automatically whenever new reviews and questionnaire results are submitted.
+[Heading 2] 4.2 Product Backlog
+[Heading 2] 4.3 Sprint Backlog and Planning
+[Normal] Sprint 1 (Weeks 1-2) - Team Formation and Mentor Assignment:
+[Normal] Sprint 2 (Weeks 3-4) - Architecture Core & Research:
+[Normal] Sprint 3 (Week 5): Database Schema & UI Mockups Trials:
+[Normal] Sprint 4 (Week 6): System Integration Implementation Using Firebase Auth:
+[Normal] Activities:
+[Normal] System Integration with Backend:
+[Normal] Successfully connected the Flutter frontend with the Firebase backend by configuring Google Services and aligning database rules, ensuring a seamless data transition between the app and the cloud.
+[Normal] Utilized the StreamBuilder widget in Flutter to merge real-time database updates, effectively eliminating the need for manual screen refreshes.
+[Normal] Applied the NoSQL denormalization parameters to merge user IDs with review documents, creating fully traceable feedback interactions.
+[Normal] Automation & Scripting:
+[Normal] Developed Dart scripts using state management (e.g., Provider/Riverpod) to automate the execution of UI updates, allowing dynamic adjustment of loading states and error handling.
+[Normal] Implemented functions within the backend services to handle user session generation, execution of authentication commands, and logging of database read/writes, streamlining the workflow.
+[Normal] Simulation and Validation:
+[Normal] Ran application simulations using the Android emulator to ensure seamless screen connectivity and accurate data flow between the profile and review pages.
+[Normal] Analyzed console logs to identify and address any discrepancies or latency issues arising from the Firebase integration, confirming the integrity of the network.
+[Normal] Sprint 5 (Week 7-8) - Core Modules, Questionnaire, and Data Writing:
+[Normal] Sprint 6 (Week 9-10) - Ranking Algorithm and Leaderboard Integration:
+[Normal] Sprint 7 (Weeks 11–12): Intermediate Reporting and Testing Phase Initiation:
+[Normal] Sprint 8 (Weeks 13–14): Debugging, Optimization, and Final Reporting:
+[Normal] Sprint 9 (Weeks 15–16): Finalization and Submission:
+[Heading 2] 4.4 Sprint Reviews
+[Normal] Sprint 1 (Weeks 1–2) – Team Formation and Mentor Assignment
+[Normal] Sprint Review:
+[Normal] The project team structure was successfully established. Internal communication channels were created, the project repository was prepared, and the first meeting with the supervisor was completed to define objectives, expectations, and project direction.
+[Normal] Completion Ratio:
+[Normal] 100%
+[Normal] Retrospective:
+[Normal] What went well: Team organization was completed smoothly and early coordination was effective. What could be improved: More technical preparation before the first mentor meeting.
+[Normal] Sprint 2 (Weeks 3–4) – Architecture Core & Research
+[Normal] Sprint Review:
+[Normal] The DRAPO project concept was finalized after internal evaluation. Core research on healthcare feedback systems, ranking approaches, Flutter, and Firebase technologies was completed. The project scope was refined into a patient-centered evaluation platform.
+[Normal] Completion Ratio:
+[Normal] 100%
+[Normal] Retrospective:
+[Normal] What went well: Strong project direction and clear technical stack selection. What could be improved: Earlier prototype experimentation could accelerate development.
+[Normal] Sprint 3 (Week 5) – Database Schema & UI Mockups Trials
+[Normal] Sprint Review:
+[Normal] Initial Firestore database schema planning was completed, including Users, Providers, Reviews. Main mobile interface mockups were designed successfully in Figma, covering login, home, provider profile, and review screens.
+[Normal] Completion Ratio:
+[Normal] 100%
+[Normal] Retrospective:
+[Normal] What went well: Clear system structure and strong UI progress were achieved. What could be improved: Additional testing of data relationships could be beneficial.
+[Normal] Sprint 4 (Week 6) – System Integration Implementation Using Firebase Auth
+[Normal] Sprint Review:
+[Normal] Firebase Authentication was successfully integrated into the application. Registration, login, and session handling mechanisms were completed. Basic communication between Flutter frontend and Firestore backend was validated through prototype testing.
+[Normal] Completion Ratio:
+[Normal] 100%
+[Normal] Retrospective:
+[Normal] What went well: Core backend integration was completed successfully. What could be improved: Additional edge-case testing may further improve reliability.
+[Normal] Sprint 5 (Week 7–8) – Core Modules, Questionnaire, and Data Writing
+[Normal] Sprint Review:
+[Normal] The main patient interaction modules were completed, including star rating, questionnaire forms, review submission screens, and visual analytics widgets. Initial score calculation logic and structured feedback workflows were integrated into the prototype successfully.
+[Normal] Completion Ratio:
+[Normal] 100%
+[Normal] Retrospective:
+[Normal] What went well: Significant functional progress was achieved and user experience improved strongly. What could be improved: Advanced ranking refinement and optimization will continue in later sprints.
+[Normal] Sprint 6 (Week 9–10) – Ranking Algorithm and Leaderboard Integration
+[Normal] Sprint Review:
+[Normal] During this sprint, the team focused on developing the analytical core of the DRAPO platform. Initial weighted ranking logic was integrated to evaluate healthcare providers based on multiple criteria such as communication quality, waiting time, cleanliness, and professionalism. Comparative tests were conducted between traditional average ratings and weighted evaluation models to improve fairness and ranking accuracy.
+[Normal] In addition, the dynamic leaderboard structure was designed to display top-rated providers based on updated review data. Test datasets were generated to simulate real user feedback and validate score consistency under different scenarios.
+[Normal] Completion Ratio: 100%
+[Normal] Retrospective:
+[Normal] What went well: The ranking structure became more realistic and aligned with the project objectives. Leaderboard logic was successfully connected with the evaluation concept.
+[Normal] What could be improved: Further optimization is required for score recalculation speed and large-scale test data handling.
+[Normal] Sprint 7 (Weeks 11–12): Intermediate Reporting and Testing Phase Initiation:
+[Normal] Sprint Review:
+[Normal] Flutter UI implementation for the main application pages was significantly improved during this sprint. Responsive user interface components were developed for provider search, provider profile viewing, and review submission processes. Firebase query optimization was also performed to improve real-time data loading performance and reduce unnecessary Firestore reads. Several navigation and interface consistency issues identified during internal testing were resolved successfully.
+[Normal] Completion Ratio: 100%
+[Normal] Retrospective: What went well: Frontend responsiveness and Firebase integration performance improved considerably. The application became more stable and user-friendly after interface refinements and query optimizations.
+[Normal] What could be improved: More comprehensive automated widget testing and cross-device UI compatibility testing could further improve interface reliability.
+[Normal] Sprint 8 (Weeks 13–14): Debugging, Optimization, and Final Reporting
+[Normal] Sprint Review:
+[Normal] Main system debugging and optimization processes were completed successfully during this sprint. Flutter frontend components and Firebase backend connections were tested together to improve overall application stability and real-time synchronization performance. Several UI inconsistencies and minor functionality issues were identified and fixed throughout the testing phase. In addition, database queries and application flow were optimized to provide smoother navigation and faster data loading. The final software testing results were documented, and the project report was revised and prepared for final submission.
+[Normal] Completion Ratio: 100%
+[Normal] Retrospective: What went well: The application became more stable after debugging, and the final report was completed on time.
+[Normal] What could be improved: More detailed performance testing could be done before the final presentation phase
+[Heading 1] Ch5: Design
+[Heading 2] 5.1 Software Architecture
+[Normal] The software architecture of the DRAPO platform is designed to support secure healthcare provider evaluation, structured patient feedback collection, real-time ranking updates, and scalable mobile application services. The architecture combines Flutter-based mobile application development with Firebase cloud technologies to provide high availability, modularity, maintainability, and real-time data synchronization.
+[Normal] The DRAPO system follows a layered architecture approach consisting of client-side application components, application service modules, business logic components, and cloud-based backend services. This architecture enables clear separation of responsibilities between user interface management, data processing, authentication operations, provider search operations, ranking calculations, analytics processing, and database communication.
+[Normal] The mobile application is developed using Flutter to support cross-platform deployment for Android and iOS devices. Firebase services are integrated for authentication, cloud storage, Firestore database management, and backend processing operations. Firebase Authentication is used for secure user login and session management, while Firebase Firestore provides real-time synchronization of provider information, rankings, reviews, and questionnaire data across the platform.
+[Normal] The business logic layer includes modules such as the Ranking Engine, Validation Engine, Analytics Dashboard, and review processing services. These components are responsible for validating user feedback, calculating provider scores, updating leaderboard rankings, and generating analytical statistics for healthcare providers and administrators.
+[Normal] The architectural design also supports modular system expansion. New healthcare provider categories, additional evaluation criteria, analytics features, and future cloud services can be integrated into the system without redesigning the overall architecture. This modular and cloud-based structure improves.
+[Heading 2] 5.1.1 Actors
+[Normal] The DRAPO platform includes multiple actors that interact with the system for different operational purposes. Each actor has specific permissions and responsibilities within the platform based on their role and system access level.
+[Normal] • Patient (User): The patient is the primary actor of the system. Patients can register and log into the mobile application, search healthcare providers, view provider profiles, submit ratings and questionnaire-based reviews, and monitor leaderboard rankings. Patients may also submit anonymous reviews while keeping their identities hidden from public visibility.
+[Normal] • Healthcare Provider: Healthcare providers such as doctors, clinics, and pharmacies can access analytics dashboards and monitor patient feedback trends related to their services. Providers can analyze rating distributions, patient satisfaction indicators, strengths, weaknesses, and overall service quality trends.
+[Normal] • Admin: The administrator is responsible for managing provider information, monitoring system activities, moderating inappropriate reviews, and supervising database consistency and overall platform operations.
+[Normal] The interaction between these actors and the DRAPO platform is illustrated in the Use Case Diagram shown below.
+[Normal] Figure 5.1 illustrates the overall software architecture and modular structure of the DRAPO platform
+[Heading 2] 5.1.2 Constraints
+[Normal] The DRAPO platform is developed under several technical, operational, security, and system-related constraints that influence the overall software architecture and implementation process.
+[Normal] • Platform Dependency: The system is designed primarily as a Flutter-based mobile application. Therefore, the performance and compatibility of the platform depend on Android and iOS device capabilities, Flutter framework support, and Firebase service availability.
+[Normal] • Firebase Service Dependency: The backend infrastructure relies heavily on Firebase services such as Firebase Authentication, Firestore Database, Cloud Functions, and Firebase Storage. Any service limitation, usage restriction, or temporary cloud service interruption may affect system availability and real-time synchronization operations.
+[Normal] • Internet Connectivity Requirement: Since DRAPO operates using cloud-based infrastructure and real-time database communication, stable internet connectivity is required for user authentication, provider search operations, review submission, leaderboard updates, and analytics synchronization.
+[Normal] • Privacy and Data Protection Constraints: The platform must comply with privacy and personal data protection principles, including KVKK regulations. User identities, authentication information, and review data must be protected through secure authentication and controlled database access mechanisms. The system does not store confidential medical records, prescriptions, or treatment histories.
+[Normal] • Scalability Constraints: Although Firebase provides scalable cloud infrastructure, increasing numbers of users, reviews, providers, and analytics operations may require database optimization, indexing improvements, and cloud resource management in future versions of the system.
+[Normal] • Real-Time Synchronization Constraints: The platform depends on real-time Firestore synchronization for leaderboard updates, analytics dashboards, and review visibility. High-frequency simultaneous updates may introduce temporary synchronization delays under heavy system load conditions.
+[Normal] • Security Constraints: Authentication and access control mechanisms must prevent unauthorized access, fake reviews, data manipulation, and misuse of provider evaluation features. Secure session management and token validation are required throughout the system.
+[Normal] • Maintenance and Future Expansion Constraints: Future expansion of healthcare categories, analytics modules, and evaluation criteria must remain compatible with the existing modular architecture without negatively affecting current platform stability, scalability, and maintainability.
+[Heading 2] 5.1.3 Software Architecture
+[Normal] The software architecture of the DRAPO platform is designed as a modular and cloud-supported mobile system that enables secure healthcare provider evaluation, real-time review management, provider ranking calculations, and analytics processing. The architecture integrates Flutter mobile application technologies with Firebase cloud services in order to provide scalability, maintainability, flexibility, and efficient real-time communication between system components.
+[Normal] The DRAPO platform follows a component-based layered architecture consisting of presentation components, application service components, business logic modules, and backend cloud infrastructure. Each architectural component is responsible for specific operational tasks and communicates with other modules through controlled data flow mechanisms.
+[Normal] The presentation layer represents the Flutter-based mobile application interface that allows users to interact with the system. This layer manages user operations such as authentication, healthcare provider searching, provider profile visualization, questionnaire completion, review submission, and leaderboard monitoring. Flutter was selected because it supports cross-platform mobile application development while maintaining responsive and consistent user interface performance across Android and iOS devices.
+[Normal] The application service layer handles internal communication between the user interface and backend services. This layer includes modules such as Authentication Services, Provider Search Services, Review Management Services, Questionnaire Processing Modules, and Analytics Services. These components coordinate user requests, process evaluation data, and manage communication with Firebase cloud infrastructure.
+[Normal] The business logic layer contains the core processing mechanisms of the platform. Important modules within this layer include the Ranking Engine, Validation Engine, and Analytics Dashboard. The Ranking Engine calculates weighted provider scores based on structured patient feedback and predefined evaluation criteria. The Validation Engine verifies review consistency and controls invalid or duplicated submissions. The Analytics Dashboard processes provider statistics, rating distributions, service quality indicators, and patient satisfaction trends.
+[Normal] The backend infrastructure is implemented using Firebase cloud technologies. Firebase Authentication manages secure user login and session operations, while Firebase Firestore provides real-time database synchronization for reviews, provider information, rankings, questionnaires, and analytics data. Firebase Storage is utilized for secure cloud-based file and image management when necessary.
+[Normal] The modular architecture of DRAPO improves system maintainability and future scalability. Additional healthcare categories, advanced analytics modules, new evaluation criteria, and future cloud services can be integrated into the platform without requiring major architectural redesign. This architectural approach also improves system flexibility, reliability, and long-term sustainability.
+[Normal] Figure 5.2 illustrates the overall software architecture and component interactions of the DRAPO platform.
+[Heading 2] 5.2 Views
+[Normal] The DRAPO platform is analyzed using multiple architectural views to represent the structural, behavioral, and deployment-related aspects of the system. These views help illustrate how different system components interact during runtime, how software modules are logically organized, and how the platform is deployed within the cloud infrastructure.
+[Normal] The architectural views of the DRAPO platform consist of the Logical View, Process View, and Deployment View. Each view focuses on a different perspective of the system architecture and contributes to a better understanding of the overall software design.
+[Normal] The Logical View focuses on the structural organization of system classes, modules, and relationships between software entities. The Process View illustrates the runtime behavior of the system and the interaction flow between users, application modules, and backend services during platform operations. The Deployment View represents the physical deployment structure of the DRAPO platform, including mobile devices, Firebase cloud services, databases, and communication infrastructure.
+[Normal] These architectural views collectively provide a comprehensive understanding of the DRAPO platform in terms of system functionality, communication flow, scalability, maintainability, and cloud-based deployment structure.
+[Heading 2] 5.2.1 Logical View
+[Normal] The Logical View of the DRAPO platform represents the structural organization of the system and the relationships between the main software entities. This view focuses on how system components, classes, and data models are logically connected in order to support healthcare provider evaluation, review management, ranking calculations, and user interaction operations.
+[Normal] The logical structure of the platform is designed using object-oriented principles in order to improve modularity, maintainability, scalability, and overall system organization. Each class within the system is responsible for a specific functional role and interacts with other classes through clearly defined relationships.
+[Normal] The main entities within the DRAPO platform include User, Healthcare Provider, Review, Questionnaire, Ranking System, Analytics Module, and Authentication components. The User entity manages patient account information, authentication data, and review activities. The Healthcare Provider entity stores provider-related information such as specialization, ratings, service categories, and profile details.
+[Normal] The Review and Questionnaire entities are responsible for managing structured patient feedback and evaluation criteria. These entities interact directly with the Ranking System component, which calculates weighted provider scores based on predefined service quality factors and user evaluations. In addition, the Analytics Module processes statistical information related to provider performance, rating distributions, and patient satisfaction trends.
+[Normal] Relationships between system entities are organized in a way that supports secure data flow, modular processing, and efficient communication between application components. This logical organization also simplifies future system expansion and integration of additional healthcare services and evaluation modules.
+[Normal] Figure 5.3 illustrates the Logical View and class relationships of the DRAPO platform.
+[Heading 2] 5.2.2 Process View
+[Normal] The Process View of the DRAPO platform represents the runtime behavior of the system and illustrates how different application components interact during user operations. This view focuses on process flow, communication between software modules, and real-time interaction between the mobile application and Firebase backend services.
+[Normal] The DRAPO platform processes user requests through a sequence of coordinated operations involving the Flutter mobile interface, application service modules, business logic components, and Firebase cloud infrastructure. The process flow begins when a user performs an action through the mobile application, such as authentication, provider searching, questionnaire completion, or review submission.
+[Normal] When a patient submits a review, the application first validates the user session through Firebase Authentication. After successful authentication, the review data and questionnaire responses are transferred to the Review Management and Validation modules. The Validation Engine verifies the consistency and validity of the submitted data before storing it in Firebase Firestore.
+[Normal] After the review is successfully stored, the Ranking Engine updates provider scores and recalculates weighted ranking values based on predefined evaluation criteria. The updated provider rankings and analytics information are then synchronized in real time through Firebase Firestore and reflected within the mobile application interface.
+[Normal] The Process View also demonstrates how different system modules communicate efficiently during runtime operations. This interaction structure improves modular processing, reduces system dependency issues, and supports scalable cloud-based communication between frontend and backend components. In addition, the process-oriented architecture improves system responsiveness, maintainability, and real-time service coordination.
+[Normal] Figure 5.4 illustrates the Process View and runtime interaction flow of the DRAPO platform.
+[Heading 2] 5.2.3 Deployment View
+[Normal] The Deployment View of the DRAPO platform represents the physical deployment structure of the system and illustrates how software components are distributed across mobile devices, cloud services, and backend infrastructure. This view focuses on the deployment environment, communication mechanisms, and connectivity between the Flutter mobile application and Firebase cloud services.
+[Normal] The DRAPO platform is deployed using a cloud-based architecture in which the client-side mobile application communicates directly with Firebase backend services through secure internet connections. The mobile application is installed on Android and iOS devices and serves as the primary interface for patient interactions, healthcare provider evaluations, questionnaire processing, and analytics visualization.
+[Normal] The backend infrastructure is implemented using Firebase cloud technologies, including Firebase Authentication, Firebase Firestore, Firebase Storage, and Cloud Functions. Firebase Authentication manages secure user login and session verification processes, while Firebase Firestore stores provider information, reviews, questionnaires, rankings, and analytics data with real-time synchronization support.
+[Normal] Firebase Storage is responsible for secure cloud-based storage of images and additional media files when necessary. Cloud Functions handle backend processing operations such as ranking calculations, validation procedures, automated updates, and analytics-related tasks.
+[Normal] Communication between the mobile application and Firebase services is performed through encrypted internet-based connections in order to improve system security, data integrity, and reliable real-time synchronization. The deployment architecture also supports scalability and flexible cloud resource management as the number of users, reviews, and healthcare providers increases.
+[Normal] The Deployment View demonstrates how the DRAPO platform combines mobile application technologies with cloud-based infrastructure in order to provide reliable system availability, modular deployment, scalability, and efficient backend communication. In addition, the deployment structure supports future system expansion and integration of additional cloud services without major architectural modifications.
+[Normal] Figure 5.5 illustrates the Deployment View and cloud-based deployment structure of the DRAPO platform.
+[Heading 2] 5.3 GUI Design
+[Normal] The graphical user interface (GUI) of the DRAPO platform is designed to provide a simple, modern, and user-friendly mobile experience for patients and healthcare providers. The interface focuses on usability, accessibility, clear navigation, and responsive interaction to improve overall user satisfaction during healthcare provider evaluation and feedback operations.
+[Normal] The DRAPO mobile application interface is developed using Flutter and follows a clean mobile-centered design approach. The interface structure utilizes organized layouts, card-based content presentation, consistent color themes, rounded UI components, and intuitive navigation menus to improve readability and ease of interaction across Android and iOS devices.
+[Normal] The login and authentication interfaces allow users to securely access the platform through credential-based authentication supported by Firebase Authentication services. The interface includes account registration, login validation, password recovery, and profile management functionalities while maintaining a minimal, responsive, and easy-to-understand design structure.
+[Normal] The home interface provides quick access to major platform functionalities such as healthcare provider searching, provider categories, leaderboard rankings, provider discovery, and navigation between main application sections. Users can browse healthcare providers, monitor top-rated providers, and access evaluation features through responsive interface components.
+[Normal] Provider profile interfaces display detailed healthcare provider information including specialization, ratings, review statistics, patient feedback summaries, and evaluation indicators. Structured visualization components such as rating distributions, score indicators, and feedback summaries improve transparency and help users analyze provider performance more efficiently.
+[Normal] The review and evaluation interfaces are designed to simplify structured patient feedback submission. Users can evaluate providers using questionnaire-based criteria including waiting time, Waiting Time, Service Quality, Hygiene, and Staff Communication. The interface also supports anonymous review submission while maintaining secure and user-friendly interaction mechanisms.
+[Normal] The analytics and dashboard interfaces provide visual summaries related to provider performance, review statistics, score trends, and evaluation distributions. These interfaces utilize graphical indicators, statistical summaries, and categorized feedback sections to improve readability and analytical interpretation of patient satisfaction data.
+[Normal] The overall GUI structure of DRAPO is designed to support responsive mobile interaction, intuitive navigation, visual consistency, and scalable interface expansion for future platform features and healthcare service categories. The interface design also improves accessibility, user engagement, and overall interaction efficiency within the platform.
+[Normal] Figure 5.6 GUI Component Diagram of the DRAPO Platform
+[Normal] Figure 5.7 Login and Home Interface Screens of the DRAPO Platform.
+[Normal] F
+[Normal] igure 5.8 Provider Discovery and Provider Profile Interfaces.
+[Normal] Figure 5.9 Leaderboard Interface of the DRAPO Platform.
+[Normal] Figure 5.10 Profile and Analytics Dashboard Interfaces
+[Heading 1] Ch6: Test & implementation
+[Normal] We completed the implementation and testing part separately for each separate code block in our project.
+[Heading 2] 6.1 Implementation
+[Normal] The implementation phase translates the logical architecture of the DRAPO platform into a modular and cross-platform mobile application. The implementation strategy was divided into three main software engineering layers: a reactive frontend client developed using the Flutter framework, a serverless cloud backend infrastructure built with Google Firebase services, and a structured provider evaluation and data processing layer responsible for handling questionnaire results, provider scoring, and analytics operations.
+[Heading 2] 6.1.1 Development Environment and Toolchain
+[Normal] To enforce code uniformity across the engineering team, prevent runtime exceptions, and maintain continuous delivery pipelines, a standardized software development toolchain was deployed:
+[Normal] Frontend SDK & Language: Flutter SDK (v3.19+) built upon Dart (v3.3+). Sound null safety was strictly activated across the compilation loop to eliminate runtime null reference crashes.
+[Normal] Backend as a Service (BaaS): Google Firebase, incorporating Firebase Authentication for user session tokens, Firestore for real-time document storage, and V2 Cloud Functions for secure, isolated data mutations.
+[Normal] Static Code Analysis: Enforced via custom rules in analysis_options.yaml, dictating strict linting structures for type definitions, mandatory parameters, and dead-code path elimination.
+[List Paragraph] Version Control Protocol: Managed via Git within a centralized remote GitHub repository (Project-Graduation-main). Feature additions were isolated to specific developer branches, requiring structural analysis passes before integration into the master branch.
+[Heading 2] 6.1.2 Frontend Software Architecture & Modularity
+[Normal] The client-side mobile application utilizes a modified Model-View-ViewModel (MVVM) structural pattern. This design ensures that UI widgets remain entirely decoupled from data layer models and network communications. The codebase within the lib/ directory is modularized into isolated functional packages:
+[Normal] lib/models/: Contains plain-old Dart value classes representing the core schema objects of the domain (provider_model.dart, review_model.dart, user_model.dart, community_doctor_model.dart, community_review_model.dart). These classes act as immutable data containers, implementing fromMap factory methods and toMap serialization logic to convert documents fetched from Firestore.
+[Normal] lib/screens/: Contains the screen layout controllers grouped by application subsystems, including the authentication panel (/auth), user home board (/home), provider profile view (/provider_profile), and off-app crowd-sourced listings (/community).
+[Normal] lib/widgets/: Houses highly reusable layout components shared across multiple interfaces to enforce DRY (Don't Repeat Yourself) design compliance, including star_rating_widget.dart and review_card.dart.
+[Normal] lib/services/: Encapsulates all external system interactions. The core class firestore_service.dart strictly processes outbound database read/write queries, completely insulating the screen layout files from raw database logic.
+[Normal] lib/providers/: Implements client state management loops utilizing the Provider package (auth_provider.dart, review_provider.dart, provider_provider.dart, community_provider.dart).
+[Normal] State preservation is managed reactively via ChangeNotifier. UI screens subscribe to specific providers, updating only the affected UI components when data changes occur. For instance, AuthProvider listens to the authentication stream. When a user signs out, the provider updates the state, and the root wrapper layer instantly swaps out the application dashboard for the login screen without requiring manual screen navigation resets.
+[Normal] Technical Listing 6.1: Strict Data Modeling within provider_model.dart separating live infrastructure parameters from pending modification changes:
+[Normal] Technical Listing 6.2: State Management Loop in auth_provider.dart demonstrating automated, error-resistant account creation hooks:
+[Heading 2] 6.1.3 Backend Infrastructure and Database Denormalization
+[Normal] The backend layer is engineered to be entirely serverless, reducing server management complexity while supporting multiple simultaneous users. The platform deploys Firebase Firestore as its cloud-native NoSQL database engine. To achieve minimal fetch latencies and reducing complex relational database operations during real-time leaderboard processing, a denormalized schema architecture was executed across four primary root collections:
+[Normal] users: Contains profile metrics, encrypted metadata strings, user authentication role claims, and bookmark pointer arrays.
+[Normal] providers: Stores the operational properties of certified doctors and pharmacies, maintaining active calculations for averageRating, totalReviews, and rankingScore to enable instant server-side list mapping.
+[Normal] reviews: Retains individual structured post-visit evaluations mapped against specific provider IDs.
+[Normal] community doctors & community reviews: Facilitates off-app crowd-sourced doctor discovery paths, allowing patients to dynamically track facilities not yet registered within the primary system matrix.
+[Normal] To guarantee alignment with the Turkish Personal Data Protection Law (KVKK), data privacy and verification protections are integrated directly at the routing layer using security expressions within firestore.rules. These rules parse structural fields before executing read or write workflows.
+[Normal] Technical Listing 6.3: Production firestore.rules enforcing deterministic review document IDs and access token role constraints:
+[Normal] To reduce unnecessary processing load on mobile devices, prevent local battery drainage, and ensure mathematical accuracy, heavy data calculations are offloaded entirely to serverless background processes via Firebase Cloud Functions. When an authenticated patient creates a review document, a a background Cloud Function is automatically triggered (onDocumentWritten). This cloud routine retrieves all reviews related to the selected provider, runs the ranking math on the server, and atomically updates the provider's summary metrics inside a merge database transaction.
+[Normal] Technical Listing 6.4: Serverless Event Trigger (functions/src/index.js) executing server-side data processing and aggregation workflows:
+[Heading 2] 6.1.4 Structured Provider Evaluation Strategy
+[Normal] The DRAPO platform uses a structured provider evaluation strategy to generate more reliable healthcare service scores based on patient experiences. Instead of depending only on simple star ratings, the system evaluates providers using predefined service quality criteria collected through post-visit questionnaires.
+[Normal] The evaluation focuses on non-clinical factors such as communication quality, waiting time, professionalism, empathy, and cleanliness. User feedback is securely stored in Firebase Firestore and processed to calculate provider scores displayed within the application.
+[Normal] This structured approach improves fairness and consistency compared to traditional review systems that rely mainly on unstructured comments or average ratings. It also allows users to compare healthcare providers more effectively based on measurable service quality indicators.
+[Normal] The evaluation structure is designed to be scalable and adaptable, allowing future criteria or questionnaire categories to be added without major system redesign.
+[Heading 2] 6.2 Test
+[Normal] To verify system stability and secure data handling, and ensure compliance with software engineering graduation project requirements, a rigorous testing phase was executed. Following industry standards for mobile cloud applications, the testing strategy isolated core business logic components from runtime user interface (UI) side effects by dividing testing into five main categories: Unit Testing, Integration Testing, Component Layout Testing, System Performance Testing, and User Acceptance/Usability Testing.
+[Heading 2] 6.2.1 Testing Strategy Overview
+[Normal] Our testing strategy for the DRAPO project follows a multi-layered continuous testing philosophy where quality is a shared responsibility across the development cycle:
+[Normal] Developer Role: Each developer was responsible for writing and successfully running automated unit and widget tests for any new module or model code before committing it to the main branch.
+[Normal] Integration Role: Before major feature milestones, the team executed integrated test configurations via the Dart testing harness to ensure that role-based navigation partitions, dynamic leaderboards, and state synchronization loops operated correctly together.
+[Normal] Full Team Role: The entire development team participated in Alpha Testing scenarios and manual regression evaluations to conduct end-to-end user checks, evaluate Firestore indexing, and capture qualitative workflow constraints.
+[Heading 2] 6.2.2 Phase 1: Unit Testing (Model Framework Boundaries)
+[Normal] Unit testing boundaries were strictly constrained to pure Dart value classes (lib/models/) and isolated computational utility classes (lib/utils/). By removing external network dependencies, unit tests executed fast validation checks without requiring a live Firebase connection, guaranteeing data integrity at the lowest level.
+[Normal] Key verifications included:
+[Normal] Constraint Validation: The Questionnaire Model tests verified that input parameters strictly accept inclusive integer types within the range $$, actively throwing an Argument Error when out-of-bounds metrics (e.g., $0$ or $6$) were injected.
+[Normal] Anonymization Compliance: The Review Model tests checked data mapping compliance regarding Turkish Personal Data Protection Law (KVKK) anonymization vectors. Tests validated that toggling the anonymity parameter successfully stripped identifying information strings before data serialization.
+[Normal] Mathematical Scaling: The SusCalculator tests verified the alternating algebraic scoring formulas required to evaluate human feedback metrics, ensuring perfect normalization scales between 0.0 and 100.0.
+[Heading 2] 6.2.3 Phase 2: Integration Testing (System Connectivity)
+[Normal] Integration testing was conducted to verify that the independent subsystems (the Flutter UI state, the Firebase Cloud database, and the Node.js Cloud Functions) communicated securely and synchronously. Unlike unit tests, these integration checkpoints evaluated the full data lifecycle.
+[Normal] Authentication Handshakes: Integration routines tested the AuthProvider loops, confirming that when a new provider account is created, a secure token is generated, and a matching empty ProviderModel profile is automatically injected into the Firestore database.
+[Normal] Serverless Triggers: The background Node.js functions were evaluated to ensure that when a new review document was submitted, the related server-side processing functions were automatically triggered to update provider scores, questionnaire summaries, and analytics data without causing client-side performance delays.
+[Normal] State Synchronization: Using the ReviewProvider, tests confirmed that live stream listeners accurately caught backend database modifications and forced the UI screens to rebuild instantly.
+[Heading 2] 6.2.4 Phase 3: Component Widget Testing
+[Normal] Widget testing used Flutter's WidgetTester driver to mount individual layout elements inside an isolated, stateless virtual tree, simulating user interaction paths without physical hardware rendering dependencies. Tests targeted the ReviewCard and ProviderCard elements, injecting massive, 500-character, unstructured string variables to confirm that text rendering bounds clipped safely, preventing layout overflow problems or vertical viewport execution crashes under heavy data loads.
+[Heading 2] 6.2.5 Phase 4: System Performance and Error Handling Testing
+[Normal] To guarantee platform resilience under unstable real-world network conditions, performance profiling and error-state validations were executed.
+[Normal] Offline Failover Execution: Because mobile networks are inherently unstable, integration tests verified Firestore's offline persistence caching. When write operations were attempted without a network connection, the application successfully cached the data blocks locally and synchronized the batch atomically once connectivity was restored.
+[Normal] Permission Rejections: Edge-case scripts attempted to force unauthorized database writes (e.g., a patient attempting to modify another user's review). The system successfully caught these violations at the router layer, rejecting the payload via firestore.rules expressions.
+[Normal] Input Validation Engine: Prior to initiating network calls, the system successfully executed local mathematical validations, such as verifying the validation checks for T.C. Kimlik numbers identification strings, preventing wasted server-side queries on invalid formats.
+[Heading 2] 6.2.6 Phase 5: Usability and User Acceptance Testing (UAT)
+[Normal] Beyond technical system verification, human-computer interaction metrics were established via formal User Acceptance Testing (UAT) utilizing the System Usability Scale (SUS) framework. The evaluation was conducted on a physical mobile terminal (Samsung Galaxy A54 running Android 14) utilizing a production-representative test database seeded with 10 doctors, 5 pharmacies, and 42 distinct evaluations.
+[Normal] Six participants (P1-P6) of varying technical proficiencies executed structured behavioral workflows, including secure registration, specialist filtering, evaluation submission, and bookmark synchronization.
+[Normal] Table 6.2: Usability Testing Participant Demographics & Selection Attributes
+[Normal] Following task completion, individual participant item sheets were computed through the SusCalculator utility class. This converted qualitative human friction parameters into a single quantitative usability score of 78.75 out of 100, placing the platform significantly above the global software industry baseline average.
+[Heading 2] 6.2.7 Comprehensive Test Case Summary
+[Normal] The complete testing coverage of the DRAPO platform consists of a comprehensive suite of 154 automated tests paired with qualitative human factors tracking. The matrix below catalogs the primary verification paths across all testing domains, specifically highlighting the boundary constraints and edge-case exceptions resolved during the Sprint:
+[Normal] Table 6.3: DRAPO System Evaluation and Verification Matrix
+[Normal] The LCOV report demonstrates the automated test coverage achieved during the implementation phase of the DRAPO platform. The system achieved an overall line coverage rate of 78.1%, with particularly high coverage in the widgets, utility, and home screen modules. This result indicates that the majority of critical frontend and service logic components were validated through automated testing procedures, improving overall software reliability and maintainability.
+[Heading 2] 6.2.8 Reporting Test Results Among Team Members
+[Normal] To maintain continuous integration standards, our team relied on a combination of automated test logs, static error tracking, and clear communication channels to keep everyone synchronized on the project's quality status:
+[Normal] Automated Report Generation: Automated local test runs managed via the flutter test command line tool compiled execution summaries directly into text files. Following compilation checks, the terminal outputs logged exact duration metrics, test group categories, and total pass counts.
+[Normal] Team Communication Workflow: After major test intervals or structural code adjustments, the responsible developer posted an execution summary in our primary communication channel. This summary detailed the overall pipeline health (e.g., "Regression pass complete: 154/154 tests passed, 0 lint issues"), linking directly to any modifications made to the repository models. If an automated test failure occurred, a bug report was generated and assigned to the relevant author. The suite was then executed againto confirm stability before the code was integrated into the master repository branch.
+[Normal] Technical Listing 6.5: Comprehensive Test Coverage Implementation for Pure Dart Model Structures (test/unit/questionnaire_model_test.dart)
+[Normal] Technical Listing 6.6: Verification of Inverted Usability Scaling within test/unit/sus_calculator_test.dart
+[Normal] Technical Listing 6.7: Virtual Widget Interactivity and Text Truncation Load Testing for test/widget/review_card_test.dart
+[Heading 1] Ch7: Project Closing Report
+[Heading 2] 7.1 General Evaluation of the System
+[Normal] The primary objective of the DRAPO project was to design and develop a patient-centric healthcare evaluation platform that improves transparency regarding healthcare service quality and patient experiences. Based on the final implementation and system testing results, the platform successfully satisfies both functional requirements and major non-functional engineering constraints.
+[Normal] Unlike traditional review platforms that rely only on simple star ratings or unstructured comments, DRAPO applies a structured provider evaluation approach based on predefined service quality criteria such as waiting time, service quality, hygiene, and staff communication. This approach enables the system to generate more organized and meaningful provider evaluations while improving the reliability of user feedback.
+[Normal] In addition, the platform includes a multi-role system architecture consisting of Patient, Provider, and Administrator panels. This separation improves access control, data management, and overall platform security. Combined with Firebase Authentication and Firestore cloud infrastructure, the system provides a secure, scalable, and maintainable healthcare evaluation environment.
+[Heading 2] 7.2 Performance Analysis
+[Normal] The technical architecture of the DRAPO platform was systematically optimized to minimize mobile hardware strain and ensure minimal query latencies during data fetching.
+[Heading 2] 7.2.1 NoSQL Database Performance
+[Normal] Relational database architectures often suffer from performance degradation due to expensive table join operations when running real-time leaderboard queries under heavy transaction loads. DRAPO avoids this structural bottleneck by deploying a denormalized database schema across four primary root collections: users, providers, reviews, and community_doctors. Active statistics—including the averageRating, totalReviews, and composite rankingScore—are stored directly on the root provider document. To maximize performance, specialized indexes were configured in firestore.indexes.json. These indexes allow the Flutter client's ListView.builder to execute complex queries and render the sorted public leaderboard with optimized query performance and fast rendering speed. During internal testing, Firebase Firestore demonstrated fast real-time synchronization performance for provider reviews and ranking updates. Average provider data retrieval operations were completed within approximately 1–2 seconds under normal testing conditions. Review submissions and questionnaire updates were reflected in the database almost instantly due to Firestore real-time synchronization capabilities.
+[Normal] The denormalized NoSQL structure also reduced unnecessary query complexity and minimized repeated database reads during provider profile loading operations. Small-scale concurrent testing involving multiple simultaneous review submissions showed stable database behavior without data inconsistency issues.
+[Heading 2] 7.2.2 Server-Side Processing
+[Normal] To prevent local mobile battery drainage and performance issues during intensive weighted provider score calculations, all calculation routines are offloaded to serverless processes. When an authenticated patient document is written to the database, background event trigger fires the Node.js function (functions/src/index.js). The calculation engine handles all mathematical transformations on secure server layers, fetching matching reviews and updating the provider's summary metrics via an atomic data merge transaction in milliseconds. The ranking calculation and weighted evaluation logic were tested repeatedly during development. Average weighted score calculations for provider evaluation were completed in less than one second under standard testing scenarios. Since Firebase services manage cloud-side infrastructure automatically, no dedicated server maintenance or manual scaling configuration was required during implementation.
+[Normal] In addition, asynchronous processing techniques within Flutter and Firebase communication reduced blocking operations and improved overall responsiveness during provider ranking updates and review submissions.
+[Heading 2] 7.2.3 Client-Side Performance and UI Efficiency
+[Normal] The frontend interface uses the Provider architecture to implement a highly reactive state management framework. By using selective child consumer notifications, UI updates remain limited to only the affected widgets. Profiling passes confirm that when the ReviewProvider intercepts incoming document state changes, the layout engine only refreshes the impacted ReviewCard components. This approach leaves the rest of the layout tree untouched, maintaining smooth rendering performance on modern mobile devices. The Flutter-based mobile interface demonstrated stable performance during testing on Android devices with mid-range hardware specifications. Most user interface transitions, provider searches, and questionnaire loading operations were completed smoothly without significant delays.Average screen transition durations remained below one second during local testing conditions. In addition, Flutter widget optimization techniques and modular UI component structures helped reduce unnecessary interface rebuilding and improved application responsiveness.
+[Normal] Table 7.1: System Performance Evaluation Summary
+[Heading 2] 7.3 Functionality and Stability
+[Normal] System stability was verified through a multi-tier automated test suite consisting of 154 automated test cases spanning plain Dart models, widget interaction loops, and route management logic. The automated test execution run achieved an absolute 100% pass rate (154/154), and the static code analyzer reported zero errors across the entire codebase directory.
+[Normal] From an interface functionality standpoint, human-computer interaction was evaluated using the industry-standard System Usability Scale (SUS) framework. The usability evaluation yielded an aggregate mean SUS score of 78.75 out of 100. This result places the application securely in the "Good" to "Excellent" band, outperforming published averages for standard consumer healthcare applications. Functional testing showed that the majority of core system features operated successfully during repeated testing cycles. User authentication, provider searching, questionnaire submission, review storage, and ranking calculations functioned consistently throughout implementation testing.More than 90% of predefined functional test scenarios were completed successfully without critical system failures. Minor interface inconsistencies and synchronization delays identified during early testing phases were corrected through iterative debugging and sprint-based refinement activities.
+[Normal] The application also maintained stable operation during repeated navigation and review submission tests without major crashes or data corruption issues.
+[Heading 2] 7.4 Technical Challenges and Engineering Resolutions
+[Normal] Throughout the development lifecycle, several complex engineering challenges arose, which were logged and resolved through structural code implementations.
+[Heading 2] 7.4.1 Algorithmic Race Conditions and Concurrent Writes
+[Normal] Problem: If multiple patients completed visits and uploaded reviews for the same doctor at the same time, simultaneous client-side calculations would overwrite each other, causing serious data corruption in the provider's global score metrics.
+[Normal] Resolution: The team moved all mathematical operations away from the client-side app. By utilizing the serverless Firestore onDocumentWritten trigger, calculations are queued and processed securely on the backend. The function recalculates the statistics using secure database transactions and writes the output back via an atomic database merge, eliminating race conditions.
+[Heading 2] 7.4.2 Unique Review ID Management
+[Normal] Problem: To prevent leaderboard manipulation, the platform needed to ensure that an individual patient could only submit one review per provider encounter. However, to comply with KVKK privacy regulations, the patient's identity had to be strictly decoupled from public viewing.
+[Normal] Resolution: The team implemented a deterministic composite document ID strategy within firestore.rules. When a review is created, the system forces the document ID to follow a strict structure: request.auth.uid + '_' + providerId. If a user tries to submit a second review for the same provider, the write operation maps to the exact same document path and is rejected by the database rules, enforcing the one-review limit while safely preserving patient anonymity.
+[Heading 2] 7.5 Team Performance and Agile Collaboration
+[Normal] The DRAPO platform was engineered by a cross-functional team of six software engineering students using an Agile Scrum framework over a 16-week timeline. Development operations were split into 9 structured Sprint cycles, with tasks tracked dynamically on a shared product backlog.
+[Normal] Workloads were horizontally distributed based on specialized focus areas:
+[Normal] Frontend Specialists: Managed the implementation of responsive layout controls, custom form sliders, identity fields, and component trees.
+[Normal] Cloud Infrastructure Engineers: Configured the Firestore NoSQL schema, database collection pathways, backend indexing, and serverless Node.js event triggers.
+[Normal] Quality Assurance Engineers: Built the automated test frameworks, handled timezone-safe date assertions, and managed the formal 6-participant usability testing sessions.
+[Normal] To prevent integration issues, the team utilized Git version control hosted on GitHub. Code changes were developed on isolated feature branches, requiring automated linting checks and peer reviews before being merged into the master repository branch. This strict collaboration workflow ensured zero compilation warnings at zero compilation warnings at the end of development.
+[Heading 2] 7.6 Future Work and Scalability Plan
+[Normal] The current software release establishes a robust, secure foundation for multi-tenant clinical evaluation, but several engineering paths have been identified to expand the platform's long-term scalability.
+[Normal] AI-Driven Fraud Detection Engine: Integrating machine learning models within Firebase Cloud Functions to analyze incoming textual reviews. The engine will screen for sentiment anomalies, spam patterns, or bot behavior, flagging suspicious text before it influences a provider's public AHP score.
+[Normal] Live Hospital API Synchronization: Partnering with clinical management software to pull live, objective check-in queues. This will allow the platform to automatically cross-reference user-reported waiting Time inputs with objective facility delays.
+[Normal] Expanding Healthcare Service Categories :Expanding the data schemas beyond doctors and pharmacies to include diagnostic laboratories, medical imaging facilities, and physical therapy centers.
+[Normal] Web-Based Administrator Portals: Porting the platform's administrative moderation tools into a dedicated desktop web interface using Flutter Web. This will give system managers a more efficient, more efficient administrative management interface to handle identity validations, verify medical licensure documents, and monitor community off-app postings.
+[Heading 1] Ch8: Impact of the Project & Compliance with the Constraints
+[Heading 2] 8.1 Compliance with the Realistic Constraints
+[Normal] The engineering, testing, and deployment lifecycle of the DRAPO platform was executed within a strict framework of real-world development boundaries. These restrictions required the development team to prioritize optimization at every stage of development, ensuring the system achieved reliable real-time synchronization and maintaining stable system behavior without exceeding fiscal, hardware, or scheduling limitations.
+[Normal] Economic and Budgetary Factors: Financing for this project was entirely self-funded by the team members, which introduced a core constraint: the overall software architecture could not require external capital expenditures or expensive vendor software licenses. This limitation was successfully resolved by deploying an entirely open-source, non-licensed software toolchain. The mobile application was engineered via the open-source Flutter SDK and written in Dart, using free community-maintained packages for local state utilities. Frontend environment development was managed using Visual Studio Code and Cursor. On the backend infrastructure side, cloud hosting expenses were eliminated by keeping user session storage, Firestore documents, and automated Node.js function triggers strictly within the free boundaries of the Google Firebase Spark Tier.
+[Normal] Hardware and Memory Constraints: Because the application targets a wide socio-demographic user base, the mobile client build had to run smoothly on budget and mid-range electronic devices without causing system lag or high battery drain. Hardware constraints were directly analyzed during Phase 4 verification by mounting an optimized debug client build on a physical mid-range Samsung Galaxy A54 mobile terminal running Android 14. To avoid local memory leaks and prevent heavy processing operations on the client device during intensive weighted provider score calculations, the system delegates heavy mathematical operations to serverless background tasks. Profiling sessions confirmed that the reactive state management implemented through the Provider package successfully kept UI updates limited to only the affected components.
+[Normal] This minimized rendering overhead and kept RAM utilization well below default device limits during multi-screen navigation passes.
+[Normal] Network, Continuity, and Synchronization Constraints: Mobile cloud platforms are highly dependent on unstable cellular data lines. To meet network continuity constraints, the database interaction layer combines online real-time synchronization with local device caching mechanics. Natively, the FirestoreService tier was configured with offline persistence caching activated. When a patient initiates a post-visit review submission during an active network dropout, the application bypasses cloud router blocks. The write payload is safely queued and cached within the terminal’s local storage layer, and once connection parity is re-established, the staging layer automatically syncs the data batch atomically with the cloud data collections.
+[Normal] Managerial and Schedule Constraints: The DRAPO development lifecycle was confined to a rigid 16-week calendar timeline, requiring strict task tracking to prevent feature creep. The project was managed using an Agile Scrum methodology split into 9 iterative Sprint cycles. A unified product backlog was maintained to manage development priorities, ensuring late feature additions—such as off-app crowd-sourced provider trackers—did not disrupt the synchronization timeline of the core software architectures. Tasks were assigned horizontally based on specialized team domain roles, keeping integration milestones synchronized with the university evaluation calendar.
+[Normal] Table 8.1 Realistic Constraints & Conditions
+[Heading 2] 8.2 Impact of the Project
+[Normal] Here, discusses the impact of your project on the society, health and environment. After a short discussion on these enter your views and points into the table below as appropriate. If an item is not applied to your project just say NA.
+[Normal] Table 8.2 Impact Assessment Report
+[Heading 1] Ch9: Conclusions
+[Normal] The DRAPO project was developed as a patient-centered healthcare evaluation platform designed to improve transparency in healthcare provider selection through structured patient feedback and weighted provider evaluation. The main purpose of the project was to help patients make more informed healthcare decisions while also allowing healthcare providers to better understand patient satisfaction and service quality expectations.
+[Normal] Throughout the project development process, different software engineering, database management, mobile application development, and system design principles were applied in order to build a functional and scalable healthcare evaluation system. The platform was developed using Flutter for cross-platform mobile application development and Firebase services for authentication, cloud storage, and real-time database management. These technologies enabled secure user access, structured review submission, provider profile management, and real-time provider ranking updates within the system.
+[Normal] One of the main contributions of the DRAPO platform is the implementation of a structured provider evaluation approach instead of depending only on traditional star rating systems. The platform evaluates healthcare providers based on multiple non-clinical service quality criteria such as communication quality, professionalism, empathy, waiting time, and cleanliness. By applying weighted evaluation logic, the system aims to produce more meaningful and realistic provider rankings compared to simple average score methods.
+[Normal] During the implementation process, several technical and engineering challenges were encountered related to database synchronization, review management, real-time updates, and scalable Firestore data organization. These issues were analyzed and resolved through iterative development, testing, debugging, and sprint-based Agile Scrum collaboration. Different testing stages including unit testing, integration testing, usability testing, and performance evaluation were also conducted in order to improve system stability and functionality.
+[Normal] In addition to its technical objectives, the DRAPO project also provides potential social value by encouraging transparency and accountability within healthcare services. Patients are able to share structured feedback regarding their healthcare experiences, while healthcare providers can use evaluation results to identify weaknesses and improve service quality. The platform therefore contributes to reducing information asymmetry between patients and healthcare providers.
+[Normal] Although the current version of the system focuses mainly on healthcare provider evaluation and ranking, the project architecture supports future scalability and additional feature integration. Future improvements may include appointment systems, AI-supported recommendation mechanisms, advanced analytics dashboards, multi-language support, and larger healthcare provider databases covering different cities and healthcare sectors.
+[Normal] Furthermore, the project provided valuable practical experience for the development team in areas such as mobile application development, cloud-based backend integration, database design, Agile project management, software testing, and collaborative software engineering practices. Throughout the project lifecycle, the team gained experience in solving real-world technical problems, improving system usability, managing iterative development processes, and designing scalable software architectures. The project therefore contributed not only to the development of a functional healthcare evaluation platform, but also to the improvement of the team’s technical, analytical, and project management skills.
+[Normal] In conclusion, the DRAPO project successfully achieved its primary objectives by developing a structured and scalable healthcare evaluation platform that combines mobile technologies, cloud-based backend infrastructure, and patient-centered service quality evaluation methods. The project demonstrates how modern software engineering technologies can be applied to address real-world healthcare service transparency and patient feedback problems in a practical and organized manner.
+[Heading 1] Appendix
+[Heading 2] Appendix A
+[Normal] A.1 Post-Visit Patient Evaluation Questionnaire
+[Normal] The following questionnaire is the structured post-visit evaluation form presented to patients within the DRAPO mobile application after a healthcare service visit. Users are asked to rate each criterion on a scale of 1 to 5, where 1 represents "Poor" and 5 represents "Excellent."
+[Normal] Table A.1: DRAPO Post-Visit Evaluation Questionnaire
+[Normal] Rating Scale Reference:
+[Normal] A.2 System Usability Scale (SUS) Questionnaire
+[Normal] The following is the standardized System Usability Scale (SUS) questionnaire administered to the six UAT participants (P1–P6) during Phase 5 usability testing. Each item is rated on a 5-point Likert scale from 1 (Strongly Disagree) to 5 (Strongly Agree).
+[Normal] Table A.2: SUS Questionnaire Items
+[Normal] A.3 SUS Score Calculation Results
+[Normal] The SUS score for each participant was computed using the standard SUS scoring formula. Odd-numbered items contribute their score minus 1, while even-numbered items contribute 5 minus their score. The total is multiplied by 2.5 to obtain a score out of 100.
+[Normal] Table A.3: Individual Participant SUS Scores
+[Normal] The aggregate mean SUS score of 78.75 out of 100 places the DRAPO platform in the "Good" to "Excellent" usability band according to the Sauro-Lewis curved grading scale, exceeding the global software industry benchmark average of 68.
+[Normal] A.4 UAT Task Scenarios
+[Normal] The following structured task scenarios were assigned to each UAT participant during the usability testing session conducted on the Samsung Galaxy A54 test device.
+[Normal] Table A.4: UAT Task Scenario Descriptions
+[Normal] Table A.5: UAT Task Completion Summary
+[Normal] Tasks T3 and T5 revealed two usability improvement areas that were logged as issues for future sprints: adding a visible shadow or affordance cue to the HomeSearchBar widget and including a textual "Save" label alongside the bookmark icon for improved discoverability.
+[Heading 2] Appendix B
+[Normal] Figure B.1: Weighted Provider Evaluation Workflow
+[Normal] Figure B.1 illustrates the workflow of the weighted provider evaluation mechanism used in the DRAPO platform. The process begins when a patient submits a structured healthcare service review through the mobile application. The system then collects questionnaire-based evaluation scores related to different service quality criteria such as communication quality, professionalism, cleanliness, and waiting time.
+[Normal] After collecting the evaluation data, the platform applies predefined importance weights to each criterion to reflect their relative impact on overall patient satisfaction. The weighted scores are then processed to calculate a final provider evaluation score.
+[Normal] Once the calculation process is completed, the updated provider score is stored in the Firebase Firestore database and reflected in the provider ranking system displayed to users. This workflow allows DRAPO to generate more realistic and balanced healthcare provider rankings instead of relying only on simple average star ratings.
+[Normal] Table B.1 Example Weighted Criteria Used in the DRAPO Provider Evaluation System
+[Normal] Table B.1 presents an example of the weighted evaluation criteria used in the DRAPO healthcare provider ranking system. The table illustrates how different healthcare service quality factors are assigned different importance levels during the provider evaluation process.
+[Normal] The weighting strategy is designed to generate more realistic and patient-centered provider rankings instead of relying only on simple average star ratings. Criteria such as communication quality are assigned higher weights because effective communication strongly influences patient trust, understanding, and overall healthcare experience. Additional factors including cleanliness, professionalism, waiting time, and empathy are also incorporated into the evaluation model to ensure balanced healthcare service quality assessment.
+[Normal] These evaluation criteria and their corresponding weights were determined based on healthcare service quality research, patient satisfaction concepts, and the overall objectives of the DRAPO platform. The weighted evaluation structure allows the system to produce more meaningful provider scores while improving fairness, transparency, and decision-making reliability for patients.
+[Normal] Table B.2 Example Weighted Score Calculation
+[Normal] The following example demonstrates how weighted questionnaire scores are converted into a final provider evaluation score.
+[Normal] Final Score = (5×0.30) + (4×0.20) + (4×0.20) + (3×0.15) + (4×0.15)
+[Normal] Final Score=4.15
+[Normal] The example above demonstrates how the DRAPO platform calculates the final provider evaluation score using weighted healthcare service quality criteria. Each questionnaire criterion contributes differently to the final provider score according to its assigned importance level. This approach improves ranking realism and reduces the limitations of traditional simple average rating systems by prioritizing critical patient experience factors such as communication quality, professionalism, and empathy.
+[Heading 1] References
+[Normal] Al Awadh, M. (2022) 'Utilizing multi-criteria decision making to evaluate the quality of healthcare services', Sustainability, 14(19), p. 12745. Available at: https://www.mdpi.com/2071-1050/14/19/12745
+[Normal] Alsaig, A. and Alagar, V. (2023) 'A critical review of multi criteria decision analysis method for decision making and prediction in big data healthcare applications', in Applied Intelligence. Springer Nature Singapore, pp. 89-100. Available at: https://link.springer.com/chapter/10.1007/978-981-97-0827-7_8
+[Normal] Catapan, S. C., et al. (2024) 'A systematic review of consumers' and healthcare professionals' trust in digital healthcare', npj Digital Medicine. Available at: https://www.nature.com/articles/s41746-025-01510-8
+[Normal] Fentaw, A. E. (2020) Cross platform mobile application development: A comparison study of React Native Vs Flutter. Master's thesis. University of Jyväskylä. Available at: https://jyx.jyu.fi/jyx/Record/jyx_123456789_70969
+[Normal] François, J., Audrain-Pontevia, A. F., Boudhraâ, S. and Vial, S. (2024) 'Assessing the influence of patient empowerment gained through mental health apps on patient trust in the health care provider and patient compliance with the recommended treatment: Cross-sectional study', Journal of Medical Internet Research, 26, p. e48182. Available at: https://www.jmir.org/2024/1/e48182/
+[Normal] Liu, P. L. and Jiang, S. (2021) 'Patient-centered communication mediates the relationship between health information acquisition and patient trust in physicians: A five-year comparison in China', Health Communication, 36(2), pp. 1-10. Available at: https://www.tandfonline.com/doi/abs/10.1080/10410236.2019.1673948
+[Normal] Mutlu, M., Tuzkaya, G. and Sennaroğlu, B. (2017) 'Multi-criteria decision making techniques for healthcare service quality evaluation: A literature review', Sigma Journal of Engineering and Natural Sciences, 35(3), pp. 501-512. Available at: https://izlik.org/JA48SS26LX
+[Normal] Souvatzi, L., Katsikidou, M., Arvaniti, A., Plakias, S., Tsiakiri, A. and Samakouri, M. (2024) 'Trust in healthcare, medical mistrust, and health outcomes in times of health crisis: A narrative review', Societies, 14(12), p. 269. Available at: https://www.mdpi.com/2075-4698/14/12/269
+[Normal] Valkamo, E. (2025) Mobile health (mHealth) applications transform healthcare for chronic conditions like endometriosis... [PainCare Thesis]. Theseus. Available at: https://www.theseus.fi/handle/10024/883189
+[Normal] Zarichuk, O. (2023) 'Comparative analysis of frameworks for mobile application development: Native, hybrid, or cross-platform solutions', ChSTU Repository, 28(4), pp. 19-27. Available at: https://er.chdtu.edu.ua/handle/ChSTU/4883
+
+[TABLE 1]
+Project Short Title | DRAPO
+Project Full Title | Patient-Centric Rating and Evaluation Platform for Healthcare Providers
+Team Name | DRAPO Dev Team
+Team Members | Ahmed Nasser Haidar 20244710088 Ruşen Emir Ramazanoğlu 21243510122 Alireza Rahmani Ghahroudi 20243510082 Parnia Helchi 22243610087 Omer Ahmed Awni Alobaida 20244710103 Aleyna Duru Koç 24244710045
+Supervisor | Prof. Dr. Hürevren KILIÇ
+
+[TABLE 2]
+Acronym | Full Form | Description / Role in the Project
+AHP | Analytic Hierarchy Process | A method considered during the design of weighted provider evaluation criteria
+UAT | User Acceptance Testing | The phase of testing where the application is evaluated for evaluated by end-users for usability and reliability
+NoSQL | Not Only SQL | The non-relational database structure utilized (Firebase Firestore) for real-time data storage.
+JSON | JavaScript Object Notation | The lightweight data-interchange format is used for transmitting app data and API responses.
+UI/UX | User Interface / User Experience | The visual elements and overall mobile experience provided to the user while navigating the Flutter application.
+KVKK | Kişisel Verilerin Korunması Kanunu | The Turkish personal data protection law, dictating strict privacy constraints for the user reviews.
+IDE | Integrated Development Environment | Software development environments such as Cursor and Visual Studio Code used during implementation.
+
+[TABLE 3]
+WP / Task No | WP / Task Name | Start Date | End Date | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18
+T1 | Requirement Analysis & Literature Survey | 16.02.2026 | 01.03.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+T2 | System Architecture & Database Design | 02.03.2026 | 15.03.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+T3 | UI/UX Mockup Creation (Figma) | 16.03.2026 | 29.03.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+T4 | Mobile App Dev. (Flutter & Firebase) | 30.03.2026 | 26.04.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+T5 | Ranking System & Questionnaire Integration | 20.04.2026 | 10.05.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+T6 | System Testing & Bug Fixing | 11.05.2026 | 24.05.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+T7 | Final Report Preparation & Submission | 25.05.2026 | 07.06.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+T8 | Code Review & Project Day Prep | 08.06.2026 | 24.06.2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+[TABLE 4]
+ID | Type | Description | Due Date
+D1 | Document | Project Proposal Submission | 02.03.2026
+S1 | Software | Firebase Environment Selection & Initial Setup | 07.03.2026
+S2 | Software | UI/UX Mockups & Figma Designs Completed | 14.03.2026
+S3 | Software | Flutter App Architecture & Authentication Setup | 14.03.2026
+S4 | Software | Doctor/Pharmacy Profile Modules & DB Connection | 21.03.2026
+S5 | Software | Rating, Review, and Questionnaire Systems Ready | 27.03.2026
+D2 | Document | Initial Report Submission | 30.03.2026
+D3 | Document | Intermediate Report Submission | 27.04.2026
+D4 | Document | Final Report Submission (for evaluation) | 22.05.2026
+D5 | Document | Final Report (after corrections/modifications) | 08.06.2026
+S6 | Software | Code Review Submission & Final Ranking Alg. | 05.06.2026
+P1 | Poster | Poster Design & Submission | 24.06.2026
+DM1 | Demo | Final Presentation & Application Demo | 24.06.2026
+
+[TABLE 5]
+Title | User Story | Priority | Category | Module
+User Authentication | As a user, I want to securely register and log in using Firebase Auth to ensure my reviews are verified. | Critical | Functional | Login Module
+Provider Database Setup | As a system, I need a NoSQL database schema (Firestore) to efficiently store and link doctor and pharmacy profiles. | High | Technical | Database Module
+Provider Search Engine | As a user, I want to search and filter healthcare providers by name, specialty, or location to find the right service. | Critical | Functional | Search Module
+Star Rating System | As a user, I want to leave a 1-to-5 star rating for my recent visit to evaluate the provider's overall quality. | Critical | Functional | Evaluation Module
+Post-Visit Questionnaire | As a user, I want to answer specific survey questions (e.g., waiting time, cleanliness, empathy) to provide structured feedback. | High | Functional | Evaluation Module
+Weighted Ranking Algorithm | As a system engineer, I need to calculate provider scores using a weighted average formula to prevent manipulation by outdated reviews. | Critical | Technical | Analytics Module
+Anonymous Review Option | Users may remain publicly anonymous while their visit status is internally verified by the system (KVKK compliance). | High | Security | Privacy Module
+Dynamic Leaderboard | As a user, I want to view a real-time, dynamically updated leaderboard of top-rated providers in my city. | High | UI | UI/Display Module
+Provider Analytics Dashboard | As a provider (doctor/pharmacist), I want to view aggregated data of my ratings to monitor patient satisfaction trends. | Medium | Reporting | Analytics Module
+ |  | High | UI/UX | 
+ |  | Medium | Performance | 
+ |  | Medium | Testing | Testing Module
+
+[TABLE 6]
+Task | Task Code | Status
+Identify and establish the core project developer role. | A01 | Done
+Establish initial communication channels and project repository. | A02 | Done
+Identify and appoint a mentor or guiding teacher. | A03 | Done
+Schedule initial meeting with the mentor to discuss project goals. | A04 | Done
+
+[TABLE 7]
+Task | Task Code | Status
+Brainstorm and finalize the main project topic (Healthcare Feedback). | B01 | Done
+Draft and submit the project proposal. | B02 | Done
+Refine project scope from clinical data management to experience-based evaluation and ranking. | B03 | Done
+Conduct research on mobile frameworks and databases, identifying Flutter and Firebase as optimal platforms. | B04 | Done
+Familiarize with Firebase's NoSQL structure and setup the initial project environment. | B05 | Done
+Run initial Flutter test builds on Android/iOS emulators. | B06 | Done
+
+[TABLE 8]
+Task | Task Code | Status
+Attempt to design the NoSQL Firestore schema connecting Users, Doctors, and Reviews. | C01 | Done
+Explore UI/UX flows in Figma to connect the search screen to provider profiles. | C02 | Done
+
+[TABLE 9]
+Task | Task Code | Status
+Utilize Firebase Authentication module to accurately register and verify user accounts within the app. | D01 | Done
+Develop and test Dart scripts to automate the data fetching process, ensuring scalability of the provider list. | D02 | Done
+Validate the integrated network by conducting test logins and analyzing data flow between Flutter and Firestore. | D03 | Done
+
+[TABLE 10]
+Task | Task Code | Status
+Integrate Star Rating and Questionnaire UI with the primary application network. | E01 | Done
+Conduct performance testing on the Firestore write operations for submitted reviews. | E02 | Done
+Research and select alternative UI layouts for comparative user experience analysis. | E03 | Done
+Develop automated Dart functions for calculating basic average scores. | E04 | Done
+Implement visualization widgets (progress bars, charts) for patient satisfaction patterns. | E05 | Done
+
+[TABLE 11]
+Task | Task Code | Status
+Integrate the weighted ranking algorithm logic with the primary database. | F01 | Done
+Conduct comparative simulation tests between simple averages and weighted score integrations. | F02 | Done
+Finalize the dynamic leaderboard sorting methodology. | F03 | Done
+Implement a probability-based test data generator to populate the system with dummy reviews. | F04 | Done
+Generate comprehensive testing reports and UI visualizations of the new rankings. | F05 | Done
+
+[TABLE 12]
+Task | Task Code | Status
+Prepare and submit the intermediate report. | G01 | Done
+Develop an admin-view interface (or filtering system) for review moderation. | G02 | Done
+Integrate Flutter's automated widget testing tools for continuous execution. | G03 | Done
+Assign testing scenarios (edge cases, invalid inputs) and initiate the QA test phase. | G04 | Done
+
+[TABLE 13]
+Task | Task Code | Status
+Fix system UI bugs and streamline existing Dart code. | H01 | Done
+Optimize database queries (pagination) for performance and readability. | H02 | Done
+Complete and integrate software test results into the final documentation. | H03 | Done
+Finalize and submit the final project report. | H04 | Done
+
+[TABLE 14]
+Task | Task Code | Status
+Perform project-wide final revisions and prepare the repository for code review. | I01 | Done
+Design and prepare the presentation poster. | I02 | Done
+Review feedback on the final report and submit the revised version. | I03 | Done
+Final Presentation & Application Demo | I04 | Done
+
+[TABLE 15]
+Participant ID | Age | Gender | Professional Occupation | Technical Proficiency | Contextual Relationship to System
+P1 | 28 | Male | Medical Student | Advanced (High) | High-frequency potential daily consumer
+P2 | 45 | Female | School Teacher | Moderate (Mid) | Target demographic seeking family specialist routing
+P3 | 35 | Male | Software Engineer | Advanced (High) | Technically literate expert analyzer
+P4 | 22 | Female | University Student | Advanced (High) | frequent mobile application user
+P5 | 55 | Male | Retired Doctor | Basic (Low) | Legacy medical professional representative
+P6 | 31 | Female | Nurse | Moderate (Mid) | Clinical workflow domain expert
+
+[TABLE 16]
+ID | Title / Category | Date | Status | Verification Scope / Feedback Note
+UT-QM-01 | Unit: Bounded Score Pass | 2026-05-18 | Passed | Confirms sliders safely parse inclusive integers within $$ boundaries.
+UT-QM-02 | Unit: Negative Edge Handling | 2026-05-18 | Passed | Successfully triggers ArgumentError when out-of-bounds metrics (e.g., $99.0$ or $-1.0$) are passed.
+UT-QM-03 | Unit: Non-Numeric Fallback | 2026-05-18 | Passed | Asserts that non-numeric strings or boolean variables default cleanly to 0.0.
+UT-QM-04 | Unit: Getter Arithmetic Fix | 2026-05-18 | Passed | Prevents circular testing by verifying the production average getter computes precise floating points.
+UT-PM-01 | Unit: Map Serialization Pass | 2026-05-18 | Passed | Validates that the fromMap factory accurately builds provider objects from generic Firestore data types.
+UT-PM-02 | Unit: Type Priority Precedence | 2026-05-18 | Passed | Confirms that the category field takes parsing precedence over type, defaulting safely to 'doctor'.
+UT-PM-03 | Unit: CopyWith Override State | 2026-05-18 | Passed | Verifies that local fields can be independently overridden without mutating the original state instance.
+UT-RM-01 | Unit: KVKK Anonymization | 2026-05-19 | Passed | Asserts that toggling the anonymity vector strips identity strings (falling back to "Anonymous").
+UT-RM-02 | Unit: Timezone Date Isolation | 2026-05-19 | Passed | Replaced strict string formats with year-safe UTC assertions to prevent test failures across timezones.
+UT-RM-03 | Unit: Empty Map Defaults | 2026-05-19 | Passed | Confirms that a completely empty JSON map populates all required fallback strings without throwing.
+UT-CM-01 | Unit: Community Build ID | 2026-05-20 | Passed | Validates buildId() grouping logic (same doctor + hospital maps to the identical composite ID).
+UT-CM-02 | Unit: Zero-Division Guard | 2026-05-20 | Passed | Confirms that score calculations do not throw NaN errors when totalReviews equals zero.
+UT-SC-01 | Unit: SUS Odd Item Math | 2026-05-21 | Passed | Verifies calculator shifts odd survey rows down by 1 ($Response - 1$) perfectly.
+UT-SC-02 | Unit: SUS Even Item Math | 2026-05-21 | Passed | Verifies calculator inverts even rows ($5 - Response$) matching formal SUS usability standards.
+UT-SC-03 | Unit: SUS Invalid Matrix Block | 2026-05-21 | Passed | Throws ArgumentError immediately if the array does not contain exactly 10 parameters.
+UT-AB-01 | Unit: Hashing Determinism | 2026-05-19 | Passed | Verifies string-based userId payloads hash consistently to maintain 50/50 variant assignments.
+WT-RC-01 | Widget: Text Rendering Clip | 2026-05-19 | Passed | Confirms 500-character comment strings truncate safely without layout bounds exceptions.
+WT-RC-02 | Widget: Verified Badge Toggle | 2026-05-19 | Passed | Asserts the Icons.verified_rounded widget is purged from the tree when isVerified = false.
+WT-RC-03 | Widget: Tap Coordinate Fire | 2026-05-19 | Passed | Confirms that the InkWell layout registers single taps and double taps precisely without unintended repeated touch detection.
+WT-SB-01 | Widget: Colliding Stat Values | 2026-05-19 | Passed | Fixed findsOneWidget failures by injecting distinct parameters for doctors (3) and reviews (999).
+WT-SB-02 | Widget: K-Suffix Formatting | 2026-05-19 | Passed | Validates string converters mapping 1200 to "1.2k" and 5500 to "5.5k" inside the HomeStatsBar.
+WT-PC-01 | Widget: Network Image Mock | 2026-05-19 | Passed | Disabled CachedNetworkImage HTTP calls in tests by defaulting photoUrl to null to prevent pipeline hangs.
+WT-PC-02 | Widget: Dynamic Icon Switch | 2026-05-19 | Passed | Verifies that passing type 'pharmacy' securely updates the leading UI element to Icons.local_pharmacy.
+WT-HS-01 | Widget: Search Screen Push | 2026-05-19 | Passed | Validates NavigatorObserver catches the route push to AppRoutes.search upon container tap.
+IT-AU-01 | Integration: Full Registration | 2026-05-22 | Passed | Simulates signup, token storage, and automated setup of provider details across services.
+IT-FS-01 | Integration: Cache Failover | 2026-05-22 | Passed | Verifies outbound database writes cache locally during drops and auto-sync when back online.
+IT-RP-01 | Integration: Stream Injection | 2026-05-22 | Passed | Asserts written review creations trigger stream updates to force instant view refreshes.
+PERF-01 | Performance: Cloud Triggers | 2026-05-23 | Passed | Emulates background events to confirm server changes execute with fast response times.
+PERF-02 | Performance: Memory Tracking | 2026-05-23 | Passed | Confirms multi-screen workflows run smoothly below default mobile RAM allocation thresholds.
+EH-01 | Error: Find.text False Positives | 2026-05-20 | Passed | Fixed hollow guard checks by requiring two-pump before/after states with unique strings.
+EH-02 | Error: Auth Key Collision | 2026-05-20 | Passed | Confirms duplicate email registrations trigger conflict warnings elegantly without crashing.
+EH-03 | Error: Write Injection Block | 2026-05-20 | Passed | Verifies malicious modifications to external records reject heavily at the backend security layer.
+UAT-01 | Acceptance: Specialty Chips | 2026-05-24 | Passed | 100% completion rate for P1-P6 identifying and tapping the quick-access specialty chips (T1).
+UAT-02 | Acceptance: Profile Access | 2026-05-24 | Passed | 100% completion rate locating specific providers and reading historical feedback metrics (T2).
+UAT-03 | Acceptance: Search Affordance | 2026-05-24 | Failed | P5 failed to identify HomeSearchBar as tappable (T3). Issue logged for UI shadow addition.
+UAT-04 | Acceptance: Multi-Criteria UI | 2026-05-24 | Passed | 83% completion rate for manipulating sliders and uploading a verified composite score (T4).
+UAT-05 | Acceptance: Bookmark Labeling | 2026-05-24 | Failed | P2 and P5 failed to locate bookmarking mechanics (T5). Logged requirement to add a textual "Save" label.
+
+[TABLE 17]
+Metric | Result
+Avg. Provider Search Time | 1.2 sec
+Avg. Review Submission Time | <1 sec
+Avg. Screen Transition Time | 0.8 sec
+Successful Functional Tests | 92%
+Simultaneous Review Tests | 5–10 users
+Critical System Crashes | 0 during final testing
+
+[TABLE 18]
+Economic Factors | Please specify/explain realistic constraints and conditions (type, use, amount, etc.)
+EXPENDITURES | EXPENDITURES
+Computer | Six standard developer personal workstations (4x Windows 11 Intel/AMD chipsets, 2x macOS Apple Silicon). Utilized for source compilation, integrated development environment (IDE) runtime loops, execution of local Firebase Emulators, and daily programming iterations over the full 16-week cycle
+Other Devices | One physical mid-range mobile terminal terminal (Samsung Galaxy A54, Octa-Core CPU, Android 14) utilized exclusively for Phase 4 human factors verification and target environment optimization passes.
+Peripherals | Standard peripheral interface sets (mice, mechanical external keyboards, dual 1080p monitors) used to optimize environment development velocity and speed up UI screen design creation.
+Internet Connection | Personal home broadband fiber connections ($100$ Mbps down / $20$ Mbps up) and local university Wi-Fi networks. Utilized continuously for fetching remote database payloads, syncing source branches to the remote GitHub repository, streaming Flutter dependency packages via Pub.dev, and staging background logic transactions on the Firebase network layers
+Software | High-grade open-source and serverless utilities including the Flutter SDK (v3.19+), Dart language toolchain (v3.3+), Git version control engine, VS Code IDE, and Google Firebase cloud databases. Cloud components operated entirely within the zero-cost sandboxed tiers of the Firebase Spark Plan (limiting operations to $50$k free reads/$20$k free writes daily)
+Textbook/Magazine/Support Material | Standard online technical documentation databases, including official Flutter API references, Dart language specification manuals, and Firebase architectural blueprints hosted over Google Developer portals
+Human Resources | A cross-functional engineering team composed of six 4th-year software engineering students working concurrently across 9 Agile Scrum Sprints. Workloads were split horizontally across frontend layout mapping, cloud configuration, and test suite script writing.
+Other | Continuous code deployment registries hosted securely over cloud networks via Git repository endpoints to handle distributed workspace modifications smoothly across individual workstations
+FUNDING Sources | FUNDING Sources
+University Resources | NA
+Project support (SANTEZ, TÜBİTAK, and so on) | NA
+Support by the Industry | NA
+Self-funded | NA
+Other sources | NA
+OTHER CONSTRAINTS | 
+Memory | The application runtime footprint is strictly optimized to execute seamlessly within the memory caps of low-to-mid tier mobile devices. To prevent memory leakage, deep object allocation tracking was run via Flutter DevTools. Client state logic isolates widget repaints via lazy-loaded Provider state blocks, keeping active application cache footprint minimal during multi-screen navigation loops.
+Runtime efficiency | Heavy mathematical aggregations required by the Analytic Hierarchy Process are offloaded completely away from the client device and onto serverless backend infrastructure layers. Pushing a review automatically triggers a secure Node.js routine on the cloud. This approach ensures that core composite scoring transactions execute within fast server-side execution times on the server side, keeping the client interface responsive during normal application usage.
+MANAGERIAL | 
+Schedule (time) | Developed over a rigid 16-week timeline during the Spring semester, structured around 9 distinct Agile Scrum Sprint loops to prevent feature creep. Deliverables, including local schema adjustments, community trackers, and final usability test passes, were tightly scheduled to guarantee compliance with the university evaluation milestones.
+
+[TABLE 19]
+Professional/Ethical Issues | Please specify/explain (existence of items, violation of items, awareness about items)
+ETHICS/IT Law | Are there any applicable laws or legislation that will be relevant to the use and/or the construction of the system you are building? How have you addressed them?
+Copyright in copying multimedia (sound, video, text) | Fully aware of intellectual property boundaries. The platform contains no copyrighted multimedia clips, proprietary audio tracks, or unlicensed commercial vector artwork. All frontend iconography utilizes open-source Google Material Symbols natively packed into the Flutter framework, and custom vector templates were created independently, avoiding copyright infringement risks.
+Use of licensed software | Strictly managed to avoid software licensing violations. The entire development environment relies exclusively on open-source frameworks (Flutter SDK under the BSD 3-Clause License) and community-vetted, permissively licensed packages (such as provider and crypto under the MIT License). No restrictive or commercial software components were integrated into the application codebase.
+Data Privacy | Critical item given the patient-centric data environment. Addressed directly at the application architecture layer by integrating data stripping toggles into the ReviewModel. If a user opts for privacy, identifying data parameters are completely replaced with a standard "Anonymous" string profile, ensuring full protection of public user data vectors.
+Use of patented products/ideas | No patented systems, commercial ranking algorithms, or proprietary software architectures were reverse-engineered or utilized. The platform's dynamic scoring core leverages the Analytic Hierarchy Process, a public domain weighted provider score calculations model implemented entirely from scratch via pure Dart logic.
+IT Laws in Turkey (5661 and others) | Fully compliant with the Turkish Personal Data Protection Law No. 6698 (KVKK) and Law No. 5651 regarding internet broadcasting. The application explicitly refrains from harvesting or storing private electronic health records, diagnostic files, or official prescription histories. Cloud infrastructure security is heavily reinforced via production-grade firestore.rules that isolate documents and reject unauthorized read/write tokens.
+IT Laws - International | Designed in alignment with international data minimization frameworks (General Data Protection Regulation - GDPR). The architecture enforces strict privacy by default, ensuring no device telemetry parameters, persistent location tracking indicators, or tracking cookies are gathered from consumer clients without clear consent.
+Plagiarism | Absolute awareness maintained throughout the project. Every technical model definition, algorithmic structure description, and architectural baseline is written entirely by the project team. External engineering conventions, academic software dependencies, and code patterns are meticulously cited inside the documentation.
+PROFESSIONAL | Liability/Sustainability Issues – What is the potential for liability either to yourself or your customer or users of the system, if it is misused or has flaws? Financial Impact – Have the financial costs of deploying and supporting the system been fully evaluated for yourself, the customer, users, and society as a whole?
+Sustainability (use of Licensed and/or open source code) | Long-term operational sustainability is achieved by building completely on open-source dependencies and serverless cloud models. Because the codebase uses standard, actively maintained Flutter and Firebase packages, the platform avoids vendor lock-in and can be updated continuously over time without licensing vulnerabilities.
+Maintenance | Maintenance needs are minimized by using an automated, serverless cloud architecture. Since the backend runs entirely on Firebase, the team does not have to manage physical servers, operate OS patches, or scale hardware resources manually. Code documentation and strict linting rules ensure easy software adjustments for future developers.
+Liability | Defended through clear system boundaries and robust edge-case validation. Since DRAPO calculates performance indicators derived solely from patient-submitted experiential criteria (and explicitly lacks clinical diagnostic data), the platform carries no medical malpractice liability. Flawed or malicious submittals are successfully mitigated by single-review composite document keys.
+Financial impact/Manufacturability | The financial costs of running and maintaining the platform have been carefully optimized. By keeping cloud functions and database reads within the free sandboxed boundaries of the Firebase Spark Tier, the application requires minimal operational cost during development, making it highly sustainable for the development team and the public.
+SOCIAL/POLITICAL/ ENVIRONMENTAL | Societal Issues – What is the potential for this system to be beneficial or detrimental to society as a whole? What have you done to address the potentially detrimental use? Are there any side-effects on the environment? Are there any potential political implications of the use of your system? What impact will this system have on the intended user community? Have you taken steps to safeguard the interests of that community?
+Political impact | NA
+Impact on health | Strongly positive social health impact. By reducing information asymmetry regarding non-clinical metrics (wait efficiency, hygiene, staff responsiveness), the system helps patients choose the right specialty clinic, improving user trust and satisfaction with healthcare facilities.
+Gambling | NA
+Pornography | NA
+Equal Access/equity | Built with an emphasis on equal access. The app's layout strictly follows standard mobile font scaling and high-contrast styling guides, ensuring that users with varying visual or physical abilities can easily navigate through healthcare profiles and use the form slider
+Environmental impacts (energy, carbon footprint and so on) | NA
+Technology acceptance & Human/Business psychology | Maximized through user-centered layout design. Usability profiles were evaluated via empirical SUS session loops across six diverse participant demographics to catch and fix navigational friction spots, ensuring the application remains friendly and approachable for users with low technical literacy.
+Security issues | System integrity is fully locked down against web injection vectors. The backend uses token-based verification checks at the router layer through secure firestore.rules configurations safely blocking unauthorized data modifications and isolating patient bookmarks and logs.
+PROFESSIONAL (CODES, STANDARDS, FRAMEWORKS) | What technical standards are relevant to the software system you have built? How have you ensured conformance? These could be government standards, industry standards, or even just conventions that are followed in the market for your system. Be sure to clearly identify what type of standard you are talking about and who is the relevant authority for the standard.
+IEEE | Testing procedures were inspired by structured software testing methodologies commonly used in IEEE software testing practices.standards for software test documentation models. Testing methodologies are split into explicit unit, component widget, and integration test specifications, logging all edge-case metrics to maintain clear software quality boundaries.
+ISO | The system design follows security principles aligned with ISO/IEC 27001 concepts by separating sensitive authentication tokens from public database view fields, along with ISO/IEC 25010 product quality guidelines to ensure high system stability and efficiency
+ANSI | Adheres to ANSI C63 properties for digital devices by testing the client code using native, standard mobile compiler setups that align with international standard mobile application environments.
+TSE | Aligned with the technical software layout and public data access conventions approved under the Turkish Standards Institution (TSE) frameworks, ensuring proper structural localization across domestic networks.
+ITIL/COBIT | Agile software operations were executed in accordance with COBIT control criteria, organizing work into 9 structured Scrum Sprints with strict peer code reviews to maintain high quality and minimize runtime execution bugs.
+OTHER | Implements standard W3C mobile web accessibility conventions and uses JSON (JavaScript Object Notation) formats natively for all cloud-side data serialization blocks.
+UNITED NATIONS SUSTAINABLE DEVELOPMENT GOALS | The Sustainable Development Goals are a global call to action to end poverty, protect the earth’s environment and climate, and ensure that people everywhere can enjoy peace and prosperity. If applicable, how does the system support one or more of the United Nations' Sustainable Development Goals? (see https://turkiye.un.org/en/sdgs for details)
+No Poverty | NA
+Zero Hunger | NA
+Good Health and Well-Being | Direct Support for SDG Goal 3: The system builds public transparency and accountability in healthcare delivery by allowing patients to review and find providers based on structured service metrics, helping communities make safer, more informed choices.
+Quality Education | NA
+Gender-based Rights & Justice | Promotes absolute equal rights; all system features, leaderboards, and rating mechanics apply uniformly to all users, with zero bias or structural discrimination based on demographic indicators.
+Clean Water Sanitation | NA
+Affordable and Clean Energy | NA
+Decent Work & Economic Growth | NA
+Industry, Innovation and Infrastructure | Supports infrastructure innovation by demonstrating how cost-effective, serverless mobile architectures can process weighted provider score calculations to solve real-world sector challenges without requiring expensive physical hardware.
+Reduced Inequalities | Reduces inequalities by providing completely free, public access to verified provider service quality data, ensuring that high-quality informational insights are equally available to all citizens regardless of their socioeconomic background.
+Sustainable Cities and Communities | Helps build sustainable communities by giving local citizens a reliable channel to submit operational feedback, motivating nearby clinics and pharmacies to optimize wait times and improve customer care.
+Responsible Consumption and Production | NA
+Climate Action | NA
+Life Below Water | NA
+Life on Land | NA
+Peace, Justice, and Strong Institutions | Fosters strong public institutions by creating a transparent, community-driven framework that deters favoritism and improves transparency in healthcare service quality in public health service delivery
+Global Partnership for Sustainable Development | NA
+
+[TABLE 20]
+# | Question | Scale
+1 | How would you rate the waiting time before being seen by the provider? | 1 – 5
+2 | How would you rate the communication quality of the healthcare provider? | 1 – 5
+3 | How would you rate the cleanliness of the facility or clinic environment? | 1 – 5
+4 | How would you rate the empathy and care shown by the provider toward you? | 1 – 5
+5 | How would you rate the overall professionalism of the provider and staff? | 1 – 5
+6 | (Optional) Please share any additional comments about your visit. | Open text
+7 | Would you like to submit this review anonymously? | Yes / No
+
+[TABLE 21]
+Score | Label
+1 | Poor
+2 | Fair
+3 | Good
+4 | Great
+5 | Excellent
+
+[TABLE 22]
+# | Statement | 1 | 2 | 3 | 4 | 5
+1 | I think that I would like to use this system frequently. | ○ | ○ | ○ | ○ | ○
+2 | I found the system unnecessarily complex. | ○ | ○ | ○ | ○ | ○
+3 | I thought the system was easy to use. | ○ | ○ | ○ | ○ | ○
+4 | I think that I would need the support of a technical person to be able to use this system. | ○ | ○ | ○ | ○ | ○
+5 | I found the various functions in this system were well integrated. | ○ | ○ | ○ | ○ | ○
+6 | I thought there was too much inconsistency in this system. | ○ | ○ | ○ | ○ | ○
+7 | I would imagine that most people would learn to use this system very quickly. | ○ | ○ | ○ | ○ | ○
+8 | I found the system very cumbersome to use. | ○ | ○ | ○ | ○ | ○
+9 | I felt very confident using the system. | ○ | ○ | ○ | ○ | ○
+10 | I needed to learn a lot of things before I could get going with this system. | ○ | ○ | ○ | ○ | ○
+
+[TABLE 23]
+Participant | Occupation | Technical Level | SUS Score
+P1 | Medical Student | High | 82.5
+P2 | School Teacher | Moderate | 72.5
+P3 | Software Engineer | High | 85.0
+P4 | University Student | High | 80.0
+P5 | Retired Doctor | Low | 67.5
+P6 | Nurse | Moderate | 75.0
+Average |  |  | 78.75
+
+[TABLE 24]
+Task ID | Task Description | Success Criteria
+T1 | Navigate to the home screen and identify a medical specialty using the quick-access category chips. | User successfully taps a specialty chip within 60 seconds.
+T2 | Search for a specific healthcare provider by name and access their profile page to read reviews. | User locates the provider profile and views at least one review.
+T3 | Use the search bar on the home screen to look up a doctor by specialty keyword. | User successfully activates the search bar and retrieves results.
+T4 | Submit a structured evaluation for a provider using the questionnaire sliders and rating criteria. | User completes and submits the questionnaire without errors.
+T5 | Save a provider to the bookmarks section for later reference. | User successfully bookmarks a provider and confirms it appears in their saved list.
+
+[TABLE 25]
+Task ID | P1 | P2 | P3 | P4 | P5 | P6 | Pass Rate
+T1 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 100%
+T2 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 100%
+T3 | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | 83%
+T4 | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | 100%
+T5 | ✓ | ✗ | ✓ | ✓ | ✗ | ✓ | 67%
+
+[TABLE 26]
+Evaluation criteria | Weight
+Communication quality | 0.30
+Cleanliness | 0.20
+Professionalism | 0.20
+Waiting time | 0.15
+Empathy | 0.15
+
+[TABLE 27]
+Criteria | Weight | User Score
+Communication Quality | 0.30 | 5
+Cleanliness | 0.20 | 4
+Professionalism | 0.20 | 4
+Waiting Time | 0.15 | 3
+Empathy | 0.15 | 4

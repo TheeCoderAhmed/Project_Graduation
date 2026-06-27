@@ -1,0 +1,56 @@
+Repository source read, 2026-05-27.
+
+README.md:
+- Project name: DRAPO - Patient-Centric Healthcare Review Platform.
+- Stack: Flutter 3.19+ / Dart 3.3+, provider package, Firebase Authentication, Firestore, Cloud Functions v2 Node.js.
+- Codebase: lib/ contains about 8,500 Dart lines; verified count is 8,541 Dart lines across 52 Dart files.
+- Data model includes users, providers, reviews, community_doctors, and community_reviews.
+- Ranking formula: rankingScore = 0.4 * averageOverallRating + 0.6 * weightedQuestionnaireScore.
+- AHP-inspired weights: staff communication 0.35, hygiene 0.25, service quality 0.25, waiting time 0.15.
+
+PRODUCT.md and DESIGN.md:
+- Audience: patients in Turkey and healthcare practitioners.
+- Product purpose: search providers, leave post-visit reviews, complete structured questionnaires, view ranked provider listings.
+- Brand personality: professional, modern corporate, minimalistic, clinical precision with human empathy, "Guided Confidence."
+- Visual system: clinical blue, mint teal, cool neutrals, warm amber for ratings.
+
+TEST_REPORT.md:
+- 154 automated Dart tests across unit, widget, and A/B phases; README also notes 2 server-side aggregation tests.
+- Final matrix: 154/154 passing.
+- Coverage: 78.1% total line coverage, approximately 92% effective coverage after excluding static theme constants and Firebase-blocked lines.
+- Tested areas include models, review cards, provider cards, home stats bar/search bar, A/B stats bar host, SUS calculator.
+
+USABILITY_TEST.md:
+- SUS + structured task observation, 6 participants, physical Samsung Galaxy A54 Android 14.
+- Seeded test data: 10 doctors, 5 pharmacies, 42 reviews.
+- Overall task completion: 86.7% (26/30 attempts).
+- Mean SUS score: 78.75, B - Good; above industry average 68 and healthcare apps average 71.4, 1.55 below excellent threshold 80.3.
+- Key next-sprint fixes: search bar affordance, bookmark label, first-launch tooltip.
+
+STUDY_GUIDE.md:
+- Role split: patient, provider, admin.
+- Patient flow: browse, search, community, reviews, profile.
+- Provider flow: dashboard, own listing, reply to reviews, request practice changes.
+- Admin flow: approve/reject practice changes.
+- Community reviews: off-app doctors grouped by deterministic slug from name + hospital.
+
+functions/src/aggregation.js:
+- calculateProviderStats computes averageRating, avgQuestionnaireScore, and rankingScore server-side.
+- round2 returns two-decimal metrics.
+- AHP weights sum to 1.0.
+
+firestore.rules:
+- Users can read/write own document; admin can read.
+- Signup allows patient/provider roles; admin cannot self-register.
+- Provider score fields are locked from providers.
+- Reviews use deterministic ID request.auth.uid + "_" + providerId, are patient-only, immutable except provider replies.
+- Community reviews use deterministic user + communityDoctor ID, patient-only create, no edits.
+
+lib/services/firestore_service.dart:
+- getTopProviders orders by rankingScore.
+- submitReview uses a transaction and deterministic review ID.
+- submitCommunityReview uses a transaction to create/increment aggregated off-app doctor listing and write the review.
+- requestPracticeChange writes pending fields; approve/reject applies or discards them through admin flow.
+
+Visual assets:
+- Copied repo screen images from stitch_medirate_healthcare_reviews into workspace assets.

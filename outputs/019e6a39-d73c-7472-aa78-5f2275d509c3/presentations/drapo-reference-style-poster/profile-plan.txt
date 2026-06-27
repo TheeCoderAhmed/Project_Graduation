@@ -1,0 +1,17 @@
+task mode: create from reference image
+primary deck-profile: engineering-platform
+secondary gates: academic graduation poster, product-platform
+
+reference treatment:
+- The uploaded reference is a section scaffold, not an exact style lock.
+- Required section names to carry forward: Team, Objective, Application Areas, Design and Architecture, Interfaces, Methods/Tools, Conclusion, References.
+- Preserve portrait poster format and three-column academic poster rhythm.
+- Improve the design with DRAPO's clinical identity, stronger visual hierarchy, app screenshots, architecture proof, and real project metrics.
+
+source/asset requirements:
+- Use repository docs and code for factual copy.
+- Use existing screen assets copied from the previous poster workspace.
+- Do not invent team member names, school names beyond CMPE/ISE/SE 494 Senior Project, patient counts, production usage, or clinical efficacy claims.
+
+known missing inputs:
+- Team member names are not available in the repository. The Team panel uses role ownership areas from STUDY_GUIDE.md instead.

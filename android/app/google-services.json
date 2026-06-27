@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "986206394751",
+    "project_id": "drapo7",
+    "storage_bucket": "drapo7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:986206394751:android:e0a1899e51c72245aba24a",
+        "android_client_info": {
+          "package_name": "DRAPO.T7"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCDqinCnTXN1FfuOQc8LC0ML5-eLxKUd4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
