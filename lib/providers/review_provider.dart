@@ -1,0 +1,143 @@
+import 'package:flutter/material.dart';
+import '../services/firestore_service.dart';
+
+import '../models/review_model.dart';
+import '../models/community_review_model.dart';
+
+class ReviewProvider extends ChangeNotifier {
+  final FirestoreService _firestoreService = FirestoreService();
+
+
+  List<ReviewModel> _reviews = [];
+  List<ReviewModel> _userReviews = [];
+  List<CommunityReviewModel> _userCommunityReviews = [];
+  bool _isLoading = false;
+  bool _isSubmitting = false;
+  String? _error;
+
+  List<ReviewModel> get reviews => _reviews;
+  List<ReviewModel> get userReviews => _userReviews;
+  /// Off-app (community) reviews written by the current user, for "My Reviews".
+  List<CommunityReviewModel> get userCommunityReviews => _userCommunityReviews;
+  bool get isLoading => _isLoading;
+  bool get isSubmitting => _isSubmitting;
+  String? get error => _error;
+
+  Future<void> loadReviews(String providerId) async {
+    _isLoading = true;
+    Future.microtask(notifyListeners);
+
+    try {
+      _reviews = await _firestoreService.getReviews(providerId);
+      _error = null;
+    } catch (e) {
+      _error = _friendlyError(e.toString());
+      _reviews = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadUserReviews(String userId) async {
+    _isLoading = true;
+    Future.microtask(notifyListeners);
+
+    try {
+      // Load both in-app and community (off-app) reviews this user wrote.
+      final results = await Future.wait([
+        _firestoreService.getUserReviews(userId),
+        _firestoreService.getUserCommunityReviews(userId),
+      ]);
+      _userReviews = results[0] as List<ReviewModel>;
+      _userCommunityReviews = results[1] as List<CommunityReviewModel>;
+      _error = null;
+    } catch (e) {
+      _error = _friendlyError(e.toString());
+      _userReviews = [];
+      _userCommunityReviews = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Submits a review to Firestore.
+  ///
+  /// Returns a [ReviewSubmitResult] so the caller has a single, unambiguous
+  /// source of truth — no try/catch needed in the screen, no dual error paths.
+  Future<ReviewSubmitResult> submitReview(ReviewModel review) async {
+    _isSubmitting = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await _firestoreService.submitReview(review);
+
+      // Optimistic local update only AFTER the Firestore write confirmed.
+      _reviews = [review, ..._reviews];
+      _userReviews = [review, ..._userReviews];
+
+      return ReviewSubmitResult.success();
+    } on Exception catch (e) {
+      final msg = _friendlyError(e.toString());
+      _error = msg;
+      return ReviewSubmitResult.failure(msg);
+    } finally {
+      _isSubmitting = false;
+      notifyListeners();
+    }
+  }
+
+  /// Provider replies to a review. Updates Firestore then patches the local
+  /// list so the reply shows immediately. Returns true on success.
+  Future<bool> replyToReview(String reviewId, String reply) async {
+    try {
+      await _firestoreService.addProviderReply(reviewId, reply);
+      _reviews = _reviews
+          .map((r) => r.reviewId == reviewId
+              ? r.copyWith(providerReply: reply, providerReplyAt: null)
+              : r)
+          .toList();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = _friendlyError(e.toString());
+      notifyListeners();
+      return false;
+    }
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  String _friendlyError(String raw) {
+    if (raw.contains('already reviewed')) {
+      return 'You have already submitted a review for this provider.';
+    }
+    if (raw.contains('network') || raw.contains('connection')) {
+      return 'No internet connection. Please try again.';
+    }
+    if (raw.contains('permission-denied')) {
+      return 'You don\'t have permission to do that. Please sign in again.';
+    }
+    return 'Something went wrong. Please try again.';
+  }
+}
+
+/// Typed result returned by [ReviewProvider.submitReview].
+/// Screens switch on [success] — no try/catch, no dual error sources.
+class ReviewSubmitResult {
+  final bool success;
+  final String? errorMessage;
+
+  const ReviewSubmitResult._({required this.success, this.errorMessage});
+
+  factory ReviewSubmitResult.success() =>
+      const ReviewSubmitResult._(success: true);
+
+  factory ReviewSubmitResult.failure(String message) =>
+      ReviewSubmitResult._(success: false, errorMessage: message);
+}

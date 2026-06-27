@@ -1,0 +1,29 @@
+class AppStrings {
+  static const String appName        = 'DRAPO';
+  static const String tagline        = 'Find the best healthcare near you';
+  static const String login          = 'Login';
+  static const String signup         = 'Sign Up';
+  static const String logout         = 'Logout';
+  static const String email          = 'Email';
+  static const String password       = 'Password';
+  static const String fullName       = 'Full Name';
+  static const String patient        = 'Patient';
+  static const String provider       = 'Provider';
+  static const String doctor         = 'Doctor';
+  static const String pharmacy       = 'Pharmacy';
+  static const String topDoctors     = 'Top Doctors';
+  static const String topPharmacies  = 'Top Pharmacies';
+  static const String search         = 'Search doctors, pharmacies...';
+  static const String writeReview    = 'Write a Review';
+  static const String submitReview   = 'Submit Review';
+  static const String waitingTime    = 'Waiting Time';
+  static const String serviceQuality = 'Service Quality';
+  static const String hygiene        = 'Hygiene';
+  static const String staffComm      = 'Staff Communication';
+  static const String overallRating  = 'Overall Rating';
+  static const String comment        = 'Share your experience...';
+  static const String settings       = 'Settings';
+  static const String myProfile      = 'My Profile';
+  static const String myReviews      = 'My Reviews';
+  static const String bookmarks      = 'Bookmarks';
+}

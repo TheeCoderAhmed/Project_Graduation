@@ -1,0 +1,28 @@
+{
+  "output": "/Users/ahmedhaidar/Desktop/Projects/DRAPO/outputs/019e6a39-d73c-7472-aa78-5f2275d509c3/presentations/drapo-reference-style-poster/output/drapo-reference-style-poster.pptx",
+  "outputBytes": 418775,
+  "slideCount": 1,
+  "slideSize": {
+    "width": 1080,
+    "height": 1920
+  },
+  "previewDir": "/Users/ahmedhaidar/Desktop/Projects/DRAPO/outputs/019e6a39-d73c-7472-aa78-5f2275d509c3/presentations/drapo-reference-style-poster/preview",
+  "previewPaths": [
+    "/Users/ahmedhaidar/Desktop/Projects/DRAPO/outputs/019e6a39-d73c-7472-aa78-5f2275d509c3/presentations/drapo-reference-style-poster/preview/slide-01.png"
+  ],
+  "layoutDir": "/Users/ahmedhaidar/Desktop/Projects/DRAPO/outputs/019e6a39-d73c-7472-aa78-5f2275d509c3/presentations/drapo-reference-style-poster/layout",
+  "layoutResults": [
+    {
+      "layoutPath": "/Users/ahmedhaidar/Desktop/Projects/DRAPO/outputs/019e6a39-d73c-7472-aa78-5f2275d509c3/presentations/drapo-reference-style-poster/layout/slide-01.layout.json"
+    }
+  ],
+  "contactSheet": "/Users/ahmedhaidar/Desktop/Projects/DRAPO/outputs/019e6a39-d73c-7472-aa78-5f2275d509c3/presentations/drapo-reference-style-poster/qa/contact-sheet.png",
+  "slides": [
+    {
+      "index": 1,
+      "requestedSlideNumber": 1,
+      "modulePath": "/Users/ahmedhaidar/Desktop/Projects/DRAPO/outputs/019e6a39-d73c-7472-aa78-5f2275d509c3/presentations/drapo-reference-style-poster/slides/slide-01.mjs",
+      "exportName": "slide01"
+    }
+  ]
+}

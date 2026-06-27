@@ -1,0 +1,28 @@
+Deliverable: one-slide, landscape, editable PowerPoint graduation poster.
+
+Macro layout:
+- Left editorial hero rail: project identity, thesis, audience, stack.
+- Center evidence field: system workflow diagram and ranking method.
+- Right app/product field: overlapped mobile screen visuals with role-based feature bullets.
+- Bottom proof rail: testing metrics, usability metrics, limitations, and next sprint.
+
+Reading order:
+1. DRAPO identity and one-sentence thesis.
+2. What problem it solves and who uses it.
+3. How the system works: Flutter app -> Auth/Firestore -> Cloud Function/rules -> dashboards.
+4. Why rankings are trustworthy: structured questionnaire, deterministic IDs, server-side score aggregation, locked score fields.
+5. Validation: automated tests, coverage, usability results.
+6. Honest limitations and next improvements.
+
+Design system:
+- Background: #f9f9fd.
+- Primary: #074469 and #2a5c82.
+- Secondary: #006a68 and #91f0ec.
+- Evidence/ratings: #f1be72 and #76510e.
+- Text: #191c1e and #41474e.
+- Typeface: Aptos fallback, with Manrope/Inter semantics reflected through weights and spacing.
+
+Structured visual precision:
+- Architecture nodes represent actual subsystems: Flutter app, Firebase Auth, Firestore, Cloud Function aggregation, Firestore rules, patient/provider/admin/community surfaces.
+- Ranking bars encode the actual weights: 35, 25, 25, 15.
+- Metrics are sourced exactly: 154 Dart tests, 2 server-side aggregation tests, 78.1% coverage, ~92% effective coverage, 6 participants, 86.7% completion, SUS 78.75.

@@ -1,0 +1,17 @@
+Deliverable: one-slide portrait graduation poster, editable PowerPoint.
+
+Slide size:
+- 1080 x 1920 portrait canvas. Exported PNG preview at 2160 x 3840 for inspection and print-friendly sharing.
+
+Reading order:
+1. Top identity band: DRAPO, project thesis, audience, stack, proof metrics.
+2. Design challenge and system workflow.
+3. Ranking method and app surfaces.
+4. Validation evidence.
+5. Role-aware product scope, limitations, and next sprint.
+
+Portrait layout rules:
+- No landscape rotation or squeezed wide layout.
+- Use stacked sections with generous left/right gutters.
+- Keep architecture connectors vertical or short horizontal hops.
+- Keep all quantitative claims sourced from repository docs/code.

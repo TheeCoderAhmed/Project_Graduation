@@ -1,0 +1,185 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── HELPER FUNCTIONS ───────────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuth() && request.auth.uid == userId;
+    }
+
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isAuth() && getUserRole() == 'admin';
+    }
+
+    function isPatient() {
+      return isAuth() && getUserRole() == 'patient';
+    }
+
+    function isValidClientRole(role) {
+      return role in ['patient', 'provider'];
+    }
+
+    function isValidRating(value) {
+      return value is number && value >= 1 && value <= 5;
+    }
+
+    function isValidQuestionnaire(questionnaire) {
+      return questionnaire is map
+        && questionnaire.keys().hasOnly([
+          'waitingTime',
+          'serviceQuality',
+          'hygiene',
+          'staffCommunication'
+        ])
+        && isValidRating(questionnaire.waitingTime)
+        && isValidRating(questionnaire.serviceQuality)
+        && isValidRating(questionnaire.hygiene)
+        && isValidRating(questionnaire.staffCommunication);
+    }
+
+    // ── USERS ──────────────────────────────────────────────────────────────
+    // Users can only read/write their OWN document. No cross-user reads.
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+          'uid',
+          'fullName',
+          'email',
+          'role',
+          'profilePhotoUrl',
+          'bookmarks',
+          'tcKimlik',
+          'gender'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && isValidClientRole(request.resource.data.role)
+        && request.resource.data.bookmarks is list
+        && request.resource.data.bookmarks.size() == 0;
+      allow update: if isAdmin() || (isOwner(userId)
+        // Users can update profile/bookmark fields, but never identity or role.
+        && request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['fullName', 'profilePhotoUrl', 'bookmarks']));
+      allow delete: if false;
+    }
+
+    // ── PROVIDERS ──────────────────────────────────────────────────────────
+    // Anyone can read. Only admins or the linked owner can write basic fields.
+    // averageRating, rankingScore, totalReviews are LOCKED — only Cloud Functions
+    // or admin can update them to prevent manipulation.
+    match /providers/{providerId} {
+      allow read: if true;
+      // Admins create any listing. A provider may claim ONE listing keyed by
+      // their own UID, with ownerId == uid and all score fields starting at 0
+      // so a new account cannot seed itself a fake rating.
+      allow create: if isAdmin() ||
+        (isAuth()
+          && providerId == request.auth.uid
+          && getUserRole() == 'provider'
+          && request.resource.data.ownerId == request.auth.uid
+          && request.resource.data.averageRating == 0
+          && request.resource.data.rankingScore == 0
+          && request.resource.data.totalReviews == 0);
+      allow update: if isAdmin() ||
+        (isAuth() && resource.data.ownerId == request.auth.uid
+          // Providers can't touch their own scores, and can't change their
+          // LIVE practice fields directly — those edits land in the pending*
+          // fields and are applied by an admin after review.
+          && !request.resource.data.diff(resource.data)
+              .affectedKeys().hasAny([
+                'averageRating', 'rankingScore', 'totalReviews',
+                'hospital', 'department', 'room'
+              ]));
+      allow delete: if isAdmin();
+    }
+
+    // ── REVIEWS ────────────────────────────────────────────────────────────
+    // Anyone can read. Only patients can create. No editing after submission.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isPatient()
+        // One review per patient/provider pair, enforced by deterministic ID.
+        && reviewId == request.auth.uid + '_' + request.resource.data.providerId
+        && exists(/databases/$(database)/documents/providers/$(request.resource.data.providerId))
+        && request.resource.data.keys().hasOnly([
+          'providerId',
+          'userId',
+          'userName',
+          'overallRating',
+          'comment',
+          'questionnaire',
+          'isVerified',
+          'createdAt'
+        ])
+        // Submitted userId must match the authenticated user
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.isVerified == false
+        // Rating must be between 1 and 5
+        && isValidRating(request.resource.data.overallRating)
+        && isValidQuestionnaire(request.resource.data.questionnaire);
+      // The only allowed update is the listing owner posting/editing a reply.
+      // Patients cannot edit a review's content after submission.
+      allow update: if isAuth()
+        && request.resource.data.diff(resource.data)
+            .affectedKeys().hasOnly(['providerReply', 'providerReplyAt'])
+        && get(/databases/$(database)/documents/providers/$(resource.data.providerId))
+            .data.ownerId == request.auth.uid;
+      allow delete: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+    }
+
+    // ── COMMUNITY DOCTORS (off-app, patient-built listings) ────────────────
+    // Aggregated listings of doctors not on DRAPO. Anyone can read. Patients
+    // create/aggregate them when submitting a community review. Score fields
+    // are community-sourced by design, so we only constrain the field set and
+    // require an authenticated patient. Admins can clean up.
+    match /community_doctors/{doctorId} {
+      allow read: if true;
+      allow create, update: if isPatient()
+        && request.resource.data.keys().hasOnly([
+          'name', 'hospital', 'department', 'specialty',
+          'totalReviews', 'ratingSum',
+          'waitSum', 'serviceSum', 'hygieneSum', 'staffSum',
+          'updatedAt'
+        ]);
+      allow delete: if isAdmin();
+    }
+
+    // ── COMMUNITY REVIEWS (reviews of off-app doctors) ─────────────────────
+    // Anyone can read. Only patients can create, one per doctor (deterministic
+    // ID). No edits after submission. Author or admin can delete.
+    match /community_reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isPatient()
+        && reviewId == request.auth.uid + '_' + request.resource.data.communityDoctorId
+        && request.resource.data.keys().hasOnly([
+          'communityDoctorId', 'userId', 'userName', 'doctorName',
+          'hospital', 'department', 'specialty',
+          'overallRating', 'comment', 'questionnaire', 'createdAt'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && isValidRating(request.resource.data.overallRating)
+        && isValidQuestionnaire(request.resource.data.questionnaire);
+      allow update: if false;
+      allow delete: if isAdmin() ||
+        (isAuth() && resource.data.userId == request.auth.uid);
+    }
+
+    // ── RANKING UPDATES (write-only from trusted path) ─────────────────────
+    // Block direct client writes to score fields on providers (enforced above).
+    // In production, move recalculateRanking() to a Cloud Function.
+
+    // ── DENY EVERYTHING ELSE ───────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,27 @@
+task mode: create
+primary deck-profile: engineering-platform
+secondary gates: product-platform, academic poster
+
+required proof objects:
+- One-page architecture/workflow map connecting Flutter app, Firebase Auth, Firestore collections, Cloud Functions, rules, and role-specific dashboards.
+- Product proof through app-screen visuals and realistic feature labels.
+- Evaluation proof tied to the technical system: automated tests, coverage, SUS usability study, seeded usability build.
+- Ranking method proof: AHP-inspired criterion weights and rankingScore formula.
+
+source/asset requirements:
+- Use repository documentation and code only: README.md, PRODUCT.md, DESIGN.md, TEST_REPORT.md, USABILITY_TEST.md, STUDY_GUIDE.md, functions/src/aggregation.js, firestore.rules, lib/services/firestore_service.dart.
+- Use existing repo screen images from stitch_medirate_healthcare_reviews as visual app evidence.
+- Do not invent team names, university names, production usage, patient counts, or deployment claims not present in source material.
+
+brand authenticity constraints:
+- DRAPO has no verified logo asset in the repository. Use text typography, the documented "Clinical Clarity" palette, and product language instead of inventing a pseudo-logo.
+- Screen assets are repo-provided design artifacts; if text inside an image still says "MediRank", surrounding poster copy must identify the actual project as DRAPO.
+
+profile-specific QA gates:
+- Technical labels must stay accurate after simplification.
+- Directional connectors must reflect actual data flow.
+- All numbers must trace to source docs or code.
+- Poster must remain readable as a single-slide presentation and printable preview.
+
+known missing inputs:
+- Team member names and university/department identity are not available in the repository, so the poster uses "DRAPO Development Team" and "CMPE/ISE/SE 494 Graduation Project" based on project documents.
